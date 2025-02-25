@@ -1,0 +1,10 @@
+cmd/ccms/parser/y.output
+
+bin
+*~
+
+doc/ccms.html
+doc/userguide.html
+doc/reference.html
+doc/serveradmin.html
+

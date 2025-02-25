@@ -1,0 +1,33 @@
+== Reference
+
+=== Service API
+
+==== Sample request
+
+----
+{
+  "commands": [
+    "retrieve (id) from myset"
+  ]
+}
+----
+
+==== Sample response
+
+----
+{
+  "fields": [
+    {
+      "name": "id"
+    }
+  ],
+  "data": [
+    [
+      "053e4063-d70c-4a41-a968-e6900e6b47d5"
+    ],
+    [
+      "ac256496-111a-4e13-9d3b-a55ac3d0f676"
+    ]
+  ]
+}
+----

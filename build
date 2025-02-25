@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+set -e
+
+fast='false'
+runtests='false'
+runalltests='false'
+verbose='false'
+
+usage() {
+    echo 'Usage:  build.sh [<flags>]'
+    echo ''
+    echo 'Builds the "ccms" and "ccm" executables in the bin directory'
+    echo ''
+    echo 'Flags:'
+    echo '-T  Run tests'
+    echo '-t  Run tests and other checks'
+    echo '-v  Enable verbose output'
+    echo '-f  Fast build (do not remove executable before compiling)'
+    echo '-h  Help'
+}
+
+while getopts 'fhtvT' flag; do
+    case "${flag}" in
+        T) runtests='true' ;;
+        t) runalltests='true' ;;
+        f) fast='true' ;;
+        h) usage
+            exit 1 ;;
+        v) verbose='true' ;;
+        *) usage
+            exit 1 ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
+for arg; do
+    if [ $arg = 'help' ]
+    then
+        usage
+        exit 1
+    fi
+    echo "build.sh: unknown argument: $arg" 1>&2
+    exit 1
+done
+
+if $verbose; then
+    v='-v'
+fi
+
+bindir=bin
+
+if ! $fast; then
+    rm -f ./$bindir/ccms ./$bindir/ccm
+fi
+
+mkdir -p $bindir
+
+version=`git describe --tags --always`
+
+#go build -o $bindir $v $tags -ldflags "-X github.com/indexdata/ccms/config.Version=$version" ./ccms ./ccm
+go build -o $bindir $v $tags -ldflags "-X github.com/indexdata/ccms.Version=$version" ./cmd/...
+
+#if $runtests || $runalltests; then
+#    go test $v -vet=off -count=1 ./ccms/util 1>&2
+#fi
+
+if $runalltests; then
+    go vet $v $tags $(go list ./...) 2>&1 | while read s; do echo "build: $s" 1>&2; done
+    go tool shadow ./...
+    if $verbose; then
+        # Using -verbose outputs the function signature for .errcheck.
+	verrcheck='-verbose'
+    fi
+    go tool errcheck $verrcheck -exclude .errcheck ./... 2>&1 | while read s; do echo "build: errcheck: $s" 1>&2; done
+    go tool govulncheck ./...
+fi
+

@@ -1,0 +1,154 @@
+== Server administration
+
+=== System requirements
+
+==== Hardware requirements
+
+This section will contain system hardware requirements.
+
+==== Software requirements
+
+* Operating system: Linux
+* Database system: https://www.postgresql.org/[PostgreSQL] 17 or later
+* To build from source:
+** https://go.dev/[Go] 1.24
+** https://www.gnu.org/software/bash/[bash]
+
+=== Building the software
+
+It is suggested that a `ccms` user be created and the server run by
+that user, for example, in `/home/ccms`.
+
+To build ccms, first set the `GOPATH` environment variable to specify
+a path that can serve as the build workspace for Go, e.g.:
+
+[source,bash]
+----
+export GOPATH=$HOME/go
+----
+
+Then to build the server:
+
+[source,bash]
+----
+./build
+----
+
+The `build` script creates a `bin/` subdirectory and builds the `ccms`
+server and `ccm` client executables there:
+
+[source,bash]
+----
+./bin/ccms help
+
+./bin/ccm help
+----
+
+In general running `ccms` takes the form:
+
+----
+ccms <command> <arguments>
+----
+
+Some typical commands are:
+
+* `init` initializes a new ccms instance
+* `start` starts the server
+* `stop` shuts down the server
+* `version` prints the ccms version
+
+For more infomation about a specific command:
+
+----
+ccms help <command>
+----
+
+=== Server configuration
+
+The ccms server makes use of local storage in a *data directory* which
+is created using `ccms` with the `init` command.  In this example we
+will create the data directory as `ccmsdata/`:
+
+[source,bash]
+----
+ccms init -D ccmsdata
+----
+
+This will also create a file `ccms.conf` in the data directory with
+the following structure:
+
+[source,subs="verbatim,quotes"]
+----
+[main]
+host = _host name of the PostgreSQL server_
+port = _port number of the PostgreSQL server_
+database = _database name_
+user = _database user that is the owner of the database_
+password = _password of user_
+sslmode = _should be set to "require" or stronger option_
+----
+
+This file should be edited to add database connection parameters, for
+example:
+
+[source,subs="verbatim,quotes"]
+----
+[main]
+host = ccms.indexdata.com
+port = 5432
+database = ccms
+user = ccms
+password = w6bqYkFWm4rpGR5mCtFw
+sslmode = require
+----
+
+The ccms server will assume that the database, superuser, and
+systemuser defined here already exist; so they should be created
+before continuing.
+
+=== Upgrading from a previous version
+
+Upgrading from a previous version of ccms is not currently supported.
+
+=== Running the server
+
+To start the server:
+
+[source,bash]
+----
+nohup ccms start -D ccmsdata -l ccms.log &
+----
+
+To stop the server:
+
+[source,bash]
+----
+ccms stop -D ccmsdata
+----
+
+The server can be set up to run with systemd via a file such as
+`/etc/systemd/system/ccms.service`, for example:
+
+[source,ini]
+----
+[Unit]
+Description=CCMS
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+User=ccms
+ExecStart=/bin/bash -ce "exec /home/ccms/bin/ccms start -D /home/ccms/ccmsdata -l /home/ccms/ccms.log"
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+----
+
+Then:
+
+----
+systemctl enable ccms
+
+systemctl start ccms
+----
