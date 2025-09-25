@@ -1,33 +1,604 @@
 == Reference
 
-=== Service API
+=== Concepts
 
-==== Sample request
+CCMS provides a model to support user interface concepts:
+
+[%header,cols="4,4,5l,14"]
+|===
+|User interface
+|CCMS types
+|CCMS commands
+|Description
+
+|Object
+|object
+|
+|An object is a bibliographic record.
+
+|List
+|set
+list
+|create set
+delete
+insert
+retrieve
+show sets
+|A set is an unordered collection of objects.  A list is an ordered
+collection of objects.  Sets are the primary data structure in
+CCMS; however, query commands such as `retrieve` or
+`show sets` return a list.
+
+|Profile
+|filter
+|define filter
+show filters
+|A filter defines rules for selecting objects from sets.
+
+|Marker
+|tag
+|define tag
+add tag
+remove tag
+show tags
+|A tag is a label that can be assigned to selected objects in sets.
+|===
+
+Filters are applied using the `filter` keyword, e.g.:
+
+----
+define filter f where date >= "01-01-2025"
+
+create set s
+
+insert into s from reserve filter f
+----
+
+Tags use the `tag` keyword:
+
+----
+define tag t
+
+add tag t on s where date >= "02-01-2025" and date < "03-01-2025"
+
+retrieve isbn from s tag t
+----
+
+Multiple tags can be listed, separated by commas:
+
+----
+retrieve isbn from s tag t, u, not v, w
+----
+
+=== Protocol
+
+Non-query commands return a diagnostic status:
 
 ----
 {
   "commands": [
-    "retrieve (id) from myset"
+    "create set myset"
   ]
 }
 ----
-
-==== Sample response
 
 ----
 {
-  "fields": [
-    {
-      "name": "id"
+  [
+    { 
+      "status": "create set"
     }
-  ],
-  "data": [
-    [
-      "053e4063-d70c-4a41-a968-e6900e6b47d5"
-    ],
-    [
-      "ac256496-111a-4e13-9d3b-a55ac3d0f676"
-    ]
   ]
 }
+----
+
+Query commands such as `retrieve` also return tabular data sets, e.g.:
+
+----
+{
+  "commands": [
+    "retrieve id from myset"
+  ]
+}
+----
+
+----
+{
+  [
+    {
+      "status": "retrieve",
+      "fields": [
+        {
+          "name": "id"
+        }
+      ],
+      "data": [
+        [
+          "053e4063-d70c-4a41-a968-e6900e6b47d5"
+        ],
+        [
+          "ac256496-111a-4e13-9d3b-a55ac3d0f676"
+        ]
+      ]
+    }
+  ]
+}
+----
+
+=== Commands
+
+==== add tag
+
+Add a tag to objects in a set
+
+[source,subs="verbatim,quotes"]
+----
+add tag `*_tag_name_*`
+    on `*_set_name_*`
+    [ where `*_condition_*` ]
+    [ filter `*_filter_name_*` ]
+----
+
+[discrete]
+===== Description
+
+The `add tag` command adds a tag to objects in a set according to
+specified criteria.  If no criteria are given, the tag is applied to
+all objects in the set.
+
+[discrete]
+===== Parameters
+
+The first argument specifies the name of the tag to add.
+
+[discrete]
+====== on
+
+The `on` clause specifies the desired set to operate on.
+
+[discrete]
+====== where
+
+The `where` clause specifies a condition in the form of a Boolean
+expression.  Only objects that satisfy this condition will be tagged.
+
+[discrete]
+====== filter
+
+The `filter` clause applies a specified filter to the objects that
+will be tagged.
+
+[discrete]
+===== Examples
+
+To add a tag `t` to objects in a set `s` selected by a filter `f`:
+
+----
+add tag t on s filter f
+----
+
+==== create set
+
+Define a new set
+
+[source,subs="verbatim,quotes"]
+----
+create set `*_set_name_*`
+----
+
+[discrete]
+===== Description
+
+The `create set` command creates a new, empty set.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_set_name_*`
+|The name of the new set.
+|===
+
+[discrete]
+===== Examples
+
+Create a set `s`:
+
+----
+create set s
+----
+
+==== define filter
+
+Define a filter
+
+[source,subs="verbatim,quotes"]
+----
+define filter `*_new_filter_name_*`
+    [ where `*_condition_*` ]
+    [ template `*_existing_filter_name_*` ]
+----
+
+[discrete]
+===== Description
+
+The `define filter` command defines criteria for selecting objects
+from sets.
+
+[discrete]
+===== Parameters
+
+The first argument specifies the name of the new filter.
+
+[discrete]
+====== where
+
+The `where` clause specifies a condition in the form of a Boolean
+expression.  Only objects that satisfy this condition will pass
+through the filter.
+
+[discrete]
+====== template
+
+The `template` clause specifies an existing filter.  The new filter
+will duplicate the existing filter.
+
+[discrete]
+===== Examples
+
+To define a filter `f` and apply it to a set `s`:
+
+----
+define filter f where date >= "01-01-2025"
+
+retrieve all from s filter f
+----
+
+==== define tag
+
+Define a tag
+
+[source,subs="verbatim,quotes"]
+----
+define tag `*_tag_name_*`
+----
+
+[discrete]
+===== Description
+
+The `define tag` command defines a new tag.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_tag_name_*`
+|The name of the new tag.
+|===
+
+[discrete]
+===== Examples
+
+Define a tag `t`:
+
+----
+define tag t
+----
+
+==== delete
+
+Delete objects from a set
+
+[source,subs="verbatim,quotes"]
+----
+delete from `*_set_name_*`
+    [ where `*_condition_*` ]
+    [ filter `*_filter_name_*` ]
+    [ tag [not] `*_tag_name_*` [, ...] ]
+----
+
+[discrete]
+===== Description
+
+The `delete` command deletes objects from a set according to specified
+criteria.  If no criteria are given, all objects in the set are
+deleted.
+
+[discrete]
+===== Parameters
+
+The first argument specifies the name of the set.
+
+[discrete]
+====== where
+
+The `where` clause specifies a condition in the form of a Boolean
+expression.  Objects that satisfy this condition will be deleted.
+
+[discrete]
+====== filter
+
+The `filter` clause applies a specified filter to the objects
+selected.  Objects that pass through the filter will be deleted.
+
+[discrete]
+====== tag
+
+The `tag` clause selects objects having the specified tags.  Those
+objects will be deleted.
+
+[discrete]
+===== Examples
+
+To delete a specific object:
+
+----
+delete from s where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
+----
+
+==== insert
+
+Insert objects into a set
+
+[source,subs="verbatim,quotes"]
+----
+insert into `*_target_set_name_*`
+    from `*_source_set_name_*`
+    [ where `*_condition_*` ]
+    [ filter `*_filter_name_*` ]
+    [ tag [not] `*_tag_name_*` [, ...] ]
+----
+
+[discrete]
+===== Description
+
+The `insert` command selects objects from a source set according to
+specified criteria, and inserts the selected objects into a
+target set.
+
+[discrete]
+===== Parameters
+
+[discrete]
+====== into
+
+The `into` clause specifies the target set.
+
+[discrete]
+====== from
+
+The `from` clause specifies the source set.
+
+[discrete]
+====== where
+
+The `where` clause specifies a condition in the form of a Boolean
+expression.  Only objects that satisfy this condition will be
+selected.
+
+[discrete]
+====== filter
+
+The `filter` clause applies a specified filter to the objects
+selected.
+
+[discrete]
+====== tag
+
+The `tag` clause selects objects having the specified tags.
+
+[discrete]
+===== Examples
+
+To select an object by `id` from a set `s` and insert it into a set
+`t`:
+
+----
+insert into t from s where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
+----
+
+==== remove tag
+
+Remove a tag from objects in a set
+
+[source,subs="verbatim,quotes"]
+----
+remove tag `*_tag_name_*`
+    on `*_set_name_*`
+    [ where `*_condition_*` ]
+    [ filter `*_filter_name_*` ]
+----
+
+[discrete]
+===== Description
+
+The `remove tag` command removes a tag from objects in a set according
+to specified criteria.  If no criteria are given, the tag is removed
+from all objects in the set.
+
+[discrete]
+===== Parameters
+
+The first argument specifies the name of the tag to remove.
+
+[discrete]
+====== on
+
+The `on` clause specifies the desired set to operate on.
+
+[discrete]
+====== where
+
+The `where` clause specifies a condition in the form of a Boolean
+expression.  Only objects that satisfy this condition will be
+untagged.
+
+[discrete]
+====== filter
+
+The `filter` clause applies a specified filter to the objects that
+will be untagged.
+
+[discrete]
+===== Examples
+
+To remove a tag `t` from a specific object in a set `s`:
+
+----
+remove tag t on s where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
+----
+
+==== retrieve
+
+Retrieve objects from a set
+
+[source,subs="verbatim,quotes"]
+----
+retrieve { all | `*_attribute_*` [, ...] }
+    from `*_set_name_*`
+    [ where `*_condition_*` ]
+    [ filter `*_filter_name_*` ]
+    [ tag [not] `*_tag_name_*` [, ...] ]
+    [ sort `*_attribute_*` [, ...] ]
+    [ offset `*_start_*` ]
+    [ limit `*_count_*` ]
+----
+
+[discrete]
+===== Description
+
+The `retrieve` command retrieves a list of objects from a set
+according to specified criteria.
+
+[discrete]
+===== Parameters
+
+The first argument specifies a comma-separated list of attributes for
+which to retrieve data, or the keyword `all` meaning all available
+attributes.
+
+[discrete]
+====== from
+
+The `from` clause specifies the desired set that will be the source of
+data.
+
+[discrete]
+====== where
+
+The `where` clause specifies a condition in the form of a Boolean
+expression.  Only objects that satisfy this condition will be
+retrieved.
+
+[discrete]
+====== filter
+
+The `filter` clause applies a specified filter to the objects
+retrieved.
+
+[discrete]
+====== tag
+
+The `tag` clause selects objects having the specified tags.
+
+[discrete]
+====== sort
+
+The `sort` clause specifies a comma-separated list of attributes to
+sort the objects on.  The default order is undefined if `sort` is not
+specified.
+
+[discrete]
+====== offset
+
+The `offset` clause specifies a number of objects that will be skipped
+and not returned as part of the result.  This can be useful for
+retrieving objects one "page" of data a time.  Note: `sort` is
+required whenever `offset` is used.
+
+[discrete]
+====== limit
+
+The `limit` clause specifies a maximum number of objects that will be
+returned.
+
+[discrete]
+===== Examples
+
+To retrieve the `id` and `title` attributes of five objects from the
+reserve set:
+
+----
+retrieve id, title from reserve limit 5
+----
+
+To look at a specific object in detail:
+
+----
+retrieve all from reserve where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
+----
+
+==== show filters
+
+List existing filters
+
+[source,subs="verbatim,quotes"]
+----
+show filters
+----
+
+[discrete]
+===== Description
+
+The `show filters` command lists existing filters.
+
+[discrete]
+===== Examples
+
+----
+show filters
+----
+
+==== show sets
+
+List existing sets
+
+[source,subs="verbatim,quotes"]
+----
+show sets
+----
+
+[discrete]
+===== Description
+
+The `show sets` command lists existing sets.
+
+[discrete]
+===== Examples
+
+----
+show sets
+----
+
+==== show tags
+
+List existing tags
+
+[source,subs="verbatim,quotes"]
+----
+show tags
+----
+
+[discrete]
+===== Description
+
+The `show tags` command lists existing tags.
+
+[discrete]
+===== Examples
+
+----
+show tags
 ----
