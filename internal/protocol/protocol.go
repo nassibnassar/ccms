@@ -1,4 +1,4 @@
-package api
+package protocol
 
 type CommandRequest struct {
 	Command string `json:"command"`

@@ -10,6 +10,7 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/internal/eout"
+	"github.com/indexdata/ccms/internal/global"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +33,7 @@ func main() {
 }
 
 func cccMain() {
-	eout.Init(ccms.ClientProgram)
+	eout.Init(global.ClientProgram)
 	run()
 }
 
@@ -50,12 +51,12 @@ func run() {
 			printHelp()
 		}
 		if os.Args[1][0] != '-' {
-			fmt.Fprintf(os.Stderr, "%s: unknown argument: %s\n", ccms.ClientProgram, os.Args[1])
+			fmt.Fprintf(os.Stderr, "%s: unknown argument: %s\n", global.ClientProgram, os.Args[1])
 			os.Exit(1)
 		}
 	}
 	var rootCmd = &cobra.Command{
-		Use:                ccms.ClientProgram,
+		Use:                global.ClientProgram,
 		SilenceErrors:      true,
 		SilenceUsage:       true,
 		DisableSuggestions: true,
@@ -81,7 +82,7 @@ func run() {
 
 func runClient() error {
 	if option.Version {
-		fmt.Printf("%s %s\n", ccms.ClientProgram, ccms.Version)
+		fmt.Printf("%s %s\n", global.ClientProgram, global.Version)
 		return nil
 	}
 	if option.NoTLS && option.Host != "127.0.0.1" {
@@ -107,7 +108,7 @@ func runClient() error {
 	}
 	eout.Interactive()
 	fmt.Printf("%s %s: type \"help\" for help, \"quit\" to quit\n",
-		ccms.ClientProgram, ccms.Version)
+		global.ClientProgram, global.Version)
 	for {
 		rline, err := rl.Readline()
 		if err != nil {
@@ -165,9 +166,9 @@ func help(cmd *cobra.Command, commandLine []string) {
 
 func printHelp() {
 	fmt.Print("" +
-		ccms.ClientProgram + " is the CCMS client\n" +
+		global.ClientProgram + " is the CCMS client\n" +
 		"\n" +
-		"Usage:  " + ccms.ClientProgram + " [options]\n" +
+		"Usage:  " + global.ClientProgram + " [options]\n" +
 		"\n" +
 		"Options:\n" +
 		hostFlag(nil, nil) +
@@ -205,10 +206,10 @@ func hostFlag(cmd *cobra.Command, host *string) string {
 
 func portFlag(cmd *cobra.Command, port *string) string {
 	if cmd != nil {
-		cmd.Flags().StringVarP(port, "port", "p", ccms.DefaultPort, "")
+		cmd.Flags().StringVarP(port, "port", "p", global.DefaultPort, "")
 	}
 	return "" +
-		"  -p, --port <p>              server port (default: " + ccms.DefaultPort + ")\n"
+		"  -p, --port <p>              server port (default: " + global.DefaultPort + ")\n"
 }
 
 func noTLSFlag(cmd *cobra.Command, noTLS *bool) string {

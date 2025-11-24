@@ -5,13 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/option"
 	"github.com/indexdata/ccms/cmd/ccd/osutil"
 	"github.com/indexdata/ccms/cmd/ccd/server"
 	"github.com/indexdata/ccms/cmd/ccd/stop"
 	"github.com/indexdata/ccms/internal/eout"
+	"github.com/indexdata/ccms/internal/global"
 	"github.com/nassibnassar/goharvest/oai"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +20,7 @@ func main() {
 	//testOAI()
 	initColor(os.Getenv("CCMS_COLOR"))
 	if err := run(); err != nil {
-		// fmt.Fprintf(os.Stderr, "%s: %s\n", ccms.ServerProgram, err)
+		// fmt.Fprintf(os.Stderr, "%s: %s\n", global.ServerProgram, err)
 		eout.Error("%s", err)
 		os.Exit(1)
 	}
@@ -155,14 +155,14 @@ func run() error {
 	var cmdVersion = &cobra.Command{
 		Use: "version",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("%s version %s\n", ccms.ServerProgram, ccms.Version)
+			fmt.Printf("%s version %s\n", global.ServerProgram, global.Version)
 			return nil
 		},
 	}
 	cmdVersion.SetHelpFunc(help)
 
 	var rootCmd = &cobra.Command{
-		Use:                ccms.ServerProgram,
+		Use:                global.ServerProgram,
 		SilenceErrors:      true,
 		SilenceUsage:       true,
 		DisableSuggestions: true,
@@ -171,7 +171,7 @@ func run() error {
 	rootCmd.SetHelpFunc(help)
 	// Redefine help flag without -h; so we can use it for something else.
 	var helpFlag bool
-	rootCmd.PersistentFlags().BoolVarP(&helpFlag, "help", "", false, "Help for "+ccms.ServerProgram)
+	rootCmd.PersistentFlags().BoolVarP(&helpFlag, "help", "", false, "Help for "+global.ServerProgram)
 	// Add commands.
 	rootCmd.AddCommand(cmdStart, cmdStop, cmdInit, cmdVersion)
 	var err error
@@ -185,16 +185,16 @@ func run() error {
 var helpStart = "Start server\n"
 var helpStop = "Shutdown server\n"
 var helpInit = "Initialize new ccms instance\n"
-var helpVersion = "Print " + ccms.ServerProgram + " version\n"
+var helpVersion = "Print " + global.ServerProgram + " version\n"
 
 func help(cmd *cobra.Command, commandLine []string) {
 	_ = commandLine
 	switch cmd.Use {
-	case ccms.ServerProgram:
+	case global.ServerProgram:
 		fmt.Print("" +
-			ccms.ServerProgram + " is the CCMS server\n" +
+			global.ServerProgram + " is the CCMS server\n" +
 			"\n" +
-			"Usage:  " + ccms.ServerProgram + " <command> [options]\n" +
+			"Usage:  " + global.ServerProgram + " <command> [options]\n" +
 			"\n" +
 			"Commands:\n" +
 			"  start                       - " + helpStart +
@@ -202,12 +202,12 @@ func help(cmd *cobra.Command, commandLine []string) {
 			"  init                        - " + helpInit +
 			"  version                     - " + helpVersion +
 			"\n" +
-			"Use \"" + ccms.ServerProgram + " help <command>\" for more information about a command.\n")
+			"Use \"" + global.ServerProgram + " help <command>\" for more information about a command.\n")
 	case "start":
 		fmt.Print("" +
 			helpStart +
 			"\n" +
-			"Usage:  " + ccms.ServerProgram + " start [options]\n" +
+			"Usage:  " + global.ServerProgram + " start [options]\n" +
 			"\n" +
 			"Options:\n" +
 			dirFlag(nil, nil) +
@@ -225,7 +225,7 @@ func help(cmd *cobra.Command, commandLine []string) {
 		fmt.Print("" +
 			helpStop +
 			"\n" +
-			"Usage:  " + ccms.ServerProgram + " stop [options]\n" +
+			"Usage:  " + global.ServerProgram + " stop [options]\n" +
 			"\n" +
 			"Options:\n" +
 			dirFlag(nil, nil) +
@@ -236,7 +236,7 @@ func help(cmd *cobra.Command, commandLine []string) {
 		fmt.Print("" +
 			helpInit +
 			"\n" +
-			"Usage:  " + ccms.ServerProgram + " init [options]\n" +
+			"Usage:  " + global.ServerProgram + " init [options]\n" +
 			"\n" +
 			"Options:\n" +
 			dirFlag(nil, nil) +
@@ -246,17 +246,17 @@ func help(cmd *cobra.Command, commandLine []string) {
 		fmt.Print("" +
 			helpVersion +
 			"\n" +
-			"Usage:  " + ccms.ServerProgram + " version\n")
+			"Usage:  " + global.ServerProgram + " version\n")
 	default:
 	}
 }
 
 func portFlag(cmd *cobra.Command, adminPort *string) string {
 	if cmd != nil {
-		cmd.Flags().StringVarP(adminPort, "port", "p", ccms.DefaultPort, "")
+		cmd.Flags().StringVarP(adminPort, "port", "p", global.DefaultPort, "")
 	}
 	return "" +
-		"  -p, --port <p>              - Port to listen on (default: " + ccms.DefaultPort + ")\n"
+		"  -p, --port <p>              - Port to listen on (default: " + global.DefaultPort + ")\n"
 }
 
 func logFlag(cmd *cobra.Command, logfile *string) string {
@@ -382,7 +382,7 @@ func initSystem(opt *option.Init) error {
 }
 
 func initColor(colorMode string) {
-	eout.Init(ccms.ServerProgram)
+	eout.Init(global.ServerProgram)
 	switch colorMode {
 	case "always":
 		eout.AlwaysColor()

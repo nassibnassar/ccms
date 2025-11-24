@@ -1,4 +1,4 @@
-package ccms
+package global
 
 // Version is defined at build time via -ldflags.
 var Version = ""

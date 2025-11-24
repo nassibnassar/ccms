@@ -11,15 +11,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/option"
 	"github.com/indexdata/ccms/cmd/ccd/osutil"
 	"github.com/indexdata/ccms/cmd/ccd/parser"
 	"github.com/indexdata/ccms/cmd/ccd/process"
-	"github.com/indexdata/ccms/internal/api"
 	"github.com/indexdata/ccms/internal/eout"
+	"github.com/indexdata/ccms/internal/global"
+	"github.com/indexdata/ccms/internal/protocol"
 )
 
 type server struct {
@@ -95,7 +95,7 @@ func serve(opt *option.Server) {
 		Addr:    addr,
 		Handler: setupHandlers(&server{Opt: opt}),
 	}
-	log.Info("CCMS %s, listening on %s", ccms.Version, addr)
+	log.Info("CCMS %s, listening on %s", global.Version, addr)
 	if opt.NoTLS && opt.Listen != "" {
 		log.Warning("disabling TLS (insecure)")
 	}
@@ -132,7 +132,7 @@ func (svr *server) handleCommand(w http.ResponseWriter, r *http.Request) {
 
 func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	// read request
-	var rq api.CommandRequest
+	var rq protocol.CommandRequest
 	var ok bool
 	if ok = ReadRequest(w, r, &rq); !ok {
 		return
@@ -149,21 +149,21 @@ func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	//}
 	//log.Info("parsed: %#v", node)
 	_ = pass
-	var cmdr api.CommandResponse
+	var cmdr protocol.CommandResponse
 	switch n := node.(type) {
 	case *ast.HelpStmt:
 		_ = n
-		cmdr = api.CommandResponse{
+		cmdr = protocol.CommandResponse{
 			Status: "help",
 			Message: "create set <set_name>\tdefine a new set\n" +
 				"show sets\t\tlist existing sets",
 		}
 	case *ast.PingStmt:
 		_ = n
-		cmdr = api.CommandResponse{Status: "ping"}
+		cmdr = protocol.CommandResponse{Status: "ping"}
 	default:
-		cmdr = api.CommandResponse{
-			Fields: []api.FieldDescription{
+		cmdr = protocol.CommandResponse{
+			Fields: []protocol.FieldDescription{
 				{
 					Name: "one",
 					// DataType: 0,
@@ -173,7 +173,7 @@ func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 					// Type: 0,
 				},
 			},
-			Data: []api.DataRow{
+			Data: []protocol.DataRow{
 				{
 					Values: []string{"a", "b"},
 				},
@@ -292,66 +292,19 @@ func HandleError(w http.ResponseWriter, err error, statusCode int) {
 	HTTPError(w, err.Error(), statusCode)
 }
 
-//type CommandResponse struct {
-//        Fields  []FieldDescription `json:"fields"`
-//        Data    []DataRow          `json:"data"`
-//        Status  string             `json:"status"`
-//        Message string             `json:"message"`
-//}
-
-// Source - https://stackoverflow.com/a
-// Posted by kinshuk4
-// Retrieved 2025-11-22, License - CC BY-SA 4.0
-
 func HTTPError(w http.ResponseWriter, errString string, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
-	m := &api.CommandResponse{
-		Status: "error",
-		//Message: "error: " + err.Error(),
+	m := &protocol.CommandResponse{
+		Status:  "error",
 		Message: errString,
 	}
-	//json.NewEncoder(w).Encode(err)
 	if err := json.NewEncoder(w).Encode(m); err != nil {
 		// TODO error handling
 		panic(err)
 	}
 }
-
-func OldHTTPError(w http.ResponseWriter, err error, code int) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(code)
-	var m = map[string]interface{}{
-		"responses": []map[string]interface{}{
-			map[string]interface{}{
-				"status": "error",
-				//"message": fmt.Sprintf("%s: %s", http.StatusText(code), err),
-				"message": err.Error(),
-				//"code":    code,
-				//"data":    "",
-			},
-		},
-	}
-	//json.NewEncoder(w).Encode(err)
-	if err = json.NewEncoder(w).Encode(m); err != nil {
-		// TODO error handling
-		panic(err)
-	}
-}
-
-/*
-----
-{
-  [
-    {
-      "status": "create set"
-    }
-  ]
-}
-----
-*/
 
 func requestString(r *http.Request) string {
 	var remoteHost, remotePort string

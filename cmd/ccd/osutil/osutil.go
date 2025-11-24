@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/indexdata/ccms"
+	"github.com/indexdata/ccms/internal/global"
 )
 
 // ModePermRW is the umask "-rw-------".
@@ -27,11 +27,11 @@ func FileExists(f string) (bool, error) {
 }
 
 func SystemPIDFileName(datadir string) string {
-	return filepath.Join(datadir, ccms.ServerProgram+".pid")
+	return filepath.Join(datadir, global.ServerProgram+".pid")
 }
 
 func ConfigFileName(datadir string) string {
-	return filepath.Join(datadir, ccms.ServerProgram+".conf")
+	return filepath.Join(datadir, global.ServerProgram+".conf")
 }
 
 func AddrHost(addr string) string {

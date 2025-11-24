@@ -11,38 +11,58 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/indexdata/ccms/internal/api"
 	"github.com/indexdata/ccms/internal/eout"
+	"github.com/indexdata/ccms/internal/protocol"
 )
 
+// client that connects to a CCMS server
 type Client struct {
-	Host          string
-	Port          string
-	User          string
-	Password      string
-	NoTLS         bool
-	TLSSkipVerify bool
+	Host          string // server host name
+	Port          string // server port
+	User          string // user name for authentication
+	Password      string // user password
+	NoTLS         bool   // disable TLS (insecure)
+	TLSSkipVerify bool   // do not verify server certificate chain and host name (insecure)
 }
 
+// response from a CCMS server
+type Response struct {
+	Status  string             // status of command, or "error"
+	Fields  []FieldDescription // attribute metadata for query result
+	Data    []DataRow          // query result data
+	Message string             // error message
+}
+
+// metadata for an attribute
+type FieldDescription struct {
+	Name string // attribute name
+}
+
+// a row of data
+type DataRow struct {
+	Values []string // data values
+}
+
+// send a command to the server and return the response
 func (c *Client) Send(cmd string) (*Response, error) {
-	var rq = &api.CommandRequest{Command: cmd}
+	var rq = &protocol.CommandRequest{Command: cmd}
 	// send the request
 	var httprs *http.Response
 	var err error
-	if httprs, err = SendRequest(c, "POST", "/cmd", rq); err != nil {
+	if httprs, err = sendRequest(c, "POST", "/cmd", rq); err != nil {
 		return nil, err
 	}
 	// check for error response
 	if httprs.StatusCode != http.StatusOK {
 		var m string
-		if m, err = ReadResponseMessage(httprs); err != nil {
+		if m, err = readResponseMessage(httprs); err != nil {
 			return nil, err
 		}
 		return nil, errors.New(m)
 	}
 
-	var cmdr api.CommandResponse
-	if err = ReadResponse(httprs, &cmdr); err != nil {
+	var cmdr protocol.CommandResponse
+	if err = readResponse(httprs, &cmdr); err != nil {
 		return nil, err
 	}
 
@@ -86,7 +106,7 @@ func (c *Client) Send(cmd string) (*Response, error) {
 	return resp, nil
 }
 
-func SendRequest(client *Client, method, url string, requestStruct interface{}) (*http.Response, error) {
+func sendRequest(client *Client, method, url string, requestStruct interface{}) (*http.Response, error) {
 	var rqj []byte
 	var err error
 	if rqj, err = json.Marshal(requestStruct); err != nil {
@@ -154,7 +174,7 @@ func SendRequest(client *Client, method, url string, requestStruct interface{}) 
 	return hrs, nil
 }
 
-func ReadResponse(httpResponse *http.Response, responseStruct interface{}) error {
+func readResponse(httpResponse *http.Response, responseStruct interface{}) error {
 	var body []byte
 	var err error
 	if body, err = ioutil.ReadAll(httpResponse.Body); err != nil {
@@ -166,16 +186,16 @@ func ReadResponse(httpResponse *http.Response, responseStruct interface{}) error
 	return nil
 }
 
-func ReadResponseMessage(httpResponse *http.Response) (string, error) {
+func readResponseMessage(httpResponse *http.Response) (string, error) {
 	var m map[string]interface{}
 	var err error
-	if m, err = ReadResponseMap(httpResponse); err != nil {
+	if m, err = readResponseMap(httpResponse); err != nil {
 		return "", err
 	}
 	return fmt.Sprintf("%v", m["message"]), nil
 }
 
-func ReadResponseMap(httpResponse *http.Response) (map[string]interface{}, error) {
+func readResponseMap(httpResponse *http.Response) (map[string]interface{}, error) {
 	var m map[string]interface{}
 	var err error
 	if err = json.NewDecoder(httpResponse.Body).Decode(&m); err != nil {
