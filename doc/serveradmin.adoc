@@ -9,9 +9,9 @@ This section will contain system hardware requirements.
 ==== Software requirements
 
 * Operating system: Linux
-* Database system: https://www.postgresql.org/[PostgreSQL] 17 or later
+* Database system: https://www.postgresql.org/[PostgreSQL] 18 or later
 * To build from source:
-** https://go.dev/[Go] 1.24
+** https://go.dev/[Go] 1.21
 ** https://www.gnu.org/software/bash/[bash]
 
 === Building the software
@@ -19,7 +19,7 @@ This section will contain system hardware requirements.
 It is suggested that a `ccms` user be created and the server run by
 that user, for example, in `/home/ccms`.
 
-To build ccms, first set the `GOPATH` environment variable to specify
+To build CCMS, first set the `GOPATH` environment variable to specify
 a path that can serve as the build workspace for Go, e.g.:
 
 [source,bash]
@@ -34,50 +34,50 @@ Then to build the server:
 ./build
 ----
 
-The `build` script creates a `bin/` subdirectory and builds the `ccms`
-server and `ccm` client executables there:
+The `build` script creates a `bin/` subdirectory and builds the `ccd`
+server and `ccc` client executables there:
 
 [source,bash]
 ----
-./bin/ccms help
+./bin/ccd help
 
-./bin/ccm help
+./bin/ccc help
 ----
 
-In general running `ccms` takes the form:
+In general running `ccd` takes the form:
 
 ----
-ccms <command> <arguments>
+ccd <command> <arguments>
 ----
 
 Some typical commands are:
 
-* `init` initializes a new ccms instance
+* `init` initializes a new CCMS instance
 * `start` starts the server
 * `stop` shuts down the server
-* `version` prints the ccms version
+* `version` prints the CCMS version
 
 For more infomation about a specific command:
 
 ----
-ccms help <command>
+ccd help <command>
 ----
 
 === Server configuration
 
-The ccms server makes use of local storage in a *data directory* which
-is created using `ccms` with the `init` command.  In this example we
-will create the data directory as `ccmsdata/`:
+The `ccd` server makes use of local storage in a *data directory*
+which is created using `ccd` with the `init` command.  In this example
+we will create the data directory as `data/`:
 
 [source,bash]
 ----
-ccms init -D ccmsdata
+ccd init -D data
 ----
 
-This will also create a file `ccms.conf` in the data directory with
-the following structure:
+This will also create a file `ccd.conf` in the data directory with the
+following structure:
 
-[source,subs="verbatim,quotes"]
+[source,ini,subs="verbatim,quotes"]
 ----
 [main]
 host = _host name of the PostgreSQL server_
@@ -91,7 +91,7 @@ sslmode = _should be set to "require" or stronger option_
 This file should be edited to add database connection parameters, for
 example:
 
-[source,subs="verbatim,quotes"]
+[source,ini,subs="verbatim,quotes"]
 ----
 [main]
 host = ccms.indexdata.com
@@ -102,7 +102,7 @@ password = w6bqYkFWm4rpGR5mCtFw
 sslmode = require
 ----
 
-The ccms server will assume that the database, superuser, and
+The `ccd` server will assume that the database, superuser, and
 systemuser defined here already exist; so they should be created
 before continuing.
 
@@ -116,14 +116,14 @@ To start the server:
 
 [source,bash]
 ----
-nohup ccms start -D ccmsdata -l ccms.log &
+nohup ccd start -D data -l ccd.log &
 ----
 
 To stop the server:
 
 [source,bash]
 ----
-ccms stop -D ccmsdata
+ccd stop -D data
 ----
 
 The server can be set up to run with systemd via a file such as
@@ -138,7 +138,7 @@ After=network.target remote-fs.target
 [Service]
 Type=simple
 User=ccms
-ExecStart=/bin/bash -ce "exec /home/ccms/bin/ccms start -D /home/ccms/ccmsdata -l /home/ccms/ccms.log"
+ExecStart=/bin/bash -ce "exec /home/ccms/bin/ccd start -D /home/ccms/data -l /home/ccms/ccd.log"
 Restart=on-abort
 
 [Install]

@@ -9,6 +9,7 @@
 :toc: left
 :toclevels: 5
 :toc-title: Contents
+:source-highlighter: rouge
 
 This is documentation for the CCMS (Collaborative Collections
 Management System) prototype.

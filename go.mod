@@ -1,11 +1,12 @@
 module github.com/indexdata/ccms
 
-go 1.24.0
+go 1.25.4
 
 require (
 	github.com/chzyer/readline v1.5.1
 	github.com/fatih/color v1.18.0
 	github.com/mattn/go-isatty v0.0.20
+	github.com/nassibnassar/goharvest v0.0.0-20160726165741-cbaf6f70f07d
 	github.com/spf13/cobra v1.8.1
 )
 

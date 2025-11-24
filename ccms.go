@@ -5,6 +5,6 @@ var Version = ""
 
 const DefaultPort = "8504"
 
-const ServerProgram = "ccms"
+const ServerProgram = "ccd"
 
-const ClientProgram = "ccm"
+const ClientProgram = "ccc"

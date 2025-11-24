@@ -3,8 +3,6 @@ package eout
 import (
 	"fmt"
 	"os"
-
-	"github.com/indexdata/ccms/internal/eout/color"
 )
 
 var EnableVerbose bool
@@ -16,13 +14,13 @@ func Init(program string) {
 
 func Error(format string, v ...interface{}) {
 	locus()
-	_, _ = color.Error.Fprint(std, "error: ")
+	//_, _ = ErrorColor.Fprint(std, "error: ")
 	message(format, v...)
 }
 
 func Warning(format string, v ...interface{}) {
 	locus()
-	_, _ = color.Warning.Fprint(std, "warning: ")
+	//_, _ = WarningColor.Fprint(std, "warning: ")
 	message(format, v...)
 }
 
@@ -47,12 +45,19 @@ func Trace(format string, v ...interface{}) {
 }
 
 func locus() {
-	_, _ = color.Locus.Fprint(std, fmt.Sprintf("%s: ", prog))
+	if !interactive {
+		_, _ = LocusColor.Fprint(std, fmt.Sprintf("%s: ", prog))
+	}
 }
 
 func message(format string, v ...interface{}) {
 	_, _ = fmt.Fprintf(std, format+"\n", v...)
 }
 
+func Interactive() {
+	interactive = true
+}
+
 var std *os.File = os.Stderr
 var prog string
+var interactive bool

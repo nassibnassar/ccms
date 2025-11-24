@@ -72,55 +72,57 @@ retrieve isbn from s tag t, u, not v, w
 
 === Protocol
 
-Non-query commands return a diagnostic status:
+Non-query commands such as `create set` return a diagnostic status:
 
+[source,json]
 ----
 {
-  "commands": [
-    "create set myset"
-  ]
+  "command": "create set myset"
 }
 ----
 
+[source,json]
 ----
 {
-  [
-    { 
-      "status": "create set"
-    }
-  ]
+  "status": "create set"
+}
+----
+
+The status may be an error:
+
+[source,json]
+----
+{
+  "status": "error",
+  "message": "myset already exists"
 }
 ----
 
 Query commands such as `retrieve` also return tabular data sets, e.g.:
 
+[source,json]
 ----
 {
-  "commands": [
-    "retrieve id from myset"
-  ]
+  "command": "retrieve id from myset"
 }
 ----
 
+[source,json]
 ----
 {
-  [
+  "status": "retrieve",
+  "fields": [
     {
-      "status": "retrieve",
-      "fields": [
-        {
-          "name": "id"
-        }
-      ],
-      "data": [
-        [
-          "053e4063-d70c-4a41-a968-e6900e6b47d5"
-        ],
-        [
-          "ac256496-111a-4e13-9d3b-a55ac3d0f676"
-        ]
-      ]
+      "name": "id"
     }
+  ],
+  "data": [
+    [
+      "053e4063-d70c-4a41-a968-e6900e6b47d5"
+    ],
+    [
+      "ac256496-111a-4e13-9d3b-a55ac3d0f676"
+    ]
   ]
 }
 ----
@@ -338,6 +340,26 @@ To delete a specific object:
 delete from s where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
 ----
 
+==== help
+
+Show supported commands
+
+[source,subs="verbatim,quotes"]
+----
+help
+----
+
+[discrete]
+===== Description
+
+The `help` command shows a list of supported commands.
+
+[discrete]
+===== Examples
+
+----
+help
+----
 ==== insert
 
 Insert objects into a set
