@@ -84,6 +84,10 @@ func runClient() error {
 		fmt.Printf("%s %s\n", global.ClientProgram, global.Version)
 		return nil
 	}
+
+	eout.Interactive()
+	fmt.Printf("%s %s: type \"help\" for help, \"quit\" to quit\n",
+		global.ClientProgram, global.Version)
 	if option.NoTLS && option.Host != "127.0.0.1" {
 		eout.Warning("disabling TLS (insecure)")
 	}
@@ -105,9 +109,6 @@ func runClient() error {
 	if _, err = client.Send("ping"); err != nil {
 		errorExit(err)
 	}
-	eout.Interactive()
-	fmt.Printf("%s %s: type \"help\" for help, \"quit\" to quit\n",
-		global.ClientProgram, global.Version)
 	for {
 		rline, err := rl.Readline()
 		if err != nil {
@@ -125,7 +126,8 @@ func runClient() error {
 		}
 		resp, err := client.Send(line)
 		if err != nil {
-			return err
+			eout.Error("%v", err)
+			continue
 		}
 		if resp.Status == "error" {
 			eout.Error("%s", resp.Message)
