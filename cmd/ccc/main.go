@@ -8,7 +8,6 @@ import (
 
 	"github.com/chzyer/readline"
 	"github.com/indexdata/ccms"
-	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/global"
 	"github.com/spf13/cobra"
@@ -86,7 +85,7 @@ func runClient() error {
 		return nil
 	}
 	if option.NoTLS && option.Host != "127.0.0.1" {
-		log.Warning("disabling TLS (insecure)")
+		eout.Warning("disabling TLS (insecure)")
 	}
 
 	rl, err := readline.New("=> ")
