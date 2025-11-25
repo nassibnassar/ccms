@@ -58,7 +58,7 @@ mkdir -p $bindir
 version=`git describe --always`
 
 # -X github.com/metadb-project/metadb/cmd/metadb/util.MetadbVersion=
-go build -o $bindir $v $tags -ldflags "-X github.com/indexdata/internal/global.Version=$version" ./cmd/ccd ./cmd/ccc
+go build -o $bindir $v $tags -ldflags "-X github.com/indexdata/ccms/internal/global.Version=$version" ./cmd/ccd ./cmd/ccc
 
 #if $runtests || $runalltests; then
 #    go test $v -vet=off -count=1 ./ccms/util 1>&2
