@@ -125,7 +125,7 @@ func runClient() error {
 		}
 		resp, err := client.Send(line)
 		if err != nil {
-			eout.Error("%v", err)
+			return err
 		}
 		if resp.Status == "error" {
 			eout.Error("%s", resp.Message)

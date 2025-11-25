@@ -140,7 +140,7 @@ func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	node, err, pass := parser.Parse(rq.Command)
 	//fmt.Printf("### %#v --- %v\n", node, err)
 	if err != nil {
-		returnError(w, err.Error(), http.StatusBadRequest)
+		returnError(w, err.Error(), http.StatusOK /* http.StatusBadRequest */)
 		return
 	}
 	//if node == nil {
