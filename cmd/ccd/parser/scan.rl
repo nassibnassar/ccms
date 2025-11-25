@@ -48,7 +48,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'create'i => { tok = CREATE; fbreak; };
 			'help'i => { tok = HELP; fbreak; };
 			'set'i => { tok = SET; fbreak; };
-			'list'i => { tok = LIST; fbreak; };
+			'show'i => { tok = SHOW; fbreak; };
 			'ping'i => { tok = PING; fbreak; };
 			'version'i => { out.str = "version"; tok = VERSION; fbreak; };
 			identifier => { out.str = string(lex.data[lex.ts:lex.te]); tok = IDENT; fbreak; };

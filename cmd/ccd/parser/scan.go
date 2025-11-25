@@ -110,8 +110,6 @@ func (lex *lexer) Lex(out *yySymType) int {
 		goto st_case_24
 	case 25:
 		goto st_case_25
-	case 26:
-		goto st_case_26
 	}
 	goto st_out
 tr1:
@@ -144,13 +142,13 @@ tr8:
  lex.te = ( lex.p)+1
 { tok = ';'; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
-tr16:
+tr15:
 //line scan.rl:56
  lex.te = ( lex.p)
 ( lex.p)--
 { out.str = string(lex.data[lex.ts:lex.te]); tok = NUMBER; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
-tr17:
+tr16:
 //line NONE:1
 	switch  lex.act {
 	case 5:
@@ -164,7 +162,7 @@ tr17:
  tok = SET; {( lex.p)++;  lex.cs = 2; goto _out } }
 	case 8:
 	{( lex.p) = ( lex.te) - 1
- tok = LIST; {( lex.p)++;  lex.cs = 2; goto _out } }
+ tok = SHOW; {( lex.p)++;  lex.cs = 2; goto _out } }
 	case 9:
 	{( lex.p) = ( lex.te) - 1
  tok = PING; {( lex.p)++;  lex.cs = 2; goto _out } }
@@ -177,7 +175,7 @@ tr17:
 	}
 	
 	goto st2
-tr18:
+tr17:
 //line scan.rl:54
  lex.te = ( lex.p)
 ( lex.p)--
@@ -194,7 +192,7 @@ tr18:
 //line NONE:1
  lex.ts = ( lex.p)
 
-//line scan.go:192
+//line scan.go:190
 		switch  lex.data[( lex.p)] {
 		case 32:
 			goto tr2
@@ -212,28 +210,24 @@ tr18:
 			goto st5
 		case 72:
 			goto st10
-		case 76:
-			goto st13
 		case 80:
-			goto st16
+			goto st13
 		case 83:
-			goto st19
+			goto st16
 		case 86:
-			goto st21
+			goto st20
 		case 95:
 			goto tr9
 		case 99:
 			goto st5
 		case 104:
 			goto st10
-		case 108:
-			goto st13
 		case 112:
-			goto st16
+			goto st13
 		case 115:
-			goto st19
+			goto st16
 		case 118:
-			goto st21
+			goto st20
 		}
 		switch {
 		case  lex.data[( lex.p)] < 48:
@@ -274,7 +268,7 @@ st_case_0:
 		if 48 <=  lex.data[( lex.p)] &&  lex.data[( lex.p)] <= 57 {
 			goto st3
 		}
-		goto tr16
+		goto tr15
 tr9:
 //line NONE:1
  lex.te = ( lex.p)+1
@@ -282,42 +276,42 @@ tr9:
 //line scan.rl:54
  lex.act = 11;
 	goto st4
-tr23:
+tr22:
 //line NONE:1
  lex.te = ( lex.p)+1
 
 //line scan.rl:48
  lex.act = 5;
 	goto st4
-tr26:
+tr25:
 //line NONE:1
  lex.te = ( lex.p)+1
 
 //line scan.rl:49
  lex.act = 6;
 	goto st4
-tr29:
-//line NONE:1
- lex.te = ( lex.p)+1
-
-//line scan.rl:51
- lex.act = 8;
-	goto st4
-tr32:
+tr28:
 //line NONE:1
  lex.te = ( lex.p)+1
 
 //line scan.rl:52
  lex.act = 9;
 	goto st4
-tr34:
+tr31:
 //line NONE:1
  lex.te = ( lex.p)+1
 
 //line scan.rl:50
  lex.act = 7;
 	goto st4
-tr40:
+tr33:
+//line NONE:1
+ lex.te = ( lex.p)+1
+
+//line scan.rl:51
+ lex.act = 8;
+	goto st4
+tr39:
 //line NONE:1
  lex.te = ( lex.p)+1
 
@@ -329,7 +323,7 @@ tr40:
 			goto _test_eof4
 		}
 	st_case_4:
-//line scan.go:327
+//line scan.go:321
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
@@ -348,7 +342,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr17
+		goto tr16
 	st5:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof5
@@ -376,7 +370,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st6:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof6
@@ -404,7 +398,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st7:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof7
@@ -432,7 +426,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st8:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof8
@@ -460,7 +454,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st9:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof9
@@ -470,11 +464,11 @@ tr40:
 		case 46:
 			goto tr9
 		case 69:
-			goto tr23
+			goto tr22
 		case 95:
 			goto tr9
 		case 101:
-			goto tr23
+			goto tr22
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -488,7 +482,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st10:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof10
@@ -516,7 +510,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st11:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof11
@@ -544,7 +538,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st12:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof12
@@ -554,11 +548,11 @@ tr40:
 		case 46:
 			goto tr9
 		case 80:
-			goto tr26
+			goto tr25
 		case 95:
 			goto tr9
 		case 112:
-			goto tr26
+			goto tr25
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -572,7 +566,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st13:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof13
@@ -600,7 +594,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st14:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof14
@@ -609,11 +603,11 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 83:
+		case 78:
 			goto st15
 		case 95:
 			goto tr9
-		case 115:
+		case 110:
 			goto st15
 		}
 		switch {
@@ -628,7 +622,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st15:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof15
@@ -637,12 +631,12 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 84:
-			goto tr29
+		case 71:
+			goto tr28
 		case 95:
 			goto tr9
-		case 116:
-			goto tr29
+		case 103:
+			goto tr28
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -656,7 +650,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st16:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof16
@@ -665,12 +659,16 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 73:
+		case 69:
 			goto st17
+		case 72:
+			goto st18
 		case 95:
 			goto tr9
-		case 105:
+		case 101:
 			goto st17
+		case 104:
+			goto st18
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -684,7 +682,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st17:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof17
@@ -693,12 +691,12 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 78:
-			goto st18
+		case 84:
+			goto tr31
 		case 95:
 			goto tr9
-		case 110:
-			goto st18
+		case 116:
+			goto tr31
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -712,7 +710,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st18:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof18
@@ -721,12 +719,12 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 71:
-			goto tr32
+		case 79:
+			goto st19
 		case 95:
 			goto tr9
-		case 103:
-			goto tr32
+		case 111:
+			goto st19
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -740,7 +738,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st19:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof19
@@ -749,12 +747,12 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 69:
-			goto st20
+		case 87:
+			goto tr33
 		case 95:
 			goto tr9
-		case 101:
-			goto st20
+		case 119:
+			goto tr33
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -768,7 +766,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st20:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof20
@@ -777,12 +775,12 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 84:
-			goto tr34
+		case 69:
+			goto st21
 		case 95:
 			goto tr9
-		case 116:
-			goto tr34
+		case 101:
+			goto st21
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -796,7 +794,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st21:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof21
@@ -805,11 +803,11 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 69:
+		case 82:
 			goto st22
 		case 95:
 			goto tr9
-		case 101:
+		case 114:
 			goto st22
 		}
 		switch {
@@ -824,7 +822,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st22:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof22
@@ -833,11 +831,11 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 82:
+		case 83:
 			goto st23
 		case 95:
 			goto tr9
-		case 114:
+		case 115:
 			goto st23
 		}
 		switch {
@@ -852,7 +850,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st23:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof23
@@ -861,11 +859,11 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 83:
+		case 73:
 			goto st24
 		case 95:
 			goto tr9
-		case 115:
+		case 105:
 			goto st24
 		}
 		switch {
@@ -880,7 +878,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st24:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof24
@@ -889,11 +887,11 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 73:
+		case 79:
 			goto st25
 		case 95:
 			goto tr9
-		case 105:
+		case 111:
 			goto st25
 		}
 		switch {
@@ -908,7 +906,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st25:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {
 			goto _test_eof25
@@ -917,40 +915,12 @@ tr40:
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr9
-		case 79:
-			goto st26
-		case 95:
-			goto tr9
-		case 111:
-			goto st26
-		}
-		switch {
-		case  lex.data[( lex.p)] < 65:
-			if 48 <=  lex.data[( lex.p)] &&  lex.data[( lex.p)] <= 57 {
-				goto tr9
-			}
-		case  lex.data[( lex.p)] > 90:
-			if 97 <=  lex.data[( lex.p)] &&  lex.data[( lex.p)] <= 122 {
-				goto tr9
-			}
-		default:
-			goto tr9
-		}
-		goto tr18
-	st26:
-		if ( lex.p)++; ( lex.p) == ( lex.pe) {
-			goto _test_eof26
-		}
-	st_case_26:
-		switch  lex.data[( lex.p)] {
-		case 46:
-			goto tr9
 		case 78:
-			goto tr40
+			goto tr39
 		case 95:
 			goto tr9
 		case 110:
-			goto tr40
+			goto tr39
 		}
 		switch {
 		case  lex.data[( lex.p)] < 65:
@@ -964,7 +934,7 @@ tr40:
 		default:
 			goto tr9
 		}
-		goto tr18
+		goto tr17
 	st_out:
 	_test_eof2:  lex.cs = 2; goto _test_eof
 	_test_eof1:  lex.cs = 1; goto _test_eof
@@ -991,59 +961,56 @@ tr40:
 	_test_eof23:  lex.cs = 23; goto _test_eof
 	_test_eof24:  lex.cs = 24; goto _test_eof
 	_test_eof25:  lex.cs = 25; goto _test_eof
-	_test_eof26:  lex.cs = 26; goto _test_eof
 
 	_test_eof: {}
 	if ( lex.p) == eof {
 		switch  lex.cs {
 		case 3:
-			goto tr16
+			goto tr15
 		case 4:
-			goto tr17
+			goto tr16
 		case 5:
-			goto tr18
+			goto tr17
 		case 6:
-			goto tr18
+			goto tr17
 		case 7:
-			goto tr18
+			goto tr17
 		case 8:
-			goto tr18
+			goto tr17
 		case 9:
-			goto tr18
+			goto tr17
 		case 10:
-			goto tr18
+			goto tr17
 		case 11:
-			goto tr18
+			goto tr17
 		case 12:
-			goto tr18
+			goto tr17
 		case 13:
-			goto tr18
+			goto tr17
 		case 14:
-			goto tr18
+			goto tr17
 		case 15:
-			goto tr18
+			goto tr17
 		case 16:
-			goto tr18
+			goto tr17
 		case 17:
-			goto tr18
+			goto tr17
 		case 18:
-			goto tr18
+			goto tr17
 		case 19:
-			goto tr18
+			goto tr17
 		case 20:
-			goto tr18
+			goto tr17
 		case 21:
-			goto tr18
+			goto tr17
 		case 22:
-			goto tr18
+			goto tr17
 		case 23:
-			goto tr18
+			goto tr17
 		case 24:
-			goto tr18
+			goto tr17
 		case 25:
-			goto tr18
-		case 26:
-			goto tr18
+			goto tr17
 		}
 	}
 

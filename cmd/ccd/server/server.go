@@ -152,15 +152,61 @@ func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	var cmdr protocol.CommandResponse
 	switch n := node.(type) {
 	case *ast.HelpStmt:
-		_ = n
 		cmdr = protocol.CommandResponse{
 			Status: "help",
-			Message: "create set <set_name>\tdefine a new set\n" +
-				"show sets\t\tlist existing sets",
+			Fields: []protocol.FieldDescription{
+				{
+					Name: "command",
+				},
+				{
+					Name: "description",
+				},
+			},
+			Data: []protocol.DataRow{
+				{
+					Values: []string{"show filters", "list existing filters"},
+				},
+				{
+					Values: []string{"show sets", "list existing sets"},
+				},
+			},
+			//Message: "create set <set_name>\tdefine a new set\n" +
+			//        "show sets\t\tlist existing sets",
 		}
 	case *ast.PingStmt:
-		_ = n
 		cmdr = protocol.CommandResponse{Status: "ping"}
+	case *ast.ShowStmt:
+		switch n.Name {
+		case "filters":
+			cmdr = protocol.CommandResponse{
+				Status: "show",
+				Fields: []protocol.FieldDescription{
+					{
+						Name: "filter",
+					},
+				},
+				Data: []protocol.DataRow{},
+			}
+		case "sets":
+			cmdr = protocol.CommandResponse{
+				Status: "show",
+				Fields: []protocol.FieldDescription{
+					{
+						Name: "set",
+					},
+				},
+				Data: []protocol.DataRow{
+					{
+						Values: []string{"reserve"},
+					},
+				},
+			}
+		default:
+			cmdr = protocol.CommandResponse{
+				Status:  "error",
+				Message: fmt.Sprintf("unknown type %q", n.Name),
+			}
+		}
 	default:
 		cmdr = protocol.CommandResponse{
 			Fields: []protocol.FieldDescription{

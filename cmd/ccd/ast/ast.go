@@ -28,12 +28,12 @@ type CreateSetStmt struct {
 func (*CreateSetStmt) node()     {}
 func (*CreateSetStmt) stmtNode() {}
 
-type ListStmt struct {
+type ShowStmt struct {
 	Name string
 }
 
-func (*ListStmt) node()     {}
-func (*ListStmt) stmtNode() {}
+func (*ShowStmt) node()     {}
+func (*ShowStmt) stmtNode() {}
 
 type PingStmt struct {
 }

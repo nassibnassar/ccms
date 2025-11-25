@@ -133,20 +133,27 @@ func runClient() error {
 			eout.Error("%s", resp.Message)
 			continue
 		}
+		header := true
 		if resp.Status == "help" {
-			fmt.Println(resp.Message)
-			continue
+			//fmt.Println(resp.Message)
+			//continue
+			header = false
 		}
 		if resp.Status == "ping" {
 			continue
 		}
-		for i := range resp.Fields {
-			if i != 0 {
-				fmt.Print("\t")
-			}
-			fmt.Print(resp.Fields[i].Name)
+		if resp.Status == "show" {
+			header = false
 		}
-		fmt.Print("\n")
+		if header {
+			for i := range resp.Fields {
+				if i != 0 {
+					fmt.Print("\t")
+				}
+				fmt.Print(resp.Fields[i].Name)
+			}
+			fmt.Print("\n")
+		}
 		for i := range resp.Data {
 			for j := range resp.Data[i].Values {
 				if j != 0 {

@@ -18,14 +18,14 @@ import (
 %type <node> stmt
 %type <node> create_set_stmt
 %type <node> help_stmt
-%type <node> list_stmt
 %type <node> ping_stmt
+%type <node> show_stmt
 
 %token CREATE
 %token HELP
-%token LIST
 %token PING
 %token SET
+%token SHOW
 
 %type <str> name
 %type <str> unreserved_keyword
@@ -59,7 +59,7 @@ stmt:
 		{
 			$$ = $1
 		}
-	| list_stmt
+	| show_stmt
 		{
 			$$ = $1
 		}
@@ -85,10 +85,10 @@ create_set_stmt:
 			$$ = &ast.CreateSetStmt{SetName: $3}
 		}
 
-list_stmt:
-	LIST name
+show_stmt:
+	SHOW name
 		{
-			$$ = &ast.ListStmt{Name: $2}
+			$$ = &ast.ShowStmt{Name: $2}
 		}
 
 ping_stmt:

@@ -75,11 +75,6 @@ func (c *Client) Send(cmd string) (*Response, error) {
 		return &Response{Status: cmdr.Status}, nil
 	}
 
-	if cmdr.Status == "help" {
-		resp := &Response{Status: cmdr.Status, Message: cmdr.Message}
-		return resp, nil
-	}
-
 	fields := make([]FieldDescription, 0)
 	for i := range cmdr.Fields {
 		fd := FieldDescription{Name: cmdr.Fields[i].Name}

@@ -17,9 +17,9 @@ type yySymType struct {
 
 const CREATE = 57346
 const HELP = 57347
-const LIST = 57348
-const PING = 57349
-const SET = 57350
+const PING = 57348
+const SET = 57349
+const SHOW = 57350
 const VERSION = 57351
 const IDENT = 57352
 const NUMBER = 57353
@@ -31,9 +31,9 @@ var yyToknames = [...]string{
 	"$unk",
 	"CREATE",
 	"HELP",
-	"LIST",
 	"PING",
 	"SET",
+	"SHOW",
 	"VERSION",
 	"IDENT",
 	"NUMBER",
@@ -54,25 +54,25 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 19
+const yyLast = 18
 
 var yyAct = [...]int8{
-	9, 10, 11, 12, 14, 13, 8, 17, 15, 1,
-	16, 7, 6, 5, 4, 3, 2, 0, 18,
+	9, 10, 12, 14, 11, 1, 8, 17, 15, 13,
+	16, 6, 7, 5, 4, 3, 2, 18,
 }
 
 var yyPact = [...]int16{
-	-4, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -3,
+	-4, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, 2,
 	-1000, -2, -1000, -2, -1000, -1000, -1000, -1000, -1000,
 }
 
 var yyPgo = [...]int8{
-	0, 16, 15, 14, 13, 12, 11, 4, 10, 9,
+	0, 16, 15, 14, 13, 12, 11, 3, 10, 5,
 }
 
 var yyR1 = [...]int8{
 	0, 9, 1, 2, 2, 2, 2, 2, 4, 3,
-	5, 6, 7, 7, 8,
+	6, 5, 7, 7, 8,
 }
 
 var yyR2 = [...]int8{
@@ -81,8 +81,8 @@ var yyR2 = [...]int8{
 }
 
 var yyChk = [...]int16{
-	-1000, -9, -1, -2, -3, -4, -5, -6, 10, 4,
-	5, 6, 7, 8, -7, 10, -8, 9, -7,
+	-1000, -9, -1, -2, -3, -4, -6, -5, 10, 4,
+	5, 8, 6, 7, -7, 10, -8, 9, -7,
 }
 
 var yyDef = [...]int8{
@@ -487,7 +487,7 @@ yydefault:
 	case 10:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
-			yyVAL.node = &ast.ListStmt{Name: yyDollar[2].str}
+			yyVAL.node = &ast.ShowStmt{Name: yyDollar[2].str}
 		}
 	case 11:
 		yyDollar = yyS[yypt-1 : yypt+1]
