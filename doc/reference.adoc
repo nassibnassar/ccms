@@ -17,8 +17,7 @@ CCMS provides a model to support user interface concepts:
 |An object is a bibliographic record.
 
 |List
-|set
-list
+|set, list
 |create set
 delete
 insert

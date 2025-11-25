@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -209,31 +210,12 @@ func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		cmdr = protocol.CommandResponse{
-			Fields: []protocol.FieldDescription{
-				{
-					Name: "one",
-					// DataType: 0,
-				},
-				{
-					Name: "two",
-					// Type: 0,
-				},
-			},
-			Data: []protocol.DataRow{
-				{
-					Values: []string{"a", "b"},
-				},
-				{
-					Values: []string{"c", "d"},
-				},
-			},
+			Status: "error",
+			Message: fmt.Sprintf("syntax error near %q\n%s\n^",
+				strings.Fields(rq.Command)[0],
+				rq.Command),
 		}
 	}
-	// var err error
-	// if err = sysdb.EnableConnector(&rq); err != nil {
-	// 	util.HandleError(w, err, http.StatusBadRequest)
-	// 	return
-	// }
 	// success response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
