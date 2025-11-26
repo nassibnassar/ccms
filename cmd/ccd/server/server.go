@@ -153,6 +153,7 @@ func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	var cmdr protocol.CommandResponse
 	switch n := node.(type) {
 	case *ast.HelpStmt:
+		_ = n
 		cmdr = protocol.CommandResponse{
 			Status: "help",
 			Fields: []protocol.FieldDescription{
@@ -176,44 +177,38 @@ func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 		}
 	case *ast.PingStmt:
 		cmdr = protocol.CommandResponse{Status: "ping"}
-	case *ast.ShowStmt:
-		switch n.Name {
-		case "filters":
-			cmdr = protocol.CommandResponse{
-				Status: "show",
-				Fields: []protocol.FieldDescription{
-					{
-						Name: "filter",
-					},
+	case *ast.ShowFiltersStmt:
+		cmdr = protocol.CommandResponse{
+			Status: "show",
+			Fields: []protocol.FieldDescription{
+				{
+					Name: "filter",
 				},
-				Data: []protocol.DataRow{},
-			}
-		case "sets":
-			cmdr = protocol.CommandResponse{
-				Status: "show",
-				Fields: []protocol.FieldDescription{
-					{
-						Name: "set",
-					},
+			},
+			Data: []protocol.DataRow{},
+		}
+	case *ast.ShowSetsStmt:
+		cmdr = protocol.CommandResponse{
+			Status: "show",
+			Fields: []protocol.FieldDescription{
+				{
+					Name: "set",
 				},
-				Data: []protocol.DataRow{
-					{
-						Values: []string{"reserve"},
-					},
+			},
+			Data: []protocol.DataRow{
+				{
+					Values: []string{"reserve"},
 				},
-			}
-		default:
-			cmdr = protocol.CommandResponse{
-				Status:  "error",
-				Message: fmt.Sprintf("unknown type %q", n.Name),
-			}
+			},
 		}
 	default:
+		firstField := strings.Fields(rq.Command)[0]
+		var b strings.Builder
+		parser.WriteCarets(&b, 0, len(firstField))
 		cmdr = protocol.CommandResponse{
 			Status: "error",
-			Message: fmt.Sprintf("syntax error near %q\n%s\n^",
-				strings.Fields(rq.Command)[0],
-				rq.Command),
+			Message: fmt.Sprintf("syntax error near %q\n%s\n%s",
+				firstField, rq.Command, b.String()),
 		}
 	}
 	// success response

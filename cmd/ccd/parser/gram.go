@@ -16,23 +16,27 @@ type yySymType struct {
 }
 
 const CREATE = 57346
-const HELP = 57347
-const PING = 57348
-const SET = 57349
-const SHOW = 57350
-const VERSION = 57351
-const IDENT = 57352
-const NUMBER = 57353
-const SLITERAL = 57354
+const FILTERS = 57347
+const HELP = 57348
+const PING = 57349
+const SET = 57350
+const SETS = 57351
+const SHOW = 57352
+const VERSION = 57353
+const IDENT = 57354
+const NUMBER = 57355
+const SLITERAL = 57356
 
 var yyToknames = [...]string{
 	"$end",
 	"error",
 	"$unk",
 	"CREATE",
+	"FILTERS",
 	"HELP",
 	"PING",
 	"SET",
+	"SETS",
 	"SHOW",
 	"VERSION",
 	"IDENT",
@@ -54,40 +58,41 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 18
+const yyLast = 19
 
 var yyAct = [...]int8{
-	9, 10, 12, 14, 11, 1, 8, 17, 15, 13,
-	16, 6, 7, 5, 4, 3, 2, 18,
+	19, 17, 9, 13, 10, 12, 14, 1, 11, 18,
+	15, 16, 7, 6, 8, 5, 4, 3, 2,
 }
 
 var yyPact = [...]int16{
-	-4, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, 2,
-	-1000, -2, -1000, -2, -1000, -1000, -1000, -1000, -1000,
+	-2, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -5,
+	-1000, 1, -1000, -11, -1000, -1000, -1000, -1000, -1000, -1000,
 }
 
 var yyPgo = [...]int8{
-	0, 16, 15, 14, 13, 12, 11, 3, 10, 5,
+	0, 18, 17, 16, 15, 14, 13, 12, 11, 9,
+	7,
 }
 
 var yyR1 = [...]int8{
-	0, 9, 1, 2, 2, 2, 2, 2, 4, 3,
-	6, 5, 7, 7, 8,
+	0, 10, 1, 2, 2, 2, 2, 2, 4, 3,
+	6, 7, 5, 8, 8, 9,
 }
 
 var yyR2 = [...]int8{
 	0, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-	2, 1, 1, 1, 1,
+	2, 2, 1, 1, 1, 1,
 }
 
 var yyChk = [...]int16{
-	-1000, -9, -1, -2, -3, -4, -6, -5, 10, 4,
-	5, 8, 6, 7, -7, 10, -8, 9, -7,
+	-1000, -10, -1, -2, -3, -4, -6, -7, -5, 4,
+	6, 10, 7, 8, 5, 9, -8, 12, -9, 11,
 }
 
 var yyDef = [...]int8{
 	0, -2, 1, 2, 3, 4, 5, 6, 7, 0,
-	8, 0, 11, 0, 10, 12, 13, 14, 9,
+	8, 0, 12, 0, 10, 11, 9, 13, 14, 15,
 }
 
 var yyTok1 = [...]int8{
@@ -96,7 +101,7 @@ var yyTok1 = [...]int8{
 
 var yyTok2 = [...]int8{
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-	12,
+	12, 13, 14,
 }
 
 var yyTok3 = [...]int8{
@@ -471,8 +476,7 @@ yydefault:
 	case 7:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yylex.(*lexer).pass = true
-			// $$ = nil
+			yyVAL.node = yyDollar[1].node
 		}
 	case 8:
 		yyDollar = yyS[yypt-1 : yypt+1]
@@ -487,19 +491,24 @@ yydefault:
 	case 10:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
-			yyVAL.node = &ast.ShowStmt{Name: yyDollar[2].str}
+			yyVAL.node = &ast.ShowFiltersStmt{}
 		}
 	case 11:
-		yyDollar = yyS[yypt-1 : yypt+1]
+		yyDollar = yyS[yypt-2 : yypt+1]
 		{
-			yyVAL.node = &ast.PingStmt{}
+			yyVAL.node = &ast.ShowSetsStmt{}
 		}
 	case 12:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.str = yyDollar[1].str
+			yyVAL.node = &ast.PingStmt{}
 		}
 	case 13:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		{
+			yyVAL.str = yyDollar[1].str
+		}
+	case 14:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.str = yyDollar[1].str

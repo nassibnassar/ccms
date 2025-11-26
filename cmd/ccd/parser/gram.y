@@ -19,12 +19,15 @@ import (
 %type <node> create_set_stmt
 %type <node> help_stmt
 %type <node> ping_stmt
-%type <node> show_stmt
+%type <node> show_filters_stmt
+%type <node> show_sets_stmt
 
 %token CREATE
+%token FILTERS
 %token HELP
 %token PING
 %token SET
+%token SETS
 %token SHOW
 
 %type <str> name
@@ -59,18 +62,17 @@ stmt:
 		{
 			$$ = $1
 		}
-	| show_stmt
+	| show_filters_stmt
+		{
+			$$ = $1
+		}
+	| show_sets_stmt
 		{
 			$$ = $1
 		}
 	| ping_stmt
 		{
 			$$ = $1
-		}
-	| IDENT
-		{
-			yylex.(*lexer).pass = true
-			// $$ = nil
 		}
 
 help_stmt:
@@ -85,10 +87,16 @@ create_set_stmt:
 			$$ = &ast.CreateSetStmt{SetName: $3}
 		}
 
-show_stmt:
-	SHOW name
+show_filters_stmt:
+	SHOW FILTERS
 		{
-			$$ = &ast.ShowStmt{Name: $2}
+			$$ = &ast.ShowFiltersStmt{}
+		}
+
+show_sets_stmt:
+	SHOW SETS
+		{
+			$$ = &ast.ShowSetsStmt{}
 		}
 
 ping_stmt:

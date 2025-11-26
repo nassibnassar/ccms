@@ -11,12 +11,12 @@ import (
 //go:generate ragel -Z -G2 -o scan.go scan.rl
 //go:generate go tool goyacc -l -o gram.go gram.y
 
-func WriteErrorContext(query string, position int) string {
+func WriteErrorContext(query string, ts, te int) string {
 	var b strings.Builder
 	// Scan to position, counting the number of newlines.
 	var pos, line, markline, linepos int
 	for _, r := range query {
-		if pos >= position {
+		if pos >= ts {
 			markline = line
 			break
 		}
@@ -60,7 +60,7 @@ func WriteErrorContext(query string, position int) string {
 	for i := 0; i < linepos; i++ {
 		b.WriteRune(' ')
 	}
-	b.WriteRune('^')
+	WriteCarets(&b, ts, te)
 	return b.String()
 }
 
@@ -70,7 +70,7 @@ func errorMessage(l *lexer) error {
 	if ts == te {
 		te++
 	}
-	s := fmt.Sprintf("%s near %q\n%s", l.err, l.data[ts:te], WriteErrorContext(string(l.data), l.ts))
+	s := fmt.Sprintf("%s near %q\n%s", l.err, l.data[ts:te], WriteErrorContext(string(l.data), ts, te))
 	return errors.New(s)
 }
 
@@ -80,11 +80,19 @@ func Parse(input string) (ast.Node, error, bool) {
 	var msg error
 	if e == 0 {
 		if l.node == nil {
-			msg = fmt.Errorf("syntax error near %q\n%s\n^",
-				strings.Split(input, " ")[0], strings.Split(input, "\n")[0])
+			var b strings.Builder
+			WriteCarets(&b, l.ts, l.te)
+			msg = fmt.Errorf("syntax error near %q\n%s\n%s",
+				strings.Split(input, " ")[0], strings.Split(input, "\n")[0], b.String())
 		}
 	} else {
 		msg = errorMessage(l)
 	}
 	return l.node, msg, l.pass
+}
+
+func WriteCarets(b *strings.Builder, ts, te int) {
+	for i := ts; i < te; i++ {
+		b.WriteRune('^')
+	}
 }
