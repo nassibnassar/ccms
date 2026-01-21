@@ -15,7 +15,6 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/config"
-	"github.com/indexdata/ccms/cmd/ccd/harvest"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/option"
 	"github.com/indexdata/ccms/cmd/ccd/osutil"
@@ -104,7 +103,7 @@ func startServer(s *svr) error {
 	}()
 
 	go serve(s)
-	go harvest.Harvest(s.dp)
+	//go harvest.Harvest(s.dp)
 
 	for {
 		if process.Stop() {
