@@ -19,13 +19,17 @@ import (
 %type <node> create_set_stmt
 %type <node> help_stmt
 %type <node> ping_stmt
+%type <node> retrieve_stmt
 %type <node> show_filters_stmt
 %type <node> show_sets_stmt
 
 %token CREATE
 %token FILTERS
+%token FROM
 %token HELP
+%token LIMIT
 %token PING
+%token RETRIEVE
 %token SET
 %token SETS
 %token SHOW
@@ -62,6 +66,10 @@ stmt:
 		{
 			$$ = $1
 		}
+	| retrieve_stmt
+		{
+			$$ = $1
+		}
 	| show_filters_stmt
 		{
 			$$ = $1
@@ -85,6 +93,16 @@ create_set_stmt:
 	CREATE SET name
 		{
 			$$ = &ast.CreateSetStmt{SetName: $3}
+		}
+
+retrieve_stmt:
+	RETRIEVE name FROM name LIMIT NUMBER
+		{
+			$$ = &ast.RetrieveStmt{Attribute: $2, Set: $4, Limit: $6}
+		}
+	| RETRIEVE name FROM name
+		{
+			$$ = &ast.RetrieveStmt{Attribute: $2, Set: $4, Limit: "20"}
 		}
 
 show_filters_stmt:

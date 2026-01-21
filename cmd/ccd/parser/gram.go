@@ -17,15 +17,18 @@ type yySymType struct {
 
 const CREATE = 57346
 const FILTERS = 57347
-const HELP = 57348
-const PING = 57349
-const SET = 57350
-const SETS = 57351
-const SHOW = 57352
-const VERSION = 57353
-const IDENT = 57354
-const NUMBER = 57355
-const SLITERAL = 57356
+const FROM = 57348
+const HELP = 57349
+const LIMIT = 57350
+const PING = 57351
+const RETRIEVE = 57352
+const SET = 57353
+const SETS = 57354
+const SHOW = 57355
+const VERSION = 57356
+const IDENT = 57357
+const NUMBER = 57358
+const SLITERAL = 57359
 
 var yyToknames = [...]string{
 	"$end",
@@ -33,8 +36,11 @@ var yyToknames = [...]string{
 	"$unk",
 	"CREATE",
 	"FILTERS",
+	"FROM",
 	"HELP",
+	"LIMIT",
 	"PING",
+	"RETRIEVE",
 	"SET",
 	"SETS",
 	"SHOW",
@@ -58,41 +64,45 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 19
+const yyLast = 26
 
 var yyAct = [...]int8{
-	19, 17, 9, 13, 10, 12, 14, 1, 11, 18,
-	15, 16, 7, 6, 8, 5, 4, 3, 2,
+	16, 10, 26, 15, 11, 20, 14, 12, 19, 17,
+	13, 25, 21, 23, 1, 18, 22, 8, 7, 6,
+	9, 5, 4, 3, 24, 2,
 }
 
 var yyPact = [...]int16{
-	-2, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -5,
-	-1000, 1, -1000, -11, -1000, -1000, -1000, -1000, -1000, -1000,
+	-3, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	-8, -1000, -6, 0, -1000, -6, 7, -1000, -1000, -1000,
+	-1000, -1000, -1000, -6, 3, -14, -1000,
 }
 
 var yyPgo = [...]int8{
-	0, 18, 17, 16, 15, 14, 13, 12, 11, 9,
-	7,
+	0, 25, 23, 22, 21, 20, 19, 18, 17, 0,
+	15, 14,
 }
 
 var yyR1 = [...]int8{
-	0, 10, 1, 2, 2, 2, 2, 2, 4, 3,
-	6, 7, 5, 8, 8, 9,
+	0, 11, 1, 2, 2, 2, 2, 2, 2, 4,
+	3, 6, 6, 7, 8, 5, 9, 9, 10,
 }
 
 var yyR2 = [...]int8{
-	0, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-	2, 2, 1, 1, 1, 1,
+	0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+	3, 6, 4, 2, 2, 1, 1, 1, 1,
 }
 
 var yyChk = [...]int16{
-	-1000, -10, -1, -2, -3, -4, -6, -7, -5, 4,
-	6, 10, 7, 8, 5, 9, -8, 12, -9, 11,
+	-1000, -11, -1, -2, -3, -4, -6, -7, -8, -5,
+	4, 7, 10, 13, 9, 11, -9, 15, -10, 14,
+	5, 12, -9, 6, -9, 8, 16,
 }
 
 var yyDef = [...]int8{
-	0, -2, 1, 2, 3, 4, 5, 6, 7, 0,
-	8, 0, 12, 0, 10, 11, 9, 13, 14, 15,
+	0, -2, 1, 2, 3, 4, 5, 6, 7, 8,
+	0, 9, 0, 0, 15, 0, 0, 16, 17, 18,
+	13, 14, 10, 0, 12, 0, 11,
 }
 
 var yyTok1 = [...]int8{
@@ -101,7 +111,7 @@ var yyTok1 = [...]int8{
 
 var yyTok2 = [...]int8{
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-	12, 13, 14,
+	12, 13, 14, 15, 16, 17,
 }
 
 var yyTok3 = [...]int8{
@@ -481,34 +491,49 @@ yydefault:
 	case 8:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.node = &ast.HelpStmt{}
+			yyVAL.node = yyDollar[1].node
 		}
 	case 9:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		{
+			yyVAL.node = &ast.HelpStmt{}
+		}
+	case 10:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.node = &ast.CreateSetStmt{SetName: yyDollar[3].str}
 		}
-	case 10:
+	case 11:
+		yyDollar = yyS[yypt-6 : yypt+1]
+		{
+			yyVAL.node = &ast.RetrieveStmt{Attribute: yyDollar[2].str, Set: yyDollar[4].str, Limit: yyDollar[6].str}
+		}
+	case 12:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		{
+			yyVAL.node = &ast.RetrieveStmt{Attribute: yyDollar[2].str, Set: yyDollar[4].str, Limit: "20"}
+		}
+	case 13:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.ShowFiltersStmt{}
 		}
-	case 11:
+	case 14:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.ShowSetsStmt{}
 		}
-	case 12:
+	case 15:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.node = &ast.PingStmt{}
 		}
-	case 13:
+	case 16:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.str = yyDollar[1].str
 		}
-	case 14:
+	case 17:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.str = yyDollar[1].str

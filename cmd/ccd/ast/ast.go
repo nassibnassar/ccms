@@ -28,6 +28,15 @@ type CreateSetStmt struct {
 func (*CreateSetStmt) node()     {}
 func (*CreateSetStmt) stmtNode() {}
 
+type RetrieveStmt struct {
+	Attribute string
+	Set       string
+	Limit     string
+}
+
+func (*RetrieveStmt) node()     {}
+func (*RetrieveStmt) stmtNode() {}
+
 type ShowFiltersStmt struct {
 }
 

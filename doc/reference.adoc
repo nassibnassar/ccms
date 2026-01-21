@@ -545,7 +545,7 @@ Retrieve objects from a set
 
 [source,subs="verbatim,quotes"]
 ----
-retrieve { all | `*_attribute_*` [, ...] }
+retrieve [ dynamic ] { all | `*_attribute_*` [, ...] }
     from `*_set_name_*`
     [ where `*_condition_*` ]
     [ filter `*_filter_name_*` ]

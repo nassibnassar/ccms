@@ -165,12 +165,12 @@ func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
 
 func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	// read request
-	var rq protocol.CommandRequest
+	var req protocol.CommandRequest
 	var ok bool
-	if ok = ReadRequest(w, r, &rq); !ok {
+	if ok = ReadRequest(w, r, &req); !ok {
 		return
 	}
-	node, err, pass := parser.Parse(rq.Command)
+	node, err, pass := parser.Parse(req.Command)
 	//fmt.Printf("### %#v --- %v\n", node, err)
 	if err != nil {
 		returnError(w, err.Error(), http.StatusOK /* http.StatusBadRequest */)
@@ -182,11 +182,11 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	//}
 	//log.Info("parsed: %#v", node)
 	_ = pass
-	var cmdr protocol.CommandResponse
-	switch n := node.(type) {
+	var resp *protocol.CommandResponse
+	_ = resp
+	switch cmd := node.(type) {
 	case *ast.HelpStmt:
-		_ = n
-		cmdr = protocol.CommandResponse{
+		resp = &protocol.CommandResponse{
 			Status: "help",
 			Fields: []protocol.FieldDescription{
 				{
@@ -198,6 +198,9 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 			},
 			Data: []protocol.DataRow{
 				{
+					Values: []string{"retrieve", "retrieve objects from a set"},
+				},
+				{
 					Values: []string{"show filters", "list existing filters"},
 				},
 				{
@@ -208,10 +211,12 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 			//        "show sets\t\tlist existing sets",
 		}
 	case *ast.PingStmt:
-		cmdr = protocol.CommandResponse{Status: "ping"}
+		resp = &protocol.CommandResponse{Status: "ping"}
+	case *ast.RetrieveStmt:
+		resp = retrieve(s, cmd)
 	case *ast.ShowFiltersStmt:
-		cmdr = protocol.CommandResponse{
-			Status: "show",
+		resp = &protocol.CommandResponse{
+			Status: "show filters",
 			Fields: []protocol.FieldDescription{
 				{
 					Name: "filter",
@@ -220,8 +225,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 			Data: []protocol.DataRow{},
 		}
 	case *ast.ShowSetsStmt:
-		cmdr = protocol.CommandResponse{
-			Status: "show",
+		resp = &protocol.CommandResponse{
+			Status: "show sets",
 			Fields: []protocol.FieldDescription{
 				{
 					Name: "set",
@@ -234,19 +239,19 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 	default:
-		firstField := strings.Fields(rq.Command)[0]
+		firstField := strings.Fields(req.Command)[0]
 		var b strings.Builder
 		parser.WriteCarets(&b, 0, len(firstField))
-		cmdr = protocol.CommandResponse{
+		resp = &protocol.CommandResponse{
 			Status: "error",
 			Message: fmt.Sprintf("syntax error near %q\n%s\n%s",
-				firstField, rq.Command, b.String()),
+				firstField, req.Command, b.String()),
 		}
 	}
 	// success response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err = json.NewEncoder(w).Encode(cmdr); err != nil {
+	if err = json.NewEncoder(w).Encode(*resp); err != nil {
 		// TODO error handling
 		_ = err
 	}
