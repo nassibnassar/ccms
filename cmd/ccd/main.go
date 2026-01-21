@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/indexdata/ccms/cmd/ccd/config"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/option"
 	"github.com/indexdata/ccms/cmd/ccd/osutil"
@@ -362,14 +363,7 @@ func initSystem(opt *option.Init) error {
 	if err != nil {
 		return fmt.Errorf("creating configuration file: %w", err)
 	}
-	var s = "[main]\n" +
-		"host = \n" +
-		"port = 5432\n" +
-		"database = \n" +
-		"user = ccms\n" +
-		"password = \n" +
-		"sslmode = require\n"
-	_, err = f.WriteString(s)
+	_, err = f.WriteString(config.InitStub())
 	if err != nil {
 		return fmt.Errorf("writing configuration file: %w", err)
 	}

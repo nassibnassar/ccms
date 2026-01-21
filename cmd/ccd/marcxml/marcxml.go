@@ -44,23 +44,25 @@ func Unmarshal(data []byte) (*MARCXML, error) {
 	return &marc, nil
 }
 
-func (m *MARCXML) Lookup(tag, ind1, ind2, subfield string) (string, bool) {
+func (m *MARCXML) Lookup(tag, subfield string) []string {
+	content := make([]string, 0)
 	cf := m.Controlfields
 	for i := range cf {
 		if cf[i].Tag == tag {
-			return cf[i].Value, true
+			content = append(content, cf[i].Value)
 		}
 	}
 	df := m.Datafields
 	for i := range df {
-		if df[i].Tag == tag && df[i].Ind1 == ind1 && df[i].Ind2 == ind2 {
+		// ignore df[i].Ind1 and df[i].Ind2
+		if df[i].Tag == tag {
 			sf := df[i].Subfields
 			for j := range sf {
 				if sf[j].Code == subfield {
-					return sf[j].Value, true
+					content = append(content, sf[j].Value)
 				}
 			}
 		}
 	}
-	return "", false
+	return content
 }

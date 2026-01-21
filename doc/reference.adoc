@@ -71,6 +71,8 @@ retrieve isbn from s tag t, u, not v, w
 
 === Protocol
 
+==== Overview
+
 Non-query commands such as `create set` return a diagnostic status:
 
 [source,json]
@@ -97,7 +99,8 @@ The status may be an error:
 }
 ----
 
-Query commands such as `retrieve` also return tabular data sets, e.g.:
+Query commands such as `retrieve` also return tabular data sets, with
+the attribute names described under `"fields"`, e.g.:
 
 [source,json]
 ----
@@ -121,6 +124,71 @@ Query commands such as `retrieve` also return tabular data sets, e.g.:
     ],
     [
       "ac256496-111a-4e13-9d3b-a55ac3d0f676"
+    ]
+  ]
+}
+----
+
+==== Dynamic attributes
+
+An attribute can be _dynamic_ in the sense that its value has to be
+retrieved from an external data source.  If such a field is requested,
+`"dynamic"` is set to `true` and the data values are `null`, e.g.:
+
+[source,json]
+----
+{
+  "status": "retrieve",
+  "fields": [
+    {
+      "name": "id"
+    },
+    {
+      "name": "cost",
+      "dynamic": true
+    }
+  ],
+  "data": [
+    [
+      "053e4063-d70c-4a41-a968-e6900e6b47d5",
+      null
+    ],
+    [
+      "ac256496-111a-4e13-9d3b-a55ac3d0f676",
+      null
+    ]
+  ]
+}
+----
+
+Instead of requesting dynamic fields in that way, or as a follow-up to
+it, the `retrieve dynamic` command can be used to request values for
+one or more dynamic attributes in a single record.  This form of query
+only supports a list of dynamic attributes and a `where` clause with a
+single `id`:
+
+----
+----
+[source,json]
+----
+{
+  "command": "retrieve dynamic cost from myset where id = \"053e4063-d70c-4a41-a968-e6900e6b47d5\""
+}
+----
+
+[source,json]
+----
+{
+  "status": "retrieve",
+  "fields": [
+    {
+      "name": "cost",
+      "dynamic": true
+    }
+  ],
+  "data": [
+    [
+      29.30
     ]
   ]
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +14,8 @@ import (
 	"time"
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
+	"github.com/indexdata/ccms/cmd/ccd/config"
+	"github.com/indexdata/ccms/cmd/ccd/harvest"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/option"
 	"github.com/indexdata/ccms/cmd/ccd/osutil"
@@ -21,10 +24,14 @@ import (
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/global"
 	"github.com/indexdata/ccms/internal/protocol"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type server struct {
-	Opt *option.Server
+type svr struct {
+	opt  *option.Server
+	conf *config.Config
+	dp   *pgxpool.Pool
 }
 
 func Start(opt *option.Server) error {
@@ -57,13 +64,38 @@ func Start(opt *option.Server) error {
 	}
 	defer process.RemovePIDFile(opt.Datadir)
 
-	if err = startServer(opt); err != nil {
+	if err = databaseServer(opt); err != nil {
 		return fmt.Errorf("server stopped: %s", err)
 	}
 	return nil
 }
 
-func startServer(opt *option.Server) error {
+func databaseServer(opt *option.Server) error {
+	conf, err := config.New(opt.Datadir)
+	if err != nil {
+		return fmt.Errorf("reading configuration file: %v", err)
+	}
+
+	dp, err := newPool(context.TODO(), conf.DB.ConnString())
+	if err != nil {
+		return fmt.Errorf("creating database connection pool: %v", err)
+	}
+	defer dp.Close()
+
+	// ensure database is initialized and compatible
+	if err = initialize(dp); err != nil {
+		return err
+	}
+
+	s := &svr{opt: opt, conf: conf, dp: dp}
+
+	if err = startServer(s); err != nil {
+		return fmt.Errorf("server stopped: %s", err)
+	}
+	return nil
+}
+
+func startServer(s *svr) error {
 	var sigc = make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGTERM)
 	go func() {
@@ -71,40 +103,40 @@ func startServer(opt *option.Server) error {
 		process.SetStop()
 	}()
 
-	go serve(opt)
-	//go harvest.Harvest()
+	go serve(s)
+	go harvest.Harvest(s.dp)
 
 	for {
 		if process.Stop() {
 			break
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 	log.Info("server stopped")
 	return nil
 }
 
-func serve(opt *option.Server) {
+func serve(s *svr) {
 	var listen string
-	if opt.Listen == "" {
+	if s.opt.Listen == "" {
 		listen = "127.0.0.1"
 	} else {
-		listen = opt.Listen
+		listen = s.opt.Listen
 	}
-	addr := net.JoinHostPort(listen, opt.Port)
+	addr := net.JoinHostPort(listen, s.opt.Port)
 	httpsvr := http.Server{
 		Addr:    addr,
-		Handler: setupHandlers(&server{Opt: opt}),
+		Handler: setupHandlers(s),
 	}
 	log.Info("CCMS %s, listening on %s", global.Version, addr)
-	if opt.NoTLS && opt.Listen != "" {
+	if s.opt.NoTLS && s.opt.Listen != "" {
 		log.Warning("disabling TLS (insecure)")
 	}
 	var err error
-	if opt.Listen == "" || opt.NoTLS {
+	if s.opt.Listen == "" || s.opt.NoTLS {
 		err = httpsvr.ListenAndServe()
 	} else {
-		err = httpsvr.ListenAndServeTLS(opt.TLSCert, opt.TLSKey)
+		err = httpsvr.ListenAndServeTLS(s.opt.TLSCert, s.opt.TLSKey)
 	}
 	if err != nil {
 		m := fmt.Sprintf("error starting server: %v", err)
@@ -114,16 +146,16 @@ func serve(opt *option.Server) {
 	}
 }
 
-func setupHandlers(svr *server) http.Handler {
+func setupHandlers(s *svr) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/cmd", svr.handleCommand)
+	mux.HandleFunc("/cmd", s.handleCommand)
 	return mux
 }
 
-func (svr *server) handleCommand(w http.ResponseWriter, r *http.Request) {
+func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		// log.Info("request: %s", requestString(r))
-		svr.handleCommandPost(w, r)
+		s.handleCommandPost(w, r)
 		return
 	}
 	// var m = unsupportedMethod("/config", r)
@@ -131,7 +163,7 @@ func (svr *server) handleCommand(w http.ResponseWriter, r *http.Request) {
 	// http.Error(w, m, http.StatusMethodNotAllowed)
 }
 
-func (svr *server) handleCommandPost(w http.ResponseWriter, r *http.Request) {
+func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	// read request
 	var rq protocol.CommandRequest
 	var ok bool
@@ -333,4 +365,36 @@ func requestString(r *http.Request) string {
 	var remoteHost, remotePort string
 	remoteHost, remotePort, _ = net.SplitHostPort(r.RemoteAddr)
 	return fmt.Sprintf("host=%s port=%s method=%s uri=%s", remoteHost, remotePort, r.Method, r.URL)
+}
+
+func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
+	config, err := pgxpool.ParseConfig(connString)
+	if err != nil {
+		return nil, err
+	}
+	config.AfterConnect = setDatabaseParameters
+	config.MaxConns = 64
+	dp, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+	return dp, nil
+}
+
+func setDatabaseParameters(ctx context.Context, dc *pgx.Conn) error {
+	q := "SET idle_in_transaction_session_timeout=0"
+	if _, err := dc.Exec(ctx, q); err != nil {
+		return err
+	}
+	q = "SET idle_session_timeout=0"
+	_, _ = dc.Exec(ctx, q) // Temporarily allow for PostgreSQL versions < 14
+	q = "SET statement_timeout=0"
+	if _, err := dc.Exec(ctx, q); err != nil {
+		return err
+	}
+	q = "SET timezone='UTC'"
+	if _, err := dc.Exec(ctx, q); err != nil {
+		return err
+	}
+	return nil
 }
