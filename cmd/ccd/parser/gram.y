@@ -11,6 +11,7 @@ import (
 	str string
 	optlist []ast.Option
 	node ast.Node
+	selectExpr ast.SelectExpr
 	pass bool
 }
 
@@ -23,6 +24,8 @@ import (
 %type <node> show_filters_stmt
 %type <node> show_sets_stmt
 
+%type <selectExpr> select_expression
+
 %token CREATE
 %token FILTERS
 %token FROM
@@ -30,6 +33,7 @@ import (
 %token LIMIT
 %token PING
 %token RETRIEVE
+%token SELECT
 %token SET
 %token SETS
 %token SHOW
@@ -96,13 +100,31 @@ create_set_stmt:
 		}
 
 retrieve_stmt:
-	RETRIEVE name FROM name LIMIT NUMBER
+	SELECT '*' FROM name LIMIT NUMBER
 		{
-			$$ = &ast.RetrieveStmt{Attribute: $2, Set: $4, Limit: $6}
+			$$ = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: $4, Limit: $6, Retrieve: false}
 		}
-	| RETRIEVE name FROM name
+	| SELECT '*' FROM name
 		{
-			$$ = &ast.RetrieveStmt{Attribute: $2, Set: $4, Limit: "20"}
+			$$ = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: $4, Limit: "20", Retrieve: false}
+		}
+	| RETRIEVE select_expression FROM name LIMIT NUMBER
+		{
+			$$ = &ast.SelectStmt{Select: $2, Set: $4, Limit: $6, Retrieve: true}
+		}
+	| RETRIEVE select_expression FROM name
+		{
+			$$ = &ast.SelectStmt{Select: $2, Set: $4, Limit: "20", Retrieve: true}
+		}
+
+select_expression:
+	name
+		{
+			$$ = &ast.AttrSelectExpr{Attribute: $1}
+		}
+	| '*'
+		{
+			$$ = &ast.StarSelectExpr{}
 		}
 
 show_filters_stmt:

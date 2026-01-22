@@ -9,16 +9,21 @@ import (
 	"github.com/indexdata/ccms/internal/protocol"
 )
 
-//	type RetrieveStmt struct {
-//	       Attribute string
-//	       Set       string
-//	       Limit     int
-//	}
-func retrieve(s *svr, cmd *ast.RetrieveStmt) *protocol.CommandResponse {
-	if cmd.Attribute != "all" {
+func selectStmt(s *svr, cmd *ast.SelectStmt) *protocol.CommandResponse {
+	if cmd.Retrieve {
 		return &protocol.CommandResponse{
 			Status:  "error",
-			Message: "selecting attributes not yet supported; use \"retrieve all\"",
+			Message: "\"retrieve all\" is no longer supported; use \"select *\"",
+		}
+	}
+
+	a, ok := cmd.Select.(*ast.AttrSelectExpr)
+	if ok {
+		if a.Attribute != "all" {
+			return &protocol.CommandResponse{
+				Status:  "error",
+				Message: "selecting attributes is not yet supported",
+			}
 		}
 	}
 	if cmd.Set != "reserve" {

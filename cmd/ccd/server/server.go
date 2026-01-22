@@ -197,7 +197,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 			},
 			Data: []protocol.DataRow{
 				{
-					Values: []string{"retrieve", "retrieve objects from a set"},
+					Values: []string{"select", "retrieve objects from a set"},
 				},
 				{
 					Values: []string{"show filters", "list existing filters"},
@@ -211,8 +211,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 		}
 	case *ast.PingStmt:
 		resp = &protocol.CommandResponse{Status: "ping"}
-	case *ast.RetrieveStmt:
-		resp = retrieve(s, cmd)
+	case *ast.SelectStmt:
+		resp = selectStmt(s, cmd)
 	case *ast.ShowFiltersStmt:
 		resp = &protocol.CommandResponse{
 			Status: "show filters",

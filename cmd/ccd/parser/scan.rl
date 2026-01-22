@@ -45,12 +45,14 @@ func (lex *lexer) Lex(out *yySymType) int {
 			',' => { tok = ','; fbreak; };
 			'(' => { tok = '('; fbreak; };
 			')' => { tok = ')'; fbreak; };
+			'*' => { tok = '*'; fbreak; };
 			'create'i => { tok = CREATE; fbreak; };
 			'filters'i => { tok = FILTERS; fbreak; };
 			'from'i => { tok = FROM; fbreak; };
 			'help'i => { tok = HELP; fbreak; };
 			'limit'i => { tok = LIMIT; fbreak; };
 			'retrieve'i => { tok = RETRIEVE; fbreak; };
+			'select'i => { tok = SELECT; fbreak; };
 			'set'i => { tok = SET; fbreak; };
 			'sets'i => { tok = SETS; fbreak; };
 			'show'i => { tok = SHOW; fbreak; };

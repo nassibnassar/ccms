@@ -10,6 +10,32 @@ type Node interface {
 	node()
 }
 
+type Expr interface {
+	Node
+	exprNode()
+}
+
+type SelectExpr interface {
+	Node
+	exprNode()
+	selectExprNode()
+}
+
+type StarSelectExpr struct {
+}
+
+func (*StarSelectExpr) node()           {}
+func (*StarSelectExpr) exprNode()       {}
+func (*StarSelectExpr) selectExprNode() {}
+
+type AttrSelectExpr struct {
+	Attribute string
+}
+
+func (*AttrSelectExpr) node()           {}
+func (*AttrSelectExpr) exprNode()       {}
+func (*AttrSelectExpr) selectExprNode() {}
+
 type Stmt interface {
 	Node
 	stmtNode()
@@ -28,14 +54,15 @@ type CreateSetStmt struct {
 func (*CreateSetStmt) node()     {}
 func (*CreateSetStmt) stmtNode() {}
 
-type RetrieveStmt struct {
-	Attribute string
-	Set       string
-	Limit     string
+type SelectStmt struct {
+	Select   SelectExpr
+	Set      string
+	Limit    string
+	Retrieve bool
 }
 
-func (*RetrieveStmt) node()     {}
-func (*RetrieveStmt) stmtNode() {}
+func (*SelectStmt) node()     {}
+func (*SelectStmt) stmtNode() {}
 
 type ShowFiltersStmt struct {
 }
