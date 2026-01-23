@@ -169,7 +169,28 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	if ok = ReadRequest(w, r, &req); !ok {
 		return
 	}
-	node, err, pass := parser.Parse(req.Command)
+
+	var resp *protocol.CommandResponse
+	var node ast.Node
+	var err error
+	var pass bool
+
+	// check for semicolon; this check can be removed later
+	var lastr rune
+	for _, r := range req.Command {
+		if r != ' ' {
+			lastr = r
+		}
+	}
+	if lastr != ';' {
+		resp = &protocol.CommandResponse{
+			Status:  "error",
+			Message: "missing semicolon at end of statement",
+		}
+		goto skipParse
+	}
+
+	node, err, pass = parser.Parse(req.Command)
 	//fmt.Printf("### %#v --- %v\n", node, err)
 	if err != nil {
 		returnError(w, err.Error(), http.StatusOK /* http.StatusBadRequest */)
@@ -181,8 +202,6 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	//}
 	//log.Info("parsed: %#v", node)
 	_ = pass
-	var resp *protocol.CommandResponse
-	_ = resp
 	switch cmd := node.(type) {
 	case *ast.HelpStmt:
 		resp = &protocol.CommandResponse{
@@ -247,6 +266,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 				firstField, req.Command, b.String()),
 		}
 	}
+skipParse:
 	// success response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

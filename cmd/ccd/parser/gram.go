@@ -51,6 +51,7 @@ var yyToknames = [...]string{
 	"IDENT",
 	"NUMBER",
 	"SLITERAL",
+	"';'",
 	"'*'",
 }
 
@@ -68,25 +69,27 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 36
+const yyLast = 45
 
 var yyAct = [...]int8{
-	19, 23, 21, 17, 10, 20, 34, 11, 33, 15,
-	13, 12, 23, 21, 14, 24, 16, 26, 1, 32,
-	31, 28, 27, 25, 22, 18, 8, 7, 29, 30,
-	6, 9, 5, 4, 3, 2,
+	20, 24, 22, 38, 36, 18, 21, 43, 42, 33,
+	32, 31, 27, 17, 39, 37, 10, 28, 41, 11,
+	40, 15, 13, 12, 24, 22, 14, 25, 16, 30,
+	34, 35, 29, 1, 23, 26, 19, 8, 7, 6,
+	9, 5, 4, 3, 2,
 }
 
 var yyPact = [...]int16{
-	0, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	4, -1000, -16, -14, 10, -1000, -3, 16, 15, -1000,
-	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -3, -3, 12,
-	11, -9, -11, -1000, -1000,
+	12, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	16, -6, -15, -14, 22, -7, 9, -1000, 26, 23,
+	-1000, -1000, -1000, -1000, -1000, -8, -9, -1000, -10, 9,
+	9, -1000, -1000, -1000, -4, -5, 3, -1000, 1, -1000,
+	-11, -12, -1000, -1000,
 }
 
 var yyPgo = [...]int8{
-	0, 35, 34, 33, 32, 31, 30, 27, 26, 25,
-	0, 24, 18,
+	0, 44, 43, 42, 41, 40, 39, 38, 37, 36,
+	0, 34, 33,
 }
 
 var yyR1 = [...]int8{
@@ -96,23 +99,25 @@ var yyR1 = [...]int8{
 }
 
 var yyR2 = [...]int8{
-	0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	3, 6, 4, 6, 4, 1, 1, 2, 2, 1,
+	0, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+	4, 7, 5, 7, 5, 1, 1, 3, 3, 2,
 	1, 1, 1,
 }
 
 var yyChk = [...]int16{
 	-1000, -12, -1, -2, -3, -4, -6, -7, -8, -5,
-	4, 7, 11, 10, 14, 9, 12, 19, -9, -10,
-	19, 16, -11, 15, 5, 13, -10, 6, 6, -10,
-	-10, 8, 8, 17, 17,
+	4, 7, 11, 10, 14, 9, 12, 19, 20, -9,
+	-10, 20, 16, -11, 15, 5, 13, 19, -10, 6,
+	6, 19, 19, 19, -10, -10, 8, 19, 8, 19,
+	17, 17, 19, 19,
 }
 
 var yyDef = [...]int8{
 	0, -2, 1, 2, 3, 4, 5, 6, 7, 8,
-	0, 9, 0, 0, 0, 19, 0, 0, 0, 15,
-	16, 20, 21, 22, 17, 18, 10, 0, 0, 12,
-	14, 0, 0, 11, 13,
+	0, 0, 0, 0, 0, 0, 0, 9, 0, 0,
+	15, 16, 20, 21, 22, 0, 0, 19, 0, 0,
+	0, 17, 18, 10, 0, 0, 0, 12, 0, 14,
+	0, 0, 11, 13,
 }
 
 var yyTok1 = [...]int8{
@@ -120,7 +125,8 @@ var yyTok1 = [...]int8{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 19,
+	3, 3, 20, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 19,
 }
 
 var yyTok2 = [...]int8{
@@ -508,32 +514,32 @@ yydefault:
 			yyVAL.node = yyDollar[1].node
 		}
 	case 9:
-		yyDollar = yyS[yypt-1 : yypt+1]
+		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.HelpStmt{}
 		}
 	case 10:
-		yyDollar = yyS[yypt-3 : yypt+1]
+		yyDollar = yyS[yypt-4 : yypt+1]
 		{
 			yyVAL.node = &ast.CreateSetStmt{SetName: yyDollar[3].str}
 		}
 	case 11:
-		yyDollar = yyS[yypt-6 : yypt+1]
+		yyDollar = yyS[yypt-7 : yypt+1]
 		{
 			yyVAL.node = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: yyDollar[4].str, Limit: yyDollar[6].str, Retrieve: false}
 		}
 	case 12:
-		yyDollar = yyS[yypt-4 : yypt+1]
+		yyDollar = yyS[yypt-5 : yypt+1]
 		{
 			yyVAL.node = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: yyDollar[4].str, Limit: "20", Retrieve: false}
 		}
 	case 13:
-		yyDollar = yyS[yypt-6 : yypt+1]
+		yyDollar = yyS[yypt-7 : yypt+1]
 		{
 			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, Set: yyDollar[4].str, Limit: yyDollar[6].str, Retrieve: true}
 		}
 	case 14:
-		yyDollar = yyS[yypt-4 : yypt+1]
+		yyDollar = yyS[yypt-5 : yypt+1]
 		{
 			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, Set: yyDollar[4].str, Limit: "20", Retrieve: true}
 		}
@@ -548,17 +554,17 @@ yydefault:
 			yyVAL.selectExpr = &ast.StarSelectExpr{}
 		}
 	case 17:
-		yyDollar = yyS[yypt-2 : yypt+1]
+		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.node = &ast.ShowFiltersStmt{}
 		}
 	case 18:
-		yyDollar = yyS[yypt-2 : yypt+1]
+		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.node = &ast.ShowSetsStmt{}
 		}
 	case 19:
-		yyDollar = yyS[yypt-1 : yypt+1]
+		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.PingStmt{}
 		}

@@ -88,31 +88,31 @@ stmt:
 		}
 
 help_stmt:
-	HELP
+	HELP ';'
 		{
 			$$ = &ast.HelpStmt{}
 		}
 
 create_set_stmt:
-	CREATE SET name
+	CREATE SET name ';'
 		{
 			$$ = &ast.CreateSetStmt{SetName: $3}
 		}
 
 retrieve_stmt:
-	SELECT '*' FROM name LIMIT NUMBER
+	SELECT '*' FROM name LIMIT NUMBER ';'
 		{
 			$$ = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: $4, Limit: $6, Retrieve: false}
 		}
-	| SELECT '*' FROM name
+	| SELECT '*' FROM name ';'
 		{
 			$$ = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: $4, Limit: "20", Retrieve: false}
 		}
-	| RETRIEVE select_expression FROM name LIMIT NUMBER
+	| RETRIEVE select_expression FROM name LIMIT NUMBER ';'
 		{
 			$$ = &ast.SelectStmt{Select: $2, Set: $4, Limit: $6, Retrieve: true}
 		}
-	| RETRIEVE select_expression FROM name
+	| RETRIEVE select_expression FROM name ';'
 		{
 			$$ = &ast.SelectStmt{Select: $2, Set: $4, Limit: "20", Retrieve: true}
 		}
@@ -128,19 +128,19 @@ select_expression:
 		}
 
 show_filters_stmt:
-	SHOW FILTERS
+	SHOW FILTERS ';'
 		{
 			$$ = &ast.ShowFiltersStmt{}
 		}
 
 show_sets_stmt:
-	SHOW SETS
+	SHOW SETS ';'
 		{
 			$$ = &ast.ShowSetsStmt{}
 		}
 
 ping_stmt:
-	PING
+	PING ';'
 		{
 			$$ = &ast.PingStmt{}
 		}
