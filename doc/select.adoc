@@ -32,12 +32,14 @@ data.
 The `limit` clause specifies a maximum number of objects that will be
 returned.
 
+NOTE: At present `select` returns a maximum of 20 records.
+
 [discrete]
 ===== Examples
 
 To retrieve all fields of an arbitrary record:
 
 ----
-select * from reserve limit 1
+select * from reserve limit 1;
 ----
 
