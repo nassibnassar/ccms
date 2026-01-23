@@ -1,3 +1,7 @@
 #!/bin/sh
+asciidoctor -a docinfo=shared doc/*.adoc
+w3m doc/select.html | head -n -1 > ./cmd/ccd/doc/select.txt
+w3m doc/showfilters.html | head -n -1 > ./cmd/ccd/doc/showfilters.txt
+w3m doc/showsets.html | head -n -1 > ./cmd/ccd/doc/showsets.txt
 ./build -t
 
