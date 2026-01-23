@@ -21,12 +21,11 @@ CCMS provides a model to support user interface concepts:
 |create set
 delete
 insert
-retrieve
+select
 show sets
 |A set is an unordered collection of objects.  A list is an ordered
-collection of objects.  Sets are the primary data structure in
-CCMS; however, query commands such as `retrieve` or
-`show sets` return a list.
+collection of objects.  Sets are the primary data structure in CCMS;
+however, query commands such as `select` or `show sets` return a list.
 
 |Profile
 |filter
@@ -60,13 +59,13 @@ define tag t
 
 add tag t on s where date >= "02-01-2025" and date < "03-01-2025"
 
-retrieve isbn from s tag t
+select isbn from s tag t
 ----
 
 Multiple tags can be listed, separated by commas:
 
 ----
-retrieve isbn from s tag t, u, not v, w
+select isbn from s tag t, u, not v, w
 ----
 
 === Protocol
@@ -99,20 +98,20 @@ The status may be an error:
 }
 ----
 
-Query commands such as `retrieve` also return tabular data sets, with
+Query commands such as `select` also return tabular data sets, with
 the attribute names described under `"fields"`, e.g.:
 
 [source,json]
 ----
 {
-  "command": "retrieve id from myset"
+  "command": "select id from myset"
 }
 ----
 
 [source,json]
 ----
 {
-  "status": "retrieve",
+  "status": "select",
   "fields": [
     {
       "name": "id"
@@ -138,7 +137,7 @@ retrieved from an external data source.  If such a field is requested,
 [source,json]
 ----
 {
-  "status": "retrieve",
+  "status": "select",
   "fields": [
     {
       "name": "id"
@@ -162,8 +161,8 @@ retrieved from an external data source.  If such a field is requested,
 ----
 
 Instead of requesting dynamic fields in that way, or as a follow-up to
-it, the `retrieve dynamic` command can be used to request values for
-one or more dynamic attributes in a single record.  This form of query
+it, the `select dynamic` command can be used to request values for one
+or more dynamic attributes in a single record.  This form of query
 only supports a list of dynamic attributes and a `where` clause with a
 single `id`:
 
@@ -172,14 +171,14 @@ single `id`:
 [source,json]
 ----
 {
-  "command": "retrieve dynamic cost from myset where id = \"053e4063-d70c-4a41-a968-e6900e6b47d5\""
+  "command": "select dynamic cost from myset where id = \"053e4063-d70c-4a41-a968-e6900e6b47d5\""
 }
 ----
 
 [source,json]
 ----
 {
-  "status": "retrieve",
+  "status": "select",
   "fields": [
     {
       "name": "cost",
@@ -321,7 +320,7 @@ To define a filter `f` and apply it to a set `s`:
 ----
 define filter f where date >= "01-01-2025"
 
-retrieve all from s filter f
+select * from s filter f
 ----
 
 ==== define tag
@@ -539,13 +538,13 @@ To remove a tag `t` from a specific object in a set `s`:
 remove tag t on s where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
 ----
 
-==== retrieve
+==== select
 
 Retrieve objects from a set
 
 [source,subs="verbatim,quotes"]
 ----
-retrieve [ dynamic ] { all | `*_attribute_*` [, ...] }
+select [ dynamic ] { * | `*_attribute_*` [, ...] }
     from `*_set_name_*`
     [ where `*_condition_*` ]
     [ filter `*_filter_name_*` ]
@@ -558,15 +557,14 @@ retrieve [ dynamic ] { all | `*_attribute_*` [, ...] }
 [discrete]
 ===== Description
 
-The `retrieve` command retrieves a list of objects from a set
-according to specified criteria.
+The `select` command retrieves a list of objects from a set according
+to specified criteria.
 
 [discrete]
 ===== Parameters
 
 The first argument specifies a comma-separated list of attributes for
-which to retrieve data, or the keyword `all` meaning all available
-attributes.
+which to retrieve data, or `*` meaning all available attributes.
 
 [discrete]
 ====== from
@@ -620,13 +618,13 @@ To retrieve the `id` and `title` attributes of five objects from the
 reserve set:
 
 ----
-retrieve id, title from reserve limit 5
+select id, title from reserve limit 5
 ----
 
 To look at a specific object in detail:
 
 ----
-retrieve all from reserve where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
+select * from reserve where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
 ----
 
 ==== show filters

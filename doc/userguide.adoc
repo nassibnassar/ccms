@@ -13,7 +13,7 @@ $ ccc
 allobjects
 myset
 reserve
-=> retrieve id from myset
+=> select id from myset
 053e4063-d70c-4a41-a968-e6900e6b47d5
 ac256496-111a-4e13-9d3b-a55ac3d0f676
 ----
@@ -24,7 +24,7 @@ We can view objects in the "reserve" which is a predefined set that
 contains all available objects.
 
 ----
-=> retrieve id from reserve limit 5
+=> select id from reserve limit 5
 c644d186-399b-4f80-b92b-c6c38d69db07
 ac256496-111a-4e13-9d3b-a55ac3d0f676
 f43bfb56-fd34-4fd3-b944-dca46e22751f
@@ -35,7 +35,7 @@ dd7de2bf-b5e1-452a-97f6-bafa586e67c5
 To look at a specific object in detail:
 
 ----
-=> retrieve all from reserve where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
+=> select * from reserve where id = "053e4063-d70c-4a41-a968-e6900e6b47d5"
 ----
 
 We can create a new set called "myset" and begin adding objects of
@@ -52,7 +52,7 @@ insert 1
 To list the objects in myset:
 
 ----
-=> retrieve id from myset
+=> select id from myset
 053e4063-d70c-4a41-a968-e6900e6b47d5
 ac256496-111a-4e13-9d3b-a55ac3d0f676
 ----
@@ -68,7 +68,7 @@ insert 42698273
 ----
 
 ----
-=> retrieve id from allobjects limit 5
+=> select id from allobjects limit 5
 c644d186-399b-4f80-b92b-c6c38d69db07
 ac256496-111a-4e13-9d3b-a55ac3d0f676
 f43bfb56-fd34-4fd3-b944-dca46e22751f
