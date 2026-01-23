@@ -1,0 +1,43 @@
+==== select
+
+Retrieve objects from a set
+
+[source,subs="verbatim,quotes"]
+----
+select *
+    from `*_set_name_*`
+    [ limit `*_count_*` ]
+----
+
+[discrete]
+===== Description
+
+The `select` command retrieves a list of objects from a set according
+to specified criteria.
+
+[discrete]
+===== Parameters
+
+The first argument specifies `*` meaning all available attributes.
+
+[discrete]
+====== from
+
+The `from` clause specifies the desired set that will be the source of
+data.
+
+[discrete]
+====== limit
+
+The `limit` clause specifies a maximum number of objects that will be
+returned.
+
+[discrete]
+===== Examples
+
+To retrieve all fields of an arbitrary record:
+
+----
+select * from reserve limit 1
+----
+

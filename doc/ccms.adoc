@@ -14,8 +14,6 @@
 This is documentation for the CCMS (Collaborative Collections
 Management System).
 
-include::userguide.adoc[]
-
 include::reference.adoc[]
 
 include::serveradmin.adoc[]
