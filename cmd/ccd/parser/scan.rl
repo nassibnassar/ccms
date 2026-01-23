@@ -52,12 +52,12 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'help'i => { tok = HELP; fbreak; };
 			'limit'i => { tok = LIMIT; fbreak; };
 			'retrieve'i => { tok = RETRIEVE; fbreak; };
-			'select'i => { tok = SELECT; fbreak; };
 			'set'i => { tok = SET; fbreak; };
 			'sets'i => { tok = SETS; fbreak; };
 			'show'i => { tok = SHOW; fbreak; };
 			'ping'i => { tok = PING; fbreak; };
 			'version'i => { out.str = "version"; tok = VERSION; fbreak; };
+			'select'i => { tok = SELECT; fbreak; };
 			identifier => { out.str = string(lex.data[lex.ts:lex.te]); tok = IDENT; fbreak; };
 			sliteral => { out.str = string(lex.data[lex.ts+1:lex.te-1]); tok = SLITERAL; fbreak; };
 			digit+ => { out.str = string(lex.data[lex.ts:lex.te]); tok = NUMBER; fbreak; };

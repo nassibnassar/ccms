@@ -2,27 +2,6 @@
 
 === Commands
 
-==== help
-
-Show supported commands
-
-[source,subs="verbatim,quotes"]
-----
-help
-----
-
-[discrete]
-===== Description
-
-The `help` command shows a list of supported commands.
-
-[discrete]
-===== Examples
-
-----
-help;
-----
-
 include::select.adoc[]
 
 include::showfilters.adoc[]

@@ -220,21 +220,21 @@ tr20:
 	case 11:
 	{( lex.p) = ( lex.te) - 1
  tok = RETRIEVE; {( lex.p)++;  lex.cs = 2; goto _out } }
-	case 12:
-	{( lex.p) = ( lex.te) - 1
- tok = SELECT; {( lex.p)++;  lex.cs = 2; goto _out } }
-	case 14:
+	case 13:
 	{( lex.p) = ( lex.te) - 1
  tok = SETS; {( lex.p)++;  lex.cs = 2; goto _out } }
-	case 15:
+	case 14:
 	{( lex.p) = ( lex.te) - 1
  tok = SHOW; {( lex.p)++;  lex.cs = 2; goto _out } }
-	case 16:
+	case 15:
 	{( lex.p) = ( lex.te) - 1
  tok = PING; {( lex.p)++;  lex.cs = 2; goto _out } }
-	case 17:
+	case 16:
 	{( lex.p) = ( lex.te) - 1
  out.str = "version"; tok = VERSION; {( lex.p)++;  lex.cs = 2; goto _out } }
+	case 17:
+	{( lex.p) = ( lex.te) - 1
+ tok = SELECT; {( lex.p)++;  lex.cs = 2; goto _out } }
 	case 18:
 	{( lex.p) = ( lex.te) - 1
  out.str = string(lex.data[lex.ts:lex.te]); tok = IDENT; {( lex.p)++;  lex.cs = 2; goto _out } }
@@ -248,7 +248,7 @@ tr21:
 { out.str = string(lex.data[lex.ts:lex.te]); tok = IDENT; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr60:
-//line scan.rl:56
+//line scan.rl:55
  lex.te = ( lex.p)
 ( lex.p)--
 { tok = SET; {( lex.p)++;  lex.cs = 2; goto _out } }
@@ -401,8 +401,8 @@ tr45:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:59
- lex.act = 16;
+//line scan.rl:58
+ lex.act = 15;
 	goto st4
 tr52:
 //line NONE:1
@@ -415,29 +415,29 @@ tr59:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:55
- lex.act = 12;
+//line scan.rl:60
+ lex.act = 17;
 	goto st4
 tr61:
+//line NONE:1
+ lex.te = ( lex.p)+1
+
+//line scan.rl:56
+ lex.act = 13;
+	goto st4
+tr63:
 //line NONE:1
  lex.te = ( lex.p)+1
 
 //line scan.rl:57
  lex.act = 14;
 	goto st4
-tr63:
-//line NONE:1
- lex.te = ( lex.p)+1
-
-//line scan.rl:58
- lex.act = 15;
-	goto st4
 tr69:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:60
- lex.act = 17;
+//line scan.rl:59
+ lex.act = 16;
 	goto st4
 	st4:
 		if ( lex.p)++; ( lex.p) == ( lex.pe) {

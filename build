@@ -57,6 +57,11 @@ mkdir -p $bindir
 
 version=`git describe --always`
 
+asciidoctor -a docinfo=shared doc/*.adoc
+w3m doc/select.html | head -n -1 > ./cmd/ccd/doc/select.txt
+w3m doc/showfilters.html | head -n -1 > ./cmd/ccd/doc/showfilters.txt
+w3m doc/showsets.html | head -n -1 > ./cmd/ccd/doc/showsets.txt
+
 # -X github.com/metadb-project/metadb/cmd/metadb/util.MetadbVersion=
 go build -o $bindir $v $tags -ldflags "-X github.com/indexdata/ccms/internal/global.Version=$version" ./cmd/ccd ./cmd/ccc
 

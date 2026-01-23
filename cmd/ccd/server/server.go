@@ -204,30 +204,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	_ = pass
 	switch cmd := node.(type) {
 	case *ast.HelpStmt:
-		resp = &protocol.CommandResponse{
-			Status: "help",
-			Fields: []protocol.FieldDescription{
-				{
-					Name: "command",
-				},
-				{
-					Name: "description",
-				},
-			},
-			Data: []protocol.DataRow{
-				{
-					Values: []string{"select", "retrieve objects from a set"},
-				},
-				{
-					Values: []string{"show filters", "list existing filters"},
-				},
-				{
-					Values: []string{"show sets", "list existing sets"},
-				},
-			},
-			//Message: "create set <set_name>\tdefine a new set\n" +
-			//        "show sets\t\tlist existing sets",
-		}
+		resp = helpStmt(s, cmd)
 	case *ast.PingStmt:
 		resp = &protocol.CommandResponse{Status: "ping"}
 	case *ast.SelectStmt:

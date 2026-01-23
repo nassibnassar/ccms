@@ -11,3 +11,5 @@ doc/showfilters.html
 doc/showsets.html
 doc/serveradmin.html
 
+cmd/ccd/doc/*.txt
+

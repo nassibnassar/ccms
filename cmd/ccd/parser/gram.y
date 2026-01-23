@@ -90,7 +90,11 @@ stmt:
 help_stmt:
 	HELP ';'
 		{
-			$$ = &ast.HelpStmt{}
+			$$ = &ast.HelpStmt{Topic: ""}
+		}
+	| HELP SLITERAL ';'
+		{
+			$$ = &ast.HelpStmt{Topic: $2}
 		}
 
 create_set_stmt:

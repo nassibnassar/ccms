@@ -86,7 +86,7 @@ func runClient() error {
 	}
 
 	eout.Interactive()
-	fmt.Printf("%s %s: type \"help\" for help, \"quit\" to quit\n",
+	fmt.Printf("%s %s: Type \"\\h\" for help, \"\\q\" to quit\n",
 		global.ClientProgram, global.Version)
 	if option.NoTLS && option.Host != "127.0.0.1" {
 		eout.Warning("disabling TLS (insecure)")
@@ -121,7 +121,23 @@ func runClient() error {
 		if line == "" {
 			continue
 		}
-		if line == "quit" {
+		if line[0] == '\\' {
+			switch line[0:2] {
+			case "\\h":
+			case "\\q":
+			default:
+				eout.Error("unknown command: %s", line)
+				continue
+			}
+		}
+		if strings.HasPrefix(line, "\\h") {
+			if line == "\\h" {
+				line = "help;"
+			} else {
+				line = "help '" + helpCommand(line) + "';"
+			}
+		}
+		if line == "\\q" {
 			break
 		}
 		resp, err := client.Send(line)
@@ -135,8 +151,6 @@ func runClient() error {
 		}
 		header := true
 		if resp.Status == "help" {
-			//fmt.Println(resp.Message)
-			//continue
 			header = false
 		}
 		if resp.Status == "ping" {
@@ -162,6 +176,9 @@ func runClient() error {
 				fmt.Print(resp.Data[i].Values[j])
 			}
 			fmt.Print("\n")
+		}
+		if line == "help;" {
+			fmt.Printf("\nType \"\\h <command>\" for more information\n")
 		}
 	}
 
@@ -265,4 +282,8 @@ func ValueFromFile(filename string) (string, error) {
 		}
 	}
 	return scanner.Text(), nil
+}
+
+func helpCommand(line string) string {
+	return strings.Join(strings.Fields(line[2:]), " ")
 }

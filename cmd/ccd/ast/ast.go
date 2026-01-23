@@ -42,6 +42,7 @@ type Stmt interface {
 }
 
 type HelpStmt struct {
+	Topic string
 }
 
 func (*HelpStmt) node()     {}
