@@ -170,6 +170,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var addr string
 	var resp *protocol.CommandResponse
 	var node ast.Node
 	var err error
@@ -190,6 +191,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 		goto skipParse
 	}
 
+	addr, _, _ = net.SplitHostPort(r.RemoteAddr)
+	log.Info("[%s] %s", addr, req.Command)
 	node, err, pass = parser.Parse(req.Command)
 	//fmt.Printf("### %#v --- %v\n", node, err)
 	if err != nil {
