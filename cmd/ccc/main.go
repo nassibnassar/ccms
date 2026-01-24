@@ -86,8 +86,8 @@ func runClient() error {
 	}
 
 	eout.Interactive()
-	fmt.Printf("%s %s: Type \"\\h\" for help, \"\\q\" to quit\n",
-		global.ClientProgram, global.Version)
+	fmt.Printf("%s (%s) client for CCMS\n", global.ClientProgram, global.Version)
+	fmt.Printf("Type \"help\" for help.\n")
 	if option.NoTLS && option.Host != "127.0.0.1" {
 		eout.Warning("disabling TLS (insecure)")
 	}
@@ -130,14 +130,24 @@ func runClient() error {
 				continue
 			}
 		}
+		if line == "help" {
+			fmt.Printf("" +
+				"Type:  \\h for help with SQL commands\n" +
+				"       \\q to quit\n")
+			continue
+		}
 		if strings.HasPrefix(line, "\\h") {
 			if line == "\\h" {
-				line = "help;"
+				line = "info;"
 			} else {
-				line = "help '" + helpCommand(line) + "';"
+				line = "info '" + helpCommand(line) + "';"
 			}
 		}
 		if line == "\\q" {
+			break
+		}
+		l := strings.Join(strings.Fields(line), "")
+		if l == "quit" || l == "quit;" || l == "exit" || l == "exit;" {
 			break
 		}
 		resp, err := client.Send(line)
@@ -150,7 +160,7 @@ func runClient() error {
 			continue
 		}
 		header := true
-		if resp.Status == "help" {
+		if resp.Status == "info" {
 			header = false
 		}
 		if resp.Status == "ping" {
@@ -177,8 +187,8 @@ func runClient() error {
 			}
 			fmt.Print("\n")
 		}
-		if line == "help;" {
-			fmt.Printf("\nType \"\\h <command>\" for more information\n")
+		if line == "info;" {
+			fmt.Printf("Type \"\\h <command>\" for more information\n")
 		}
 	}
 

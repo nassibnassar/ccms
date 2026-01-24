@@ -47,13 +47,11 @@ func (lex *lexer) Lex(out *yySymType) int {
 			')' => { tok = ')'; fbreak; };
 			'*' => { tok = '*'; fbreak; };
 			'create'i => { tok = CREATE; fbreak; };
-			'filters'i => { tok = FILTERS; fbreak; };
 			'from'i => { tok = FROM; fbreak; };
-			'help'i => { tok = HELP; fbreak; };
+			'info'i => { tok = INFO; fbreak; };
 			'limit'i => { tok = LIMIT; fbreak; };
 			'retrieve'i => { tok = RETRIEVE; fbreak; };
 			'set'i => { tok = SET; fbreak; };
-			'sets'i => { tok = SETS; fbreak; };
 			'show'i => { tok = SHOW; fbreak; };
 			'ping'i => { tok = PING; fbreak; };
 			'version'i => { out.str = "version"; tok = VERSION; fbreak; };

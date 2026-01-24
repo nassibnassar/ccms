@@ -18,24 +18,21 @@ import (
 %type <node> top_level_stmt
 %type <node> stmt
 %type <node> create_set_stmt
-%type <node> help_stmt
+%type <node> info_stmt
 %type <node> ping_stmt
 %type <node> retrieve_stmt
-%type <node> show_filters_stmt
-%type <node> show_sets_stmt
+%type <node> show_stmt
 
 %type <selectExpr> select_expression
 
 %token CREATE
-%token FILTERS
 %token FROM
-%token HELP
+%token INFO
 %token LIMIT
 %token PING
 %token RETRIEVE
 %token SELECT
 %token SET
-%token SETS
 %token SHOW
 
 %type <str> name
@@ -66,7 +63,7 @@ stmt:
 		{
 			$$ = $1
 		}
-	| help_stmt
+	| info_stmt
 		{
 			$$ = $1
 		}
@@ -74,11 +71,7 @@ stmt:
 		{
 			$$ = $1
 		}
-	| show_filters_stmt
-		{
-			$$ = $1
-		}
-	| show_sets_stmt
+	| show_stmt
 		{
 			$$ = $1
 		}
@@ -87,14 +80,14 @@ stmt:
 			$$ = $1
 		}
 
-help_stmt:
-	HELP ';'
+info_stmt:
+	INFO ';'
 		{
-			$$ = &ast.HelpStmt{Topic: ""}
+			$$ = &ast.InfoStmt{Topic: ""}
 		}
-	| HELP SLITERAL ';'
+	| INFO SLITERAL ';'
 		{
-			$$ = &ast.HelpStmt{Topic: $2}
+			$$ = &ast.InfoStmt{Topic: $2}
 		}
 
 create_set_stmt:
@@ -131,16 +124,10 @@ select_expression:
 			$$ = &ast.StarSelectExpr{}
 		}
 
-show_filters_stmt:
-	SHOW FILTERS ';'
+show_stmt:
+	SHOW name ';'
 		{
-			$$ = &ast.ShowFiltersStmt{}
-		}
-
-show_sets_stmt:
-	SHOW SETS ';'
-		{
-			$$ = &ast.ShowSetsStmt{}
+			$$ = &ast.ShowStmt{Name: $2}
 		}
 
 ping_stmt:

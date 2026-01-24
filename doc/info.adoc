@@ -1,0 +1,36 @@
+==== info
+
+Show supported commands
+
+[source,subs="verbatim,quotes"]
+----
+info [ '`*_topic_*`' ]
+----
+
+[discrete]
+===== Description
+
+The `info` command shows information about supported commands.
+
+[discrete]
+===== Parameters
+
+The optional parameter string '`*_topic_*`' specifies a command that
+the user would like information about.  If '`*_topic_*`' is not
+specified, `info` shows a list of available topics.
+
+[discrete]
+===== Examples
+
+To show a list of available topics:
+
+----
+info;
+----
+
+To show information about the `select` command:
+
+----
+info 'select';
+----
+

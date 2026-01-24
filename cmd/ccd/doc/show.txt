@@ -1,0 +1,22 @@
+show
+
+List the values of a system variable
+
+show name
+
+Description
+
+show lists the current values of system configurations or other variables.
+
+Parameters
+
+name
+
+     filters Currently defined filters.
+
+     sets    Currently defined sets.
+
+Examples
+
+show sets;
+

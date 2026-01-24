@@ -2,9 +2,10 @@
 
 === Commands
 
+
+include::info.adoc[]
+
 include::select.adoc[]
 
-include::showfilters.adoc[]
-
-include::showsets.adoc[]
+include::show.adoc[]
 

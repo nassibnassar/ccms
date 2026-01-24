@@ -13,9 +13,6 @@ This section will contain system hardware requirements.
 * To build from source:
 ** https://go.dev/[Go] 1.21 or later
 ** https://www.gnu.org/software/bash/[bash]
-** https://w3m.sourceforge.net/[w3m]
-** https://asciidoctor.org/[Asciidoctor]
-** https://github.com/rouge-ruby/rouge[Rouge]
 
 === Building the software
 

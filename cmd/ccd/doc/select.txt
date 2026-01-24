@@ -1,0 +1,34 @@
+select
+
+Retrieve objects from a set
+
+select *
+    from set_name
+    [ limit count ]
+
+Description
+
+The select command retrieves a list of objects from a set according to
+specified criteria.
+
+Parameters
+
+The first argument specifies * meaning all available attributes.
+
+from
+
+The from clause specifies the desired set that will be the source of data.
+
+limit
+
+The limit clause specifies a maximum number of objects that will be returned.
+
+Note At present select returns a maximum of 20 records even if a higher maximum
+     is specified using limit.
+
+Examples
+
+To retrieve all fields of an arbitrary record:
+
+select * from reserve limit 1;
+

@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+//go:embed info.txt
+var infoTxt string
+
+func Info() string {
+	return strings.TrimSpace(infoTxt)
+}
+
 //go:embed select.txt
 var selectTxt string
 
@@ -12,16 +19,9 @@ func Select() string {
 	return strings.TrimSpace(selectTxt)
 }
 
-//go:embed showfilters.txt
-var showfiltersTxt string
+//go:embed show.txt
+var showTxt string
 
-func ShowFilters() string {
-	return strings.TrimSpace(showfiltersTxt)
-}
-
-//go:embed showsets.txt
-var showsetsTxt string
-
-func ShowSets() string {
-	return strings.TrimSpace(showsetsTxt)
+func Show() string {
+	return strings.TrimSpace(showTxt)
 }

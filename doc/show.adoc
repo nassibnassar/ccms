@@ -1,0 +1,40 @@
+==== show
+
+List the values of a system variable
+
+[source,subs="verbatim,quotes"]
+----
+show `*_name_*`
+----
+
+[discrete]
+===== Description
+
+`show` lists the current values of system configurations or other
+variables.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,3,8"]
+|===
+|`*_name_*`
+|
+|
+
+|
+|`filters`
+|Currently defined filters.
+
+|
+|`sets`
+|Currently defined sets.
+|===
+
+[discrete]
+===== Examples
+
+----
+show sets;
+----
+

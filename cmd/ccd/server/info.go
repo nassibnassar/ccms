@@ -8,20 +8,22 @@ import (
 	"github.com/indexdata/ccms/internal/protocol"
 )
 
-func helpStmt(s *svr, cmd *ast.HelpStmt) *protocol.CommandResponse {
+func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 	if cmd.Topic == "" {
 		return &protocol.CommandResponse{
-			Status: "help",
+			Status: "info",
 			Fields: []protocol.FieldDescription{
 				{
-					Name: "help",
+					Name: "info",
 				},
 			},
 			Data: []protocol.DataRow{
 				{
-					Values: []string{`select        retrieve objects from a set
-show filters  list existing filters
-show sets     list existing sets`},
+					Values: []string{"" +
+						"SQL commands:\n" +
+						"        info    show supported commands\n" +
+						"        select  retrieve objects from a set\n" +
+						"        show    list existing filters or sets\n"},
 				},
 			},
 		}
@@ -29,21 +31,21 @@ show sets     list existing sets`},
 
 	var docstr string
 	switch cmd.Topic {
+	case "info":
+		docstr = doc.Info()
 	case "select":
 		docstr = doc.Select()
-	case "show filters":
-		docstr = doc.ShowFilters()
-	case "show sets":
-		docstr = doc.ShowSets()
+	case "show":
+		docstr = doc.Show()
 	default:
 		docstr = fmt.Sprintf("unknown command %q", cmd.Topic)
 	}
 
 	return &protocol.CommandResponse{
-		Status: "help",
+		Status: "info",
 		Fields: []protocol.FieldDescription{
 			{
-				Name: "help",
+				Name: "info",
 			},
 		},
 		Data: []protocol.DataRow{

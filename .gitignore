@@ -4,12 +4,6 @@ bin
 *~
 
 doc/ccms.html
-doc/userguide.html
 doc/reference.html
-doc/select.html
-doc/showfilters.html
-doc/showsets.html
 doc/serveradmin.html
-
-cmd/ccd/doc/*.txt
 

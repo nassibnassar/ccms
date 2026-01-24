@@ -1,0 +1,26 @@
+info
+
+Show supported commands
+
+info [ ‘topic’ ]
+
+Description
+
+The info command shows information about supported commands.
+
+Parameters
+
+The optional parameter string ‘topic’ specifies a command that the user would
+like information about. If ‘topic’ is not specified, info shows a list of
+available topics.
+
+Examples
+
+To show a list of available topics:
+
+info;
+
+To show information about the select command:
+
+info 'select';
+

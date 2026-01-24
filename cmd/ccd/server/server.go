@@ -203,36 +203,14 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	//log.Info("parsed: %#v", node)
 	_ = pass
 	switch cmd := node.(type) {
-	case *ast.HelpStmt:
-		resp = helpStmt(s, cmd)
+	case *ast.InfoStmt:
+		resp = infoStmt(s, cmd)
 	case *ast.PingStmt:
 		resp = &protocol.CommandResponse{Status: "ping"}
 	case *ast.SelectStmt:
 		resp = selectStmt(s, cmd)
-	case *ast.ShowFiltersStmt:
-		resp = &protocol.CommandResponse{
-			Status: "show filters",
-			Fields: []protocol.FieldDescription{
-				{
-					Name: "filter",
-				},
-			},
-			Data: []protocol.DataRow{},
-		}
-	case *ast.ShowSetsStmt:
-		resp = &protocol.CommandResponse{
-			Status: "show sets",
-			Fields: []protocol.FieldDescription{
-				{
-					Name: "set",
-				},
-			},
-			Data: []protocol.DataRow{
-				{
-					Values: []string{"reserve"},
-				},
-			},
-		}
+	case *ast.ShowStmt:
+		resp = showStmt(s, cmd)
 	default:
 		firstField := strings.Fields(req.Command)[0]
 		var b strings.Builder

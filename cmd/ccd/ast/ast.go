@@ -41,12 +41,12 @@ type Stmt interface {
 	stmtNode()
 }
 
-type HelpStmt struct {
+type InfoStmt struct {
 	Topic string
 }
 
-func (*HelpStmt) node()     {}
-func (*HelpStmt) stmtNode() {}
+func (*InfoStmt) node()     {}
+func (*InfoStmt) stmtNode() {}
 
 type CreateSetStmt struct {
 	SetName string
@@ -65,17 +65,12 @@ type SelectStmt struct {
 func (*SelectStmt) node()     {}
 func (*SelectStmt) stmtNode() {}
 
-type ShowFiltersStmt struct {
+type ShowStmt struct {
+	Name string
 }
 
-func (*ShowFiltersStmt) node()     {}
-func (*ShowFiltersStmt) stmtNode() {}
-
-type ShowSetsStmt struct {
-}
-
-func (*ShowSetsStmt) node()     {}
-func (*ShowSetsStmt) stmtNode() {}
+func (*ShowStmt) node()     {}
+func (*ShowStmt) stmtNode() {}
 
 type PingStmt struct {
 }
