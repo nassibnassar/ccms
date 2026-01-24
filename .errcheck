@@ -1,3 +1,4 @@
+fmt.Fprint
 (*os.File).Close
 os.Remove
 os.RemoveAll

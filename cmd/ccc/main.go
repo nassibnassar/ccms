@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/chzyer/readline"
 	"github.com/indexdata/ccms"
@@ -169,24 +170,27 @@ func runClient() error {
 		if resp.Status == "show" {
 			header = false
 		}
+
+		w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
 		if header {
 			for i := range resp.Fields {
 				if i != 0 {
-					fmt.Print("\t")
+					fmt.Fprint(w, "\t")
 				}
-				fmt.Print(resp.Fields[i].Name)
+				fmt.Fprint(w, resp.Fields[i].Name)
 			}
-			fmt.Print("\n")
+			fmt.Fprint(w, "\n")
 		}
 		for i := range resp.Data {
 			for j := range resp.Data[i].Values {
 				if j != 0 {
-					fmt.Print("\t")
+					fmt.Fprint(w, "\t")
 				}
-				fmt.Print(resp.Data[i].Values[j])
+				fmt.Fprint(w, resp.Data[i].Values[j])
 			}
-			fmt.Print("\n")
+			fmt.Fprint(w, "\n")
 		}
+		_ = w.Flush()
 		if line == "info;" {
 			fmt.Printf("Type \"\\h <command>\" for more information\n")
 		}
