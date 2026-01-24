@@ -132,10 +132,10 @@ func serve(s *svr) {
 	}
 	log.Info("CCMS %s, listening on %s", global.Version, addr)
 	if s.opt.NoTLS && s.opt.Listen != "" {
-		log.Warning("disabling TLS (insecure)")
+		log.Warning("disabled TLS (insecure)")
 	}
-	if !s.opt.NoHarvest {
-		log.Info("harvesting")
+	if s.opt.NoHarvest {
+		log.Warning("disabled harvesting")
 	}
 	var err error
 	if s.opt.Listen == "" || s.opt.NoTLS {
