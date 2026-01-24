@@ -55,6 +55,7 @@ func createTableAttr(tx pgx.Tx) error {
 		"id bigint primary key," +
 		"author text," +
 		"title text)"
+		//"place_of_publication text)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table "+global.SystemSchema+".attr: %v", err)
 	}
@@ -66,6 +67,10 @@ func createTableAttr(tx pgx.Tx) error {
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating index on "+global.SystemSchema+".attr (title): %v", err)
 	}
+	//q = "create index on " + global.SystemSchema + ".attr (place_of_publication)"
+	//if _, err := tx.Exec(context.TODO(), q); err != nil {
+	//        return fmt.Errorf("creating index on "+global.SystemSchema+".attr (place_of_publication): %v", err)
+	//}
 	return nil
 }
 

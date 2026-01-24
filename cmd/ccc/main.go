@@ -192,7 +192,7 @@ func runClient() error {
 		}
 		_ = w.Flush()
 		if line == "info;" {
-			fmt.Printf("Type \"\\h <command>\" for more information\n")
+			fmt.Printf("Type \"\\h <command>\" for more information.\n")
 		}
 	}
 

@@ -15,6 +15,7 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/config"
+	"github.com/indexdata/ccms/cmd/ccd/harvest"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/option"
 	"github.com/indexdata/ccms/cmd/ccd/osutil"
@@ -103,7 +104,9 @@ func startServer(s *svr) error {
 	}()
 
 	go serve(s)
-	//go harvest.Harvest(s.dp)
+	if !s.opt.NoHarvest {
+		go harvest.Harvest(s.dp)
+	}
 
 	for {
 		if process.Stop() {
@@ -130,6 +133,9 @@ func serve(s *svr) {
 	log.Info("CCMS %s, listening on %s", global.Version, addr)
 	if s.opt.NoTLS && s.opt.Listen != "" {
 		log.Warning("disabling TLS (insecure)")
+	}
+	if !s.opt.NoHarvest {
+		log.Info("harvesting")
 	}
 	var err error
 	if s.opt.Listen == "" || s.opt.NoTLS {

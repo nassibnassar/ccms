@@ -101,6 +101,7 @@ func Harvest(dp *pgxpool.Pool) {
 		title245a := m.Lookup("245", "a")
 		title245b := m.Lookup("245", "b")
 		title245 := strings.Join(append(title245a, title245b...), "\n")
+		//placePub := strings.Join(m.Lookup("260", "a"), "\n")
 		//fmt.Printf("%s [%s] %s\t%s\n", dateStamp, identifier, author100a, title245)
 		_ = m
 		//c++
@@ -109,12 +110,16 @@ func Harvest(dp *pgxpool.Pool) {
 		//}
 
 		var author, title *string
+		//var author, title, placeOfPublication *string
 		if author100a != "" {
 			author = &author100a
 		}
 		if title245 != "" {
 			title = &title245
 		}
+		//if placePub != "" {
+		//        placeOfPublication = &placePub
+		//}
 
 		tx, err := dp.Begin(context.TODO())
 		if err != nil {
@@ -128,7 +133,7 @@ func Harvest(dp *pgxpool.Pool) {
 		err = tx.QueryRow(context.TODO(), q, identifier, time.Now(), dateStamp, metadata).Scan(&id)
 		switch {
 		case errors.Is(err, pgx.ErrNoRows):
-			log.Info("conflict: skipping record %s", identifier)
+			//log.Info("conflict: skipping record %s", identifier)
 		case err != nil:
 			panic(fmt.Sprintf("writing to table "+global.SystemSchema+".md: %v", err))
 		default:
@@ -147,7 +152,7 @@ func Harvest(dp *pgxpool.Pool) {
 				panic(fmt.Sprintf("writing to table "+global.SystemSchema+".reserve: %v", err))
 			}
 
-			log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)
+			//log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)
 		}
 
 		if err = tx.Commit(context.TODO()); err != nil {

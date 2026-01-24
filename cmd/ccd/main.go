@@ -124,6 +124,7 @@ func run() error {
 	// _ = debugFlag(cmdStart, &serverOpt.Debug)
 	// _ = traceLogFlag(cmdStart, &serverOpt.Trace)
 	_ = noTLSFlag(cmdStart, &serverOpt.NoTLS)
+	_ = noHarvestFlag(cmdStart, &serverOpt.NoHarvest)
 
 	var cmdStop = &cobra.Command{
 		Use: "stop",
@@ -219,6 +220,7 @@ func help(cmd *cobra.Command, commandLine []string) {
 			keyFlag(nil, nil) +
 			//debugFlag(nil, nil) +
 			noTLSFlag(nil, nil) +
+			noHarvestFlag(nil, nil) +
 			//traceLogFlag(nil, nil) +
 			//memoryLimitFlag(nil, nil) +
 			"")
@@ -307,6 +309,14 @@ func noTLSFlag(cmd *cobra.Command, noTLS *bool) string {
 	}
 	return "" +
 		"      --notls                 - Disable TLS in client connections (insecure)\n"
+}
+
+func noHarvestFlag(cmd *cobra.Command, noHarvest *bool) string {
+	if cmd != nil {
+		cmd.Flags().BoolVar(noHarvest, "noharvest", false, "")
+	}
+	return "" +
+		"      --noharvest             - Do not harvest records\n"
 }
 
 func setupLog(logfile string, debug bool, trace bool) (*os.File, *os.File, error) {

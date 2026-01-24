@@ -2,7 +2,7 @@ info
 
 Show supported commands
 
-info [ ‘topic’ ]
+info [ 'topic' ]
 
 Description
 
@@ -10,9 +10,8 @@ The info command shows information about supported commands.
 
 Parameters
 
-The optional parameter string ‘topic’ specifies a command that the user would
-like information about. If ‘topic’ is not specified, info shows a list of
-available topics.
+'topic' A command that the user would like information about. If this parameter
+        is not specified, a list of available topics will be shown.
 
 Examples
 

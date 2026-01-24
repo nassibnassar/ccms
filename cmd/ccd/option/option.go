@@ -9,14 +9,15 @@ type Init struct {
 }
 
 type Server struct {
-	Debug   bool
-	Trace   bool
-	Datadir string
-	Listen  string
-	Port    string
-	TLSCert string
-	TLSKey  string
-	NoTLS   bool
+	Debug     bool
+	Trace     bool
+	Datadir   string
+	Listen    string
+	Port      string
+	TLSCert   string
+	TLSKey    string
+	NoTLS     bool
+	NoHarvest bool
 	Global
 }
 
