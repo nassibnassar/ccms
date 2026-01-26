@@ -5,12 +5,14 @@ import (
 	"strings"
 )
 
+/*
 //go:embed info.txt
 var infoTxt string
 
 func Info() string {
 	return strings.TrimSpace(infoTxt)
 }
+*/
 
 //go:embed select.txt
 var selectTxt string

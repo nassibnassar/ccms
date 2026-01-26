@@ -21,7 +21,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 				{
 					Values: []string{"" +
 						"SQL commands:\n" +
-						"        info    show supported commands\n" +
+						//"        info    show supported commands\n" +
 						"        select  retrieve objects from a set\n" +
 						"        show    list existing filters or sets\n"},
 				},
@@ -31,8 +31,8 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 
 	var docstr string
 	switch cmd.Topic {
-	case "info":
-		docstr = doc.Info()
+	//case "info":
+	//        docstr = doc.Info()
 	case "select":
 		docstr = doc.Select()
 	case "show":
@@ -54,12 +54,4 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 			},
 		},
 	}
-
-	//if cmd.Retrieve {
-	//        return &protocol.CommandResponse{
-	//                Status:  "error",
-	//                Message: "\"retrieve all\" is no longer supported; use \"select *\"",
-	//        }
-	//}
-
 }
