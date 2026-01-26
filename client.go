@@ -27,20 +27,20 @@ type Client struct {
 
 // response from a CCMS server
 type Response struct {
-	Status  string             // status of command, or "error"
-	Fields  []FieldDescription // attribute metadata for query result
-	Data    []DataRow          // query result data
-	Message string             // error message
+	Status  string             `json:"status"`            // status of command, or "error"
+	Message string             `json:"message,omitempty"` // error message
+	Fields  []FieldDescription `json:"fields,omitempty"`  // attribute metadata for query result
+	Data    []DataRow          `json:"data,omitempty"`    // query result data
 }
 
 // metadata for an attribute
 type FieldDescription struct {
-	Name string // attribute name
+	Name string `json:"name"` // attribute name
 }
 
 // a row of data
 type DataRow struct {
-	Values []string // data values
+	Values []string `json:"values"` // data values
 }
 
 // send a command to the server and return the response

@@ -2,6 +2,7 @@ package marcxml
 
 import (
 	"encoding/xml"
+	"strings"
 )
 
 type MARCXML struct {
@@ -44,25 +45,34 @@ func Unmarshal(data []byte) (*MARCXML, error) {
 	return &marc, nil
 }
 
-func (m *MARCXML) Lookup(tag, subfield string) []string {
+func (m *MARCXML) Lookup(tag, ind1, ind2, subfield string) string {
 	content := make([]string, 0)
 	cf := m.Controlfields
 	for i := range cf {
 		if cf[i].Tag == tag {
-			content = append(content, cf[i].Value)
+			content = append(content, strings.TrimSpace(cf[i].Value))
 		}
 	}
 	df := m.Datafields
 	for i := range df {
-		// ignore df[i].Ind1 and df[i].Ind2
-		if df[i].Tag == tag {
-			sf := df[i].Subfields
-			for j := range sf {
-				if sf[j].Code == subfield {
-					content = append(content, sf[j].Value)
-				}
+		if len(content) != 0 {
+			break
+		}
+		if ind1 != "" && ind1 != df[i].Ind1 {
+			continue
+		}
+		if ind2 != "" && ind2 != df[i].Ind2 {
+			continue
+		}
+		if df[i].Tag != tag {
+			continue
+		}
+		sf := df[i].Subfields
+		for j := range sf {
+			if sf[j].Code == subfield {
+				content = append(content, strings.TrimSpace(sf[j].Value))
 			}
 		}
 	}
-	return content
+	return strings.Join(content, "\n")
 }

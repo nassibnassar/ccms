@@ -36,7 +36,7 @@ func selectStmt(s *svr, cmd *ast.SelectStmt) *protocol.CommandResponse {
 	if lim > 20 {
 		lim = 20
 	}
-	q := "select id, coalesce(author, ''), coalesce(title, '') from ccms.attr where author is not null limit " + strconv.Itoa(lim)
+	q := "select id, coalesce(author, ''), coalesce(title, ''), coalesce(full_vendor_name, ''), coalesce(availability, '') from ccms.attr where author is not null limit " + strconv.Itoa(lim)
 	rows, err := s.dp.Query(context.TODO(), q)
 	if err != nil {
 		panic(fmt.Sprintf("selecting from reserve: %v", err))
@@ -45,13 +45,13 @@ func selectStmt(s *svr, cmd *ast.SelectStmt) *protocol.CommandResponse {
 	data := make([]protocol.DataRow, 0)
 	for rows.Next() {
 		var id int64
-		var author, title string
-		err = rows.Scan(&id, &author, &title)
+		var author, title, full_vendor_name, availability string
+		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability)
 		if err != nil {
 			panic(fmt.Sprintf("reading from reserve: %v", err))
 		}
 		data = append(data, protocol.DataRow{
-			Values: []string{strconv.FormatInt(id, 10), author, title},
+			Values: []string{strconv.FormatInt(id, 10), author, title, full_vendor_name, availability},
 		})
 	}
 	if err = rows.Err(); err != nil {
@@ -69,6 +69,12 @@ func selectStmt(s *svr, cmd *ast.SelectStmt) *protocol.CommandResponse {
 			},
 			{
 				Name: "title",
+			},
+			{
+				Name: "full_vendor_name",
+			},
+			{
+				Name: "availability",
 			},
 		},
 		Data: data,

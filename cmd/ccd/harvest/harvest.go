@@ -97,11 +97,16 @@ func Harvest(dp *pgxpool.Pool) {
 		metadata := strings.TrimSpace(string(record.Metadata.Body))
 		identifier := strings.TrimPrefix(record.Header.Identifier, "oai:")
 		dateStamp := record.Header.DateStamp
-		author100a := strings.Join(m.Lookup("100", "a"), "\n")
-		title245a := m.Lookup("245", "a")
-		title245b := m.Lookup("245", "b")
-		title245 := strings.Join(append(title245a, title245b...), "\n")
-		//placePub := strings.Join(m.Lookup("260", "a"), "\n")
+		author100a := m.Lookup("100", "", "", "a")
+		title245 := m.Lookup("245", "", "", "a")
+		title245b := m.Lookup("245", "", "", "b")
+		if title245b != "" {
+			title245 = title245 + "\n" + title245b
+		}
+		//title245 := strings.Join([]string{title245a, title245b}, "\n")
+		fullVendorName := m.Lookup("999", "1", "3", "a")
+		availability := m.Lookup("999", "1", "3", "z")
+		//placePub := m.Lookup("260", "a")
 		//fmt.Printf("%s [%s] %s\t%s\n", dateStamp, identifier, author100a, title245)
 		_ = m
 		//c++
@@ -140,9 +145,9 @@ func Harvest(dp *pgxpool.Pool) {
 		}
 
 		if id != 0 {
-			q = "insert into ccms.attr (id, author, title) " +
-				"values ($1, $2, $3) on conflict do nothing"
-			if _, err = tx.Exec(context.TODO(), q, id, author, title); err != nil {
+			q = "insert into ccms.attr (id, author, title, full_vendor_name, availability) " +
+				"values ($1, $2, $3, $4, $5) on conflict do nothing"
+			if _, err = tx.Exec(context.TODO(), q, id, author, title, fullVendorName, availability); err != nil {
 				panic(fmt.Sprintf("writing to table "+global.SystemSchema+".attr: %v", err))
 			}
 
