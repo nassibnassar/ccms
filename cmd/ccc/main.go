@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/tabwriter"
 
@@ -95,7 +96,12 @@ func runClient() error {
 		eout.Warning("disabling TLS (insecure)")
 	}
 
-	rl, err := readline.New("=> ")
+	home := os.Getenv("HOME")
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt:       "=> ",
+		HistoryFile:  filepath.Join(home, ".ccc_history"),
+		AutoComplete: completer,
+	})
 	if err != nil {
 		return err
 	}
@@ -308,3 +314,14 @@ func ValueFromFile(filename string) (string, error) {
 func helpCommand(line string) string {
 	return strings.Join(strings.Fields(line[2:]), " ")
 }
+
+var completer = readline.NewPrefixCompleter(
+	readline.PcItem("select * from reserve",
+		readline.PcItem(";"),
+		readline.PcItem("limit"),
+	),
+	readline.PcItem("\\h",
+		readline.PcItem("select"),
+		readline.PcItem("show"),
+	),
+)
