@@ -32,7 +32,7 @@ data.
 The `limit` clause specifies a maximum number of objects that will be
 returned.
 
-NOTE: At present `select` returns a maximum of 20 records even if a
+NOTE: At present `select` returns a maximum of 1000 records even if a
 higher maximum is specified using `limit`.
 
 [discrete]

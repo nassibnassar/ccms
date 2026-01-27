@@ -8,6 +8,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/chzyer/readline"
+	"github.com/essentialkaos/ek/v13/pager"
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/global"
@@ -172,6 +173,9 @@ func runClient() error {
 			header = false
 		}
 
+		if err = pager.Setup("less -EFX"); err != nil {
+			return err
+		}
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
 		if header {
 			for i := range resp.Fields {
@@ -195,6 +199,7 @@ func runClient() error {
 		if line == "info;" {
 			fmt.Printf("Type \"\\h <command>\" for more information.\n")
 		}
+		pager.Complete()
 	}
 
 	return nil

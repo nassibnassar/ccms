@@ -33,8 +33,8 @@ func selectStmt(s *svr, cmd *ast.SelectStmt) *protocol.CommandResponse {
 		}
 	}
 	lim, _ := strconv.Atoi(cmd.Limit)
-	if lim > 20 {
-		lim = 20
+	if lim > 1000 {
+		lim = 1000
 	}
 	q := "select id, coalesce(author, ''), coalesce(title, ''), coalesce(full_vendor_name, ''), coalesce(availability, '') from ccms.attr where author is not null limit " + strconv.Itoa(lim)
 	rows, err := s.dp.Query(context.TODO(), q)
