@@ -103,7 +103,7 @@ retrieve_stmt:
 		}
 	| SELECT '*' FROM name ';'
 		{
-			$$ = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: $4, Limit: "20", Retrieve: false}
+			$$ = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: $4, Limit: "1000", Retrieve: false}
 		}
 	| RETRIEVE select_expression FROM name LIMIT NUMBER ';'
 		{

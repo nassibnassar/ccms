@@ -527,7 +527,7 @@ yydefault:
 	case 12:
 		yyDollar = yyS[yypt-5 : yypt+1]
 		{
-			yyVAL.node = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: yyDollar[4].str, Limit: "20", Retrieve: false}
+			yyVAL.node = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: yyDollar[4].str, Limit: "1000", Retrieve: false}
 		}
 	case 13:
 		yyDollar = yyS[yypt-7 : yypt+1]
