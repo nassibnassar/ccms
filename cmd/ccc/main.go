@@ -87,6 +87,7 @@ func runClient() error {
 		return nil
 	}
 
+	pager.AllowEnv = true
 	eout.Interactive()
 	fmt.Printf("%s (%s) client for CCMS\n", global.ClientProgram, global.Version)
 	fmt.Printf("Type \"help\" for help.\n")
@@ -173,7 +174,7 @@ func runClient() error {
 			header = false
 		}
 
-		if err = pager.Setup("less -EFX"); err != nil {
+		if err = pager.Setup(); err != nil {
 			return err
 		}
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
