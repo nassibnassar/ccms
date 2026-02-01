@@ -9,8 +9,6 @@ import (
 )
 
 func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *protocol.CommandResponse {
-	// TODO check if project exists
-
 	if cmd.SetName == "reserve" || s.cat.SetExists(cmd.SetName) {
 		return &protocol.CommandResponse{
 			Status:  "error",
@@ -22,6 +20,14 @@ func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *protocol.Command
 		return &protocol.CommandResponse{
 			Status:  "error",
 			Message: "set \"" + cmd.SetName + "\" does not have a project name",
+		}
+	}
+
+	sp := strings.Split(cmd.SetName, ".")
+	if sp[0] != "test" {
+		return &protocol.CommandResponse{
+			Status:  "error",
+			Message: "invalid project \"" + sp[0] + "\"",
 		}
 	}
 

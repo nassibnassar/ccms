@@ -21,8 +21,8 @@ The `create set` command creates a new, empty set.
 |The name of the new set.
 |===
 
-NOTE:  Currently set names must begin with `test.` because `test` is
-the only available project space for new sets.
+NOTE:  Currently set names must begin with `test` followed by `.`,
+because `test` is the only available project space for new sets.
 
 [discrete]
 ===== Examples

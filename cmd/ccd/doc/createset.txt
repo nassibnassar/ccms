@@ -12,8 +12,8 @@ Parameters
 
 set_name The name of the new set.
 
-Note Currently set names must begin with test. because test is the only
-     available project space for new sets.
+Note Currently set names must begin with test followed by ., because test is
+     the only available project space for new sets.
 
 Examples
 
