@@ -6,6 +6,7 @@ Retrieve objects from a set
 ----
 select *
     from `*_set_name_*`
+    [ where `*_condition_*` ]
     [ limit `*_count_*` ]
 ----
 
@@ -27,16 +28,32 @@ The `from` clause specifies the desired set that will be the source of
 data.
 
 [discrete]
+====== where
+
+The `where` clause specifies a condition in the form of a Boolean
+expression.  Only objects that satisfy this condition will be
+retrieved.
+
+NOTE:  Currently the only supported form of `*_condition_*` is
+`_attribute_ = '_value_'`.
+
+[discrete]
 ====== limit
 
 The `limit` clause specifies a maximum number of objects that will be
 returned.
 
-NOTE: At present `select` returns a maximum of 1000 records even if a
-higher maximum is specified using `limit`.
+NOTE:  At present the CCMS server returns a maximum of 30 records to
+the client, even if a higher maximum is specified using `limit`.
 
 [discrete]
 ===== Examples
+
+To retrieve all fields of items in stock:
+
+----
+select * from reserve where availability = 'In stock';
+----
 
 To retrieve all fields of an arbitrary record:
 

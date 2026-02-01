@@ -36,6 +36,27 @@ func (*AttrSelectExpr) node()           {}
 func (*AttrSelectExpr) exprNode()       {}
 func (*AttrSelectExpr) selectExprNode() {}
 
+type LimitExpr interface {
+	Node
+	exprNode()
+	limitExprNode()
+}
+
+type NoLimitExpr struct {
+}
+
+func (*NoLimitExpr) node()          {}
+func (*NoLimitExpr) exprNode()      {}
+func (*NoLimitExpr) limitExprNode() {}
+
+type LimitValueExpr struct {
+	Value string
+}
+
+func (*LimitValueExpr) node()          {}
+func (*LimitValueExpr) exprNode()      {}
+func (*LimitValueExpr) limitExprNode() {}
+
 type Stmt interface {
 	Node
 	stmtNode()
@@ -56,14 +77,37 @@ func (*CreateSetStmt) node()     {}
 func (*CreateSetStmt) stmtNode() {}
 
 type SelectStmt struct {
-	Select   SelectExpr
-	Set      string
-	Limit    string
-	Retrieve bool
+	Select     SelectExpr
+	From       string
+	WhereAttr  string
+	WhereValue string
+	Limit      LimitExpr
+	Retrieve   bool
 }
 
 func (*SelectStmt) node()     {}
 func (*SelectStmt) stmtNode() {}
+
+func (s *SelectStmt) SQL() string {
+	//var sel []string
+	//switch se := cmd.Select.(type) {
+	//case *AttrSelectExpr:
+	//        sel = []string{se.Attribute}
+	//case *StarSelectExpr:
+	//        sel = []string{"*"}
+	//}
+	var where string
+	if s.WhereAttr != "" {
+		where = " and " + s.WhereAttr + "='" + s.WhereValue + "'"
+	}
+	var limit string
+	switch l := s.Limit.(type) {
+	case *NoLimitExpr:
+	case *LimitValueExpr:
+		limit = " limit " + l.Value
+	}
+	return "select a.id, coalesce(a.author, ''), coalesce(a.title, ''), coalesce(a.full_vendor_name, ''), coalesce(a.availability, '') from " + s.From + " t join ccms.attr a on t.id=a.id where a.author is not null" + where + limit
+}
 
 type ShowStmt struct {
 	Name string

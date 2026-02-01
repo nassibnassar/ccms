@@ -91,10 +91,10 @@ func runClient() error {
 	pager.AllowEnv = true
 	eout.Interactive()
 	fmt.Printf("%s (%s) client for CCMS\n", global.ClientProgram, global.Version)
-	fmt.Printf("Type \"help\" for help.\n")
 	if option.NoTLS && option.Host != "127.0.0.1" {
 		eout.Warning("disabling TLS (insecure)")
 	}
+	fmt.Printf("Type \"help\" for help.\n")
 
 	home := os.Getenv("HOME")
 	rl, err := readline.NewEx(&readline.Config{
@@ -115,9 +115,9 @@ func runClient() error {
 		NoTLS:         option.NoTLS,
 		TLSSkipVerify: option.TLSSkipVerify,
 	}
-	if _, err = client.Send("ping"); err != nil {
-		errorExit(err)
-	}
+	//if _, err = client.Send("ping"); err != nil {
+	//        errorExit(err)
+	//}
 	for {
 		rline, err := rl.Readline()
 		if err != nil {
@@ -180,33 +180,42 @@ func runClient() error {
 			header = false
 		}
 
-		if err = pager.Setup(); err != nil {
-			return err
-		}
-		w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
-		if header {
-			for i := range resp.Fields {
-				if i != 0 {
-					fmt.Fprint(w, "\t")
-				}
-				fmt.Fprint(w, resp.Fields[i].Name)
+		switch resp.Status {
+		case "info":
+			fallthrough
+		case "show":
+			fallthrough
+		case "select":
+			if err = pager.Setup(); err != nil {
+				return err
 			}
-			fmt.Fprint(w, "\n")
-		}
-		for i := range resp.Data {
-			for j := range resp.Data[i].Values {
-				if j != 0 {
-					fmt.Fprint(w, "\t")
+			w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
+			if header {
+				for i := range resp.Fields {
+					if i != 0 {
+						fmt.Fprint(w, "\t")
+					}
+					fmt.Fprint(w, resp.Fields[i].Name)
 				}
-				fmt.Fprint(w, resp.Data[i].Values[j])
+				fmt.Fprint(w, "\n")
 			}
-			fmt.Fprint(w, "\n")
+			for i := range resp.Data {
+				for j := range resp.Data[i].Values {
+					if j != 0 {
+						fmt.Fprint(w, "\t")
+					}
+					fmt.Fprint(w, resp.Data[i].Values[j])
+				}
+				fmt.Fprint(w, "\n")
+			}
+			_ = w.Flush()
+			if line == "info;" {
+				fmt.Printf("Type \"\\h <command>\" for more information.\n")
+			}
+			pager.Complete()
+		default:
+			fmt.Println(resp.Status)
 		}
-		_ = w.Flush()
-		if line == "info;" {
-			fmt.Printf("Type \"\\h <command>\" for more information.\n")
-		}
-		pager.Complete()
 	}
 
 	return nil
@@ -316,11 +325,18 @@ func helpCommand(line string) string {
 }
 
 var completer = readline.NewPrefixCompleter(
-	readline.PcItem("select * from reserve",
-		readline.PcItem(";"),
-		readline.PcItem("limit"),
+	readline.PcItem("create set"),
+	readline.PcItem("select * from"),
+	readline.PcItem("show",
+		readline.PcItem("filters",
+			readline.PcItem(";"),
+		),
+		readline.PcItem("sets",
+			readline.PcItem(";"),
+		),
 	),
 	readline.PcItem("\\h",
+		readline.PcItem("create set"),
 		readline.PcItem("select"),
 		readline.PcItem("show"),
 	),

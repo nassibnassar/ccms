@@ -1,0 +1,23 @@
+create set
+
+Define a new set
+
+create set set_name
+
+Description
+
+The create set command creates a new, empty set.
+
+Parameters
+
+set_name The name of the new set.
+
+Note Currently set names must begin with test. because test is the only
+     available project space for new sets.
+
+Examples
+
+Create a set myset in project test:
+
+create set test.myset;
+

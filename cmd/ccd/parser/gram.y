@@ -34,6 +34,7 @@ import (
 %token SELECT
 %token SET
 %token SHOW
+%token WHERE
 
 %type <str> name
 %type <str> unreserved_keyword
@@ -97,21 +98,29 @@ create_set_stmt:
 		}
 
 retrieve_stmt:
-	SELECT '*' FROM name LIMIT NUMBER ';'
+	SELECT select_expression FROM name LIMIT NUMBER ';'
 		{
-			$$ = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: $4, Limit: $6, Retrieve: false}
+			$$ = &ast.SelectStmt{Select: $2, From: $4, Limit: &ast.LimitValueExpr{Value: $6}, Retrieve: false}
 		}
-	| SELECT '*' FROM name ';'
+	| SELECT select_expression FROM name ';'
 		{
-			$$ = &ast.SelectStmt{Select: &ast.StarSelectExpr{}, Set: $4, Limit: "30", Retrieve: false}
+			$$ = &ast.SelectStmt{Select: $2, From: $4, Limit: &ast.NoLimitExpr{}, Retrieve: false}
+		}
+	| SELECT select_expression FROM name WHERE name '=' SLITERAL LIMIT NUMBER ';'
+		{
+			$$ = &ast.SelectStmt{Select: $2, From: $4, WhereAttr: $6, WhereValue: $8, Limit: &ast.LimitValueExpr{Value: $10}, Retrieve: false}
+		}
+	| SELECT select_expression FROM name WHERE name '=' SLITERAL ';'
+		{
+			$$ = &ast.SelectStmt{Select: $2, From: $4,  WhereAttr: $6, WhereValue: $8, Limit: &ast.NoLimitExpr{}, Retrieve: false}
 		}
 	| RETRIEVE select_expression FROM name LIMIT NUMBER ';'
 		{
-			$$ = &ast.SelectStmt{Select: $2, Set: $4, Limit: $6, Retrieve: true}
+			$$ = &ast.SelectStmt{Select: $2, From: $4, Limit: &ast.LimitValueExpr{Value: $6}, Retrieve: true}
 		}
 	| RETRIEVE select_expression FROM name ';'
 		{
-			$$ = &ast.SelectStmt{Select: $2, Set: $4, Limit: "20", Retrieve: true}
+			$$ = &ast.SelectStmt{Select: $2, From: $4, Limit: &ast.NoLimitExpr{}, Retrieve: true}
 		}
 
 select_expression:

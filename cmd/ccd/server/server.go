@@ -10,10 +10,12 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"time"
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
+	"github.com/indexdata/ccms/cmd/ccd/catalog"
 	"github.com/indexdata/ccms/cmd/ccd/config"
 	"github.com/indexdata/ccms/cmd/ccd/harvest"
 	"github.com/indexdata/ccms/cmd/ccd/log"
@@ -29,9 +31,10 @@ import (
 )
 
 type svr struct {
-	opt  *option.Server
-	conf *config.Config
+	cat  *catalog.Catalog
 	dp   *pgxpool.Pool
+	conf *config.Config
+	opt  *option.Server
 }
 
 func Start(opt *option.Server) error {
@@ -83,11 +86,12 @@ func databaseServer(opt *option.Server) error {
 	defer dp.Close()
 
 	// ensure database is initialized and compatible
-	if err = initialize(dp); err != nil {
+	cat, err := catalog.Initialize(dp)
+	if err != nil {
 		return err
 	}
 
-	s := &svr{opt: opt, conf: conf, dp: dp}
+	s := &svr{cat: cat, dp: dp, conf: conf, opt: opt}
 
 	if err = startServer(s); err != nil {
 		return fmt.Errorf("server stopped: %s", err)
@@ -118,6 +122,8 @@ func startServer(s *svr) error {
 	return nil
 }
 
+var counter atomic.Int64
+
 func serve(s *svr) {
 	var listen string
 	if s.opt.Listen == "" {
@@ -137,6 +143,7 @@ func serve(s *svr) {
 	if s.opt.NoHarvest {
 		log.Warning("disabled harvesting")
 	}
+	catalog.Init()
 	var err error
 	if s.opt.Listen == "" || s.opt.NoTLS {
 		err = httpsvr.ListenAndServe()
@@ -152,15 +159,17 @@ func serve(s *svr) {
 }
 
 func setupHandlers(s *svr) http.Handler {
+	//counter.Load(-1)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/cmd", s.handleCommand)
 	return mux
 }
 
 func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
+	rqid := counter.Add(1)
 	if r.Method == "POST" {
 		// log.Info("request: %s", requestString(r))
-		s.handleCommandPost(w, r)
+		s.handleCommandPost(w, r, rqid)
 		return
 	}
 	// var m = unsupportedMethod("/config", r)
@@ -168,7 +177,7 @@ func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
 	// http.Error(w, m, http.StatusMethodNotAllowed)
 }
 
-func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
+func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int64) {
 	// read request
 	var req protocol.CommandRequest
 	var ok bool
@@ -198,7 +207,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	addr, _, _ = net.SplitHostPort(r.RemoteAddr)
-	log.Info("[%s] %s", addr, req.Command)
+	log.Info("[%d] %s - %s", rqid, addr, req.Command)
 	node, err, pass = parser.Parse(req.Command)
 	//fmt.Printf("### %#v --- %v\n", node, err)
 	if err != nil {
@@ -212,12 +221,14 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 	//log.Info("parsed: %#v", node)
 	_ = pass
 	switch cmd := node.(type) {
+	case *ast.CreateSetStmt:
+		resp = createSetStmt(s, rqid, cmd)
 	case *ast.InfoStmt:
 		resp = infoStmt(s, cmd)
 	case *ast.PingStmt:
 		resp = &protocol.CommandResponse{Status: "ping"}
 	case *ast.SelectStmt:
-		resp = selectStmt(s, cmd)
+		resp = selectStmt(s, rqid, cmd)
 	case *ast.ShowStmt:
 		resp = showStmt(s, cmd)
 	default:
@@ -226,8 +237,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request) {
 		parser.WriteCarets(&b, 0, len(firstField))
 		resp = &protocol.CommandResponse{
 			Status: "error",
-			Message: fmt.Sprintf("syntax error near %q\n%s\n%s",
-				firstField, req.Command, b.String()),
+			Message: fmt.Sprintf("syntax error near %s\n%s\n%s",
+				parser.Near(firstField), req.Command, b.String()),
 		}
 	}
 skipParse:

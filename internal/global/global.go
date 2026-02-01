@@ -14,5 +14,3 @@ const ClientProgram = "ccc"
 func ServerConfigFileName(datadir string) string {
 	return filepath.Join(datadir, "ccd.conf")
 }
-
-const SystemSchema = "ccms"

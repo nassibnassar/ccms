@@ -9,7 +9,6 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/marcxml"
-	"github.com/indexdata/ccms/internal/global"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nassibnassar/goharvest/oai"
@@ -140,7 +139,7 @@ func Harvest(dp *pgxpool.Pool) {
 		case errors.Is(err, pgx.ErrNoRows):
 			//log.Info("conflict: skipping record %s", identifier)
 		case err != nil:
-			panic(fmt.Sprintf("writing to table "+global.SystemSchema+".md: %v", err))
+			panic(fmt.Sprintf("writing to table ccms.md: %v", err))
 		default:
 		}
 
@@ -148,13 +147,13 @@ func Harvest(dp *pgxpool.Pool) {
 			q = "insert into ccms.attr (id, author, title, full_vendor_name, availability) " +
 				"values ($1, $2, $3, $4, $5) on conflict do nothing"
 			if _, err = tx.Exec(context.TODO(), q, id, author, title, fullVendorName, availability); err != nil {
-				panic(fmt.Sprintf("writing to table "+global.SystemSchema+".attr: %v", err))
+				panic(fmt.Sprintf("writing to table ccms.attr: %v", err))
 			}
 
 			q = "insert into ccms.reserve (id) " +
 				"values ($1) on conflict do nothing"
 			if _, err = tx.Exec(context.TODO(), q, id); err != nil {
-				panic(fmt.Sprintf("writing to table "+global.SystemSchema+".reserve: %v", err))
+				panic(fmt.Sprintf("writing to table ccms.reserve: %v", err))
 			}
 
 			//log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)

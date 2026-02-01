@@ -70,7 +70,7 @@ func errorMessage(l *lexer) error {
 	if ts == te {
 		te++
 	}
-	s := fmt.Sprintf("%s near %q\n%s", l.err, l.data[ts:te], WriteErrorContext(string(l.data), ts, te))
+	s := fmt.Sprintf("%s near %s\n%s", l.err, Near(string(l.data[ts:te])), WriteErrorContext(string(l.data), ts, te))
 	return errors.New(s)
 }
 
@@ -82,8 +82,8 @@ func Parse(input string) (ast.Node, error, bool) {
 		if l.node == nil {
 			var b strings.Builder
 			WriteCarets(&b, l.ts, l.te)
-			msg = fmt.Errorf("syntax error near %q\n%s\n%s",
-				strings.Split(input, " ")[0], strings.Split(input, "\n")[0], b.String())
+			msg = fmt.Errorf("syntax error near %s\n%s\n%s",
+				Near(strings.Split(input, " ")[0]), strings.Split(input, "\n")[0], b.String())
 		}
 	} else {
 		msg = errorMessage(l)
@@ -94,5 +94,13 @@ func Parse(input string) (ast.Node, error, bool) {
 func WriteCarets(b *strings.Builder, ts, te int) {
 	for i := ts; i < te; i++ {
 		b.WriteRune('^')
+	}
+}
+
+func Near(str string) string {
+	if str == "\"" {
+		return str
+	} else {
+		return "\"" + str + "\""
 	}
 }

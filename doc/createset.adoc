@@ -1,0 +1,35 @@
+==== create set
+
+Define a new set
+
+[source,subs="verbatim,quotes"]
+----
+create set `*_set_name_*`
+----
+
+[discrete]
+===== Description
+
+The `create set` command creates a new, empty set.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_set_name_*`
+|The name of the new set.
+|===
+
+NOTE:  Currently set names must begin with `test.` because `test` is
+the only available project space for new sets.
+
+[discrete]
+===== Examples
+
+Create a set `myset` in project `test`:
+
+----
+create set test.myset;
+----
+

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.26">
-<title>select</title>
+<title>create set</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -458,56 +458,32 @@ h1, h2, h3, h4, h5, h6, #toctitle,
 </div>
 <div id="content">
 <div class="sect3">
-<h4 id="_select">select</h4>
+<h4 id="_create_set">create set</h4>
 <div class="paragraph">
-<p>Retrieve objects from a set</p>
+<p>Define a new set</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>select *
-    from <code><strong><em>set_name</em></strong></code>
-    [ where <code><strong><em>condition</em></strong></code> ]
-    [ limit <code><strong><em>count</em></strong></code> ]</code></pre>
+<pre class="highlight"><code>create set <code><strong><em>set_name</em></strong></code></code></pre>
 </div>
 </div>
 <h5 id="_description" class="discrete">Description</h5>
 <div class="paragraph">
-<p>The <code>select</code> command retrieves a list of objects from a set according
-to specified criteria.</p>
+<p>The <code>create set</code> command creates a new, empty set.</p>
 </div>
 <h5 id="_parameters" class="discrete">Parameters</h5>
-<div class="paragraph">
-<p>The first argument specifies <code>*</code> meaning all available attributes.</p>
-</div>
-<h6 id="_from" class="discrete">from</h6>
-<div class="paragraph">
-<p>The <code>from</code> clause specifies the desired set that will be the source of
-data.</p>
-</div>
-<h6 id="_where" class="discrete">where</h6>
-<div class="paragraph">
-<p>The <code>where</code> clause specifies a condition in the form of a Boolean
-expression.  Only objects that satisfy this condition will be
-retrieved.</p>
-</div>
-<div class="admonitionblock note">
-<table>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<tbody>
 <tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-Currently the only supported form of <code><strong><em>condition</em></strong></code> is
-<code><em>attribute</em> = '<em>value</em>'</code>.
-</td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>set_name</em></strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the new set.</p></td>
 </tr>
+</tbody>
 </table>
-</div>
-<h6 id="_limit" class="discrete">limit</h6>
-<div class="paragraph">
-<p>The <code>limit</code> clause specifies a maximum number of objects that will be
-returned.</p>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -515,34 +491,26 @@ returned.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-At present the CCMS server returns a maximum of 30 records to
-the client, even if a higher maximum is specified using <code>limit</code>.
+Currently set names must begin with <code>test.</code> because <code>test</code> is
+the only available project space for new sets.
 </td>
 </tr>
 </table>
 </div>
 <h5 id="_examples" class="discrete">Examples</h5>
 <div class="paragraph">
-<p>To retrieve all fields of items in stock:</p>
+<p>Create a set <code>myset</code> in project <code>test</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>select * from reserve where availability = 'In stock';</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>To retrieve all fields of an arbitrary record:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>select * from reserve limit 1;</pre>
+<pre>create set test.myset;</pre>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-01-31 11:18:41 -0500
+Last updated 2026-02-01 14:41:53 -0500
 </div>
 </div>
 </body>

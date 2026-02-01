@@ -2,6 +2,7 @@
 
 === Commands
 
+include::createset.adoc[]
 
 include::select.adoc[]
 

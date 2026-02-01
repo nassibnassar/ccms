@@ -4,41 +4,69 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
+	"github.com/indexdata/ccms/cmd/ccd/catalog"
+	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/internal/protocol"
 )
 
-func selectStmt(s *svr, cmd *ast.SelectStmt) *protocol.CommandResponse {
+func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandResponse {
 	if cmd.Retrieve {
 		return &protocol.CommandResponse{
 			Status:  "error",
-			Message: "\"retrieve all\" is no longer supported; use \"select *\"",
+			Message: "\"retrieve\" is no longer supported; use \"select\"",
 		}
 	}
 
-	a, ok := cmd.Select.(*ast.AttrSelectExpr)
-	if ok {
-		if a.Attribute != "all" {
-			return &protocol.CommandResponse{
-				Status:  "error",
-				Message: "selecting attributes is not yet supported",
-			}
-		}
+	if !strings.ContainsRune(cmd.From, '.') {
+		cmd.From = "ccms." + cmd.From
 	}
-	if cmd.Set != "reserve" {
+	if !s.cat.SetExists(cmd.From) {
 		return &protocol.CommandResponse{
 			Status:  "error",
-			Message: "set \"" + cmd.Set + "\" does not exist",
+			Message: "set \"" + cmd.From + "\" does not exist",
 		}
 	}
-	lim, _ := strconv.Atoi(cmd.Limit)
-	if lim > 30 {
-		lim = 30
+
+	switch cmd.Select.(type) {
+	case *ast.AttrSelectExpr:
+		return &protocol.CommandResponse{
+			Status:  "error",
+			Message: "selecting attributes is not yet supported",
+		}
+	case *ast.StarSelectExpr:
 	}
-	q := "select id, coalesce(author, ''), coalesce(title, ''), coalesce(full_vendor_name, ''), coalesce(availability, '') from ccms.attr where author is not null limit " + strconv.Itoa(lim)
-	rows, err := s.dp.Query(context.TODO(), q)
+
+	if cmd.WhereAttr != "" && !catalog.IsAttribute(cmd.WhereAttr) {
+		return &protocol.CommandResponse{
+			Status:  "error",
+			Message: "attribute \"" + cmd.WhereAttr + "\" does not exist",
+		}
+	}
+
+	switch l := cmd.Limit.(type) {
+	case *ast.NoLimitExpr:
+		cmd.Limit = &ast.LimitValueExpr{Value: "30"} // temporary maximum
+	case *ast.LimitValueExpr:
+		lim, _ := strconv.Atoi(l.Value)
+		if lim < 0 {
+			return &protocol.CommandResponse{
+				Status:  "error",
+				Message: "limit must not be negative",
+			}
+		}
+		if lim > 30 {
+			cmd.Limit = &ast.LimitValueExpr{Value: "30"} // temporary maximum
+		}
+	}
+
+	log.Info("[%d] %s", rqid, cmd.SQL())
+	sql := cmd.SQL()
+	rows, err := s.dp.Query(context.TODO(), sql)
 	if err != nil {
+		fmt.Println(sql)
 		panic(fmt.Sprintf("selecting from reserve: %v", err))
 	}
 	defer rows.Close()
@@ -50,8 +78,9 @@ func selectStmt(s *svr, cmd *ast.SelectStmt) *protocol.CommandResponse {
 		if err != nil {
 			panic(fmt.Sprintf("reading from reserve: %v", err))
 		}
+		ids := strconv.FormatInt(id, 10)
 		data = append(data, protocol.DataRow{
-			Values: []string{strconv.FormatInt(id, 10), author, title, full_vendor_name, availability},
+			Values: []string{ids, author, title, full_vendor_name, availability},
 		})
 	}
 	if err = rows.Err(); err != nil {
@@ -59,7 +88,7 @@ func selectStmt(s *svr, cmd *ast.SelectStmt) *protocol.CommandResponse {
 	}
 
 	return &protocol.CommandResponse{
-		Status: "retrieve",
+		Status: "select",
 		Fields: []protocol.FieldDescription{
 			{
 				Name: "id",
