@@ -51,9 +51,9 @@ maximum applies only to the `select` command; it does not apply to the
 [discrete]
 ===== Examples
 
-To retrieve all fields of items in stock:
+To retrieve items in stock from the set `test.myset`:
 
 ----
-select * from reserve where availability = 'In stock';
+select * from test.myset where availability = 'In stock';
 ----
 

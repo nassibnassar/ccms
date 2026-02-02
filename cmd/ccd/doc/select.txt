@@ -38,7 +38,7 @@ Note even if a higher maximum is specified using limit. This maximum applies
 
 Examples
 
-To retrieve all fields of items in stock:
+To retrieve items in stock from the set test.myset:
 
-select * from reserve where availability = 'In stock';
+select * from test.myset where availability = 'In stock';
 
