@@ -23,6 +23,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 						"SQL commands:\n" +
 						"        create set  define a new set\n" +
 						//"        info    show supported commands\n" +
+						"        insert      insert objects into a set\n" +
 						"        select      retrieve objects from a set\n" +
 						"        show        list existing filters or sets\n"},
 				},
@@ -36,6 +37,8 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 		docstr = doc.CreateSet()
 	//case "info":
 	//        docstr = doc.Info()
+	case "insert":
+		docstr = doc.Insert()
 	case "select":
 		docstr = doc.Select()
 	case "show":

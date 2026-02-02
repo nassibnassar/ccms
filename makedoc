@@ -2,6 +2,7 @@
 asciidoctor -a docinfo=shared ./doc/*.adoc
 w3m ./doc/createset.html | head -n -1 > ./cmd/ccd/doc/createset.txt
 #w3m ./doc/info.html | head -n -1 > ./cmd/ccd/doc/info.txt
+w3m ./doc/insert.html | head -n -1 > ./cmd/ccd/doc/insert.txt
 w3m ./doc/select.html | head -n -1 > ./cmd/ccd/doc/select.txt
 w3m ./doc/show.html | head -n -1 > ./cmd/ccd/doc/show.txt
 

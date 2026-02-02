@@ -225,6 +225,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		resp = createSetStmt(s, rqid, cmd)
 	case *ast.InfoStmt:
 		resp = infoStmt(s, cmd)
+	case *ast.InsertStmt:
+		resp = insertStmt(s, rqid, cmd)
 	case *ast.PingStmt:
 		resp = &protocol.CommandResponse{Status: "ping"}
 	case *ast.SelectStmt:

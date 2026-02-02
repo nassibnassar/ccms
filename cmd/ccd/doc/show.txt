@@ -12,9 +12,7 @@ Parameters
 
 name
 
-     filters Currently defined filters.
-
-     sets    Currently defined sets.
+     sets Currently defined sets.
 
 Examples
 

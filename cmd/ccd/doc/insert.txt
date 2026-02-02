@@ -1,0 +1,42 @@
+insert
+
+Insert objects into a set
+
+insert into target_set_name
+    from source_set_name
+    [ where condition ]
+    [ limit count ]
+
+Description
+
+The insert command selects objects from a source set according to specified
+criteria, and inserts the selected objects into a target set.
+
+Parameters
+
+into
+
+The into clause specifies the target set.
+
+from
+
+The from clause specifies the source set.
+
+where
+
+The where clause specifies a condition in the form of a Boolean expression.
+Only objects that satisfy this condition will be selected.
+
+Note Currently the only supported form of condition is attribute = 'value'.
+
+limit
+
+The limit clause specifies a maximum number of objects that will be returned.
+
+Examples
+
+To select objects in stock from the reserve set and insert them into a set
+test.myset:
+
+insert into test.myset from reserve where availability = 'In stock';
+

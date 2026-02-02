@@ -21,6 +21,13 @@ func Info() string {
 }
 */
 
+//go:embed insert.txt
+var insertTxt string
+
+func Insert() string {
+	return strings.TrimSpace(insertTxt)
+}
+
 //go:embed select.txt
 var selectTxt string
 

@@ -15,6 +15,16 @@ type Expr interface {
 	exprNode()
 }
 
+type QueryExpr struct {
+	From       string
+	WhereAttr  string
+	WhereValue string
+	Limit      LimitExpr
+}
+
+func (*QueryExpr) node()     {}
+func (*QueryExpr) exprNode() {}
+
 type SelectExpr interface {
 	Node
 	exprNode()
@@ -76,17 +86,39 @@ type CreateSetStmt struct {
 func (*CreateSetStmt) node()     {}
 func (*CreateSetStmt) stmtNode() {}
 
+type InsertStmt struct {
+	Into  string
+	Query *QueryExpr
+}
+
+func (*InsertStmt) node()     {}
+func (*InsertStmt) stmtNode() {}
+
 type SelectStmt struct {
-	Select     SelectExpr
-	From       string
-	WhereAttr  string
-	WhereValue string
-	Limit      LimitExpr
-	Retrieve   bool
+	Select SelectExpr
+	Query  *QueryExpr
 }
 
 func (*SelectStmt) node()     {}
 func (*SelectStmt) stmtNode() {}
+
+func (q *QueryExpr) SQL() string {
+	var where string
+	if q.WhereAttr != "" {
+		where = " and " + q.WhereAttr + "='" + q.WhereValue + "'"
+	}
+	var limit string
+	switch l := q.Limit.(type) {
+	case *NoLimitExpr:
+	case *LimitValueExpr:
+		limit = " limit " + l.Value
+	}
+	return "from " + q.From + " t join ccms.attr a on t.id=a.id" + where + limit
+}
+
+func (i *InsertStmt) SQL() string {
+	return "insert into " + i.Into + " select a.id " + i.Query.SQL() + " on conflict do nothing"
+}
 
 func (s *SelectStmt) SQL() string {
 	//var sel []string
@@ -96,17 +128,7 @@ func (s *SelectStmt) SQL() string {
 	//case *StarSelectExpr:
 	//        sel = []string{"*"}
 	//}
-	var where string
-	if s.WhereAttr != "" {
-		where = " and " + s.WhereAttr + "='" + s.WhereValue + "'"
-	}
-	var limit string
-	switch l := s.Limit.(type) {
-	case *NoLimitExpr:
-	case *LimitValueExpr:
-		limit = " limit " + l.Value
-	}
-	return "select a.id, coalesce(a.author, ''), coalesce(a.title, ''), coalesce(a.full_vendor_name, ''), coalesce(a.availability, '') from " + s.From + " t join ccms.attr a on t.id=a.id where a.author is not null" + where + limit
+	return "select a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability " + s.Query.SQL()
 }
 
 type ShowStmt struct {

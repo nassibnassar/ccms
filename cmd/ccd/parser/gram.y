@@ -12,6 +12,7 @@ import (
 	optlist []ast.Option
 	node ast.Node
 	selectExpr ast.SelectExpr
+	queryExpr *ast.QueryExpr
 	pass bool
 }
 
@@ -20,14 +21,18 @@ import (
 %type <node> create_set_stmt
 %type <node> info_stmt
 %type <node> ping_stmt
-%type <node> retrieve_stmt
+%type <node> insert_stmt
+%type <node> select_stmt
 %type <node> show_stmt
 
 %type <selectExpr> select_expression
+%type <queryExpr> query_expression
 
 %token CREATE
 %token FROM
 %token INFO
+%token INSERT
+%token INTO
 %token LIMIT
 %token PING
 %token RETRIEVE
@@ -68,7 +73,11 @@ stmt:
 		{
 			$$ = $1
 		}
-	| retrieve_stmt
+	| insert_stmt
+		{
+			$$ = $1
+		}
+	| select_stmt
 		{
 			$$ = $1
 		}
@@ -97,30 +106,34 @@ create_set_stmt:
 			$$ = &ast.CreateSetStmt{SetName: $3}
 		}
 
-retrieve_stmt:
-	SELECT select_expression FROM name LIMIT NUMBER ';'
+insert_stmt:
+	INSERT INTO name query_expression ';'
 		{
-			$$ = &ast.SelectStmt{Select: $2, From: $4, Limit: &ast.LimitValueExpr{Value: $6}, Retrieve: false}
+			$$ = &ast.InsertStmt{Into: $3, Query: $4}
 		}
-	| SELECT select_expression FROM name ';'
+
+select_stmt:
+	SELECT select_expression query_expression ';'
 		{
-			$$ = &ast.SelectStmt{Select: $2, From: $4, Limit: &ast.NoLimitExpr{}, Retrieve: false}
+			$$ = &ast.SelectStmt{Select: $2, Query: $3}
 		}
-	| SELECT select_expression FROM name WHERE name '=' SLITERAL LIMIT NUMBER ';'
+
+query_expression:
+	FROM name LIMIT NUMBER
 		{
-			$$ = &ast.SelectStmt{Select: $2, From: $4, WhereAttr: $6, WhereValue: $8, Limit: &ast.LimitValueExpr{Value: $10}, Retrieve: false}
+			$$ = &ast.QueryExpr{From: $2, Limit: &ast.LimitValueExpr{Value: $4}}
 		}
-	| SELECT select_expression FROM name WHERE name '=' SLITERAL ';'
+	| FROM name
 		{
-			$$ = &ast.SelectStmt{Select: $2, From: $4,  WhereAttr: $6, WhereValue: $8, Limit: &ast.NoLimitExpr{}, Retrieve: false}
+			$$ = &ast.QueryExpr{From: $2, Limit: &ast.NoLimitExpr{}}
 		}
-	| RETRIEVE select_expression FROM name LIMIT NUMBER ';'
+	| FROM name WHERE name '=' SLITERAL LIMIT NUMBER
 		{
-			$$ = &ast.SelectStmt{Select: $2, From: $4, Limit: &ast.LimitValueExpr{Value: $6}, Retrieve: true}
+			$$ = &ast.QueryExpr{From: $2,  WhereAttr: $4, WhereValue: $6, Limit: &ast.LimitValueExpr{Value: $8}}
 		}
-	| RETRIEVE select_expression FROM name ';'
+	| FROM name WHERE name '=' SLITERAL
 		{
-			$$ = &ast.SelectStmt{Select: $2, From: $4, Limit: &ast.NoLimitExpr{}, Retrieve: true}
+			$$ = &ast.QueryExpr{From: $2,  WhereAttr: $4, WhereValue: $6, Limit: &ast.NoLimitExpr{}}
 		}
 
 select_expression:

@@ -1,11 +1,11 @@
-==== select
+==== insert
 
-Retrieve objects from a set
+Insert objects into a set
 
 [source,subs="verbatim,quotes"]
 ----
-select *
-    from `*_set_name_*`
+insert into `*_target_set_name_*`
+    from `*_source_set_name_*`
     [ where `*_condition_*` ]
     [ limit `*_count_*` ]
 ----
@@ -13,26 +13,29 @@ select *
 [discrete]
 ===== Description
 
-The `select` command retrieves a list of objects from a set according
-to specified criteria.
+The `insert` command selects objects from a source set according to
+specified criteria, and inserts the selected objects into a
+target set.
 
 [discrete]
 ===== Parameters
 
-The first argument specifies `*` meaning all available attributes.
+[discrete]
+====== into
+
+The `into` clause specifies the target set.
 
 [discrete]
 ====== from
 
-The `from` clause specifies the desired set that will be the source of
-data.
+The `from` clause specifies the source set.
 
 [discrete]
 ====== where
 
 The `where` clause specifies a condition in the form of a Boolean
 expression.  Only objects that satisfy this condition will be
-retrieved.
+selected.
 
 NOTE:  Currently the only supported form of `*_condition_*` is
 `_attribute_ = '_value_'`.
@@ -43,15 +46,13 @@ NOTE:  Currently the only supported form of `*_condition_*` is
 The `limit` clause specifies a maximum number of objects that will be
 returned.
 
-NOTE:  At present the CCMS server returns a maximum of 30 records to
-the client, even if a higher maximum is specified using `limit`.
-
 [discrete]
 ===== Examples
 
-To retrieve all fields of items in stock:
+To select objects in stock from the `reserve` set and insert them into
+a set `test.myset`:
 
 ----
-select * from reserve where availability = 'In stock';
+insert into test.myset from reserve where availability = 'In stock';
 ----
 

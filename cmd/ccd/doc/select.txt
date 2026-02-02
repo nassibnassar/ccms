@@ -40,7 +40,3 @@ To retrieve all fields of items in stock:
 
 select * from reserve where availability = 'In stock';
 
-To retrieve all fields of an arbitrary record:
-
-select * from reserve limit 1;
-

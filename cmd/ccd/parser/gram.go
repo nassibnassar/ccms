@@ -13,23 +13,26 @@ type yySymType struct {
 	optlist    []ast.Option
 	node       ast.Node
 	selectExpr ast.SelectExpr
+	queryExpr  *ast.QueryExpr
 	pass       bool
 }
 
 const CREATE = 57346
 const FROM = 57347
 const INFO = 57348
-const LIMIT = 57349
-const PING = 57350
-const RETRIEVE = 57351
-const SELECT = 57352
-const SET = 57353
-const SHOW = 57354
-const WHERE = 57355
-const VERSION = 57356
-const IDENT = 57357
-const NUMBER = 57358
-const SLITERAL = 57359
+const INSERT = 57349
+const INTO = 57350
+const LIMIT = 57351
+const PING = 57352
+const RETRIEVE = 57353
+const SELECT = 57354
+const SET = 57355
+const SHOW = 57356
+const WHERE = 57357
+const VERSION = 57358
+const IDENT = 57359
+const NUMBER = 57360
+const SLITERAL = 57361
 
 var yyToknames = [...]string{
 	"$end",
@@ -38,6 +41,8 @@ var yyToknames = [...]string{
 	"CREATE",
 	"FROM",
 	"INFO",
+	"INSERT",
+	"INTO",
 	"LIMIT",
 	"PING",
 	"RETRIEVE",
@@ -68,59 +73,55 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 52
+const yyLast = 48
 
 var yyAct = [...]int8{
-	19, 23, 21, 44, 35, 46, 47, 20, 38, 50,
-	37, 17, 16, 45, 25, 36, 27, 48, 43, 39,
-	32, 31, 28, 26, 49, 42, 23, 21, 15, 40,
-	33, 34, 18, 30, 29, 9, 1, 10, 41, 14,
-	12, 11, 22, 13, 7, 24, 6, 8, 5, 4,
-	3, 2,
+	21, 31, 25, 23, 43, 38, 18, 17, 22, 36,
+	34, 33, 29, 27, 44, 26, 10, 28, 11, 12,
+	30, 46, 15, 41, 13, 39, 14, 25, 23, 45,
+	16, 40, 35, 37, 19, 32, 1, 24, 20, 8,
+	7, 42, 6, 9, 5, 4, 3, 2,
 }
 
 var yyPact = [...]int16{
-	31, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, 17,
-	-6, -13, -13, 12, 5, 12, -1000, 4, 29, -1000,
-	-1000, -1000, -1000, -1000, 28, 3, -1000, 2, -1000, 12,
-	12, -1000, -1000, -3, 1, 13, -1000, 12, 9, -1000,
-	0, -16, -5, -1000, -12, -1000, -1, 8, -1000, -9,
-	-1000,
+	12, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	17, -13, 26, -14, 11, -7, 11, -1000, -8, 11,
+	30, -1000, -1000, -1000, -1000, -1000, -9, -1000, -10, -1000,
+	30, -11, 11, -1000, -1000, -15, -1000, 16, -1000, 5,
+	11, -1000, -17, -5, 20, 3, -1000,
 }
 
 var yyPgo = [...]int8{
-	0, 51, 50, 49, 48, 47, 46, 44, 32, 0,
-	42, 36,
+	0, 47, 46, 45, 44, 43, 42, 40, 39, 38,
+	1, 0, 37, 36,
 }
 
 var yyR1 = [...]int8{
-	0, 11, 1, 2, 2, 2, 2, 2, 4, 4,
-	3, 6, 6, 6, 6, 6, 6, 8, 8, 7,
-	5, 9, 9, 10,
+	0, 13, 1, 2, 2, 2, 2, 2, 2, 4,
+	4, 3, 6, 7, 10, 10, 10, 10, 9, 9,
+	8, 5, 11, 11, 12,
 }
 
 var yyR2 = [...]int8{
-	0, 1, 1, 1, 1, 1, 1, 1, 2, 3,
-	4, 7, 5, 11, 9, 7, 5, 1, 1, 3,
-	2, 1, 1, 1,
+	0, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+	3, 4, 5, 4, 4, 2, 8, 6, 1, 1,
+	3, 2, 1, 1, 1,
 }
 
 var yyChk = [...]int16{
-	-1000, -11, -1, -2, -3, -4, -6, -7, -5, 4,
-	6, 10, 9, 12, 8, 11, 18, 17, -8, -9,
-	20, 15, -10, 14, -8, -9, 18, -9, 18, 5,
-	5, 18, 18, -9, -9, 7, 18, 13, 7, 18,
-	16, -9, 16, 18, 19, 18, 17, 7, 18, 16,
-	18,
+	-1000, -13, -1, -2, -3, -4, -6, -7, -8, -5,
+	4, 6, 7, 12, 14, 10, 13, 20, 19, 8,
+	-9, -11, 22, 17, -12, 16, -11, 20, -11, 20,
+	-11, -10, 5, 20, 20, -10, 20, -11, 20, 9,
+	15, 18, -11, 21, 19, 9, 18,
 }
 
 var yyDef = [...]int8{
-	0, -2, 1, 2, 3, 4, 5, 6, 7, 0,
-	0, 0, 0, 0, 0, 0, 8, 0, 0, 17,
-	18, 21, 22, 23, 0, 0, 20, 0, 9, 0,
-	0, 19, 10, 0, 0, 0, 12, 0, 0, 16,
-	0, 0, 0, 11, 0, 15, 0, 0, 14, 0,
-	13,
+	0, -2, 1, 2, 3, 4, 5, 6, 7, 8,
+	0, 0, 0, 0, 0, 0, 0, 9, 0, 0,
+	0, 18, 19, 22, 23, 24, 0, 21, 0, 10,
+	0, 0, 0, 20, 11, 0, 13, 15, 12, 0,
+	0, 14, 0, 0, 17, 0, 16,
 }
 
 var yyTok1 = [...]int8{
@@ -128,14 +129,14 @@ var yyTok1 = [...]int8{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 20, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 18,
-	3, 19,
+	3, 3, 22, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 20,
+	3, 21,
 }
 
 var yyTok2 = [...]int8{
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-	12, 13, 14, 15, 16, 17,
+	12, 13, 14, 15, 16, 17, 18, 19,
 }
 
 var yyTok3 = [...]int8{
@@ -513,76 +514,81 @@ yydefault:
 			yyVAL.node = yyDollar[1].node
 		}
 	case 8:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		{
+			yyVAL.node = yyDollar[1].node
+		}
+	case 9:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.InfoStmt{Topic: ""}
 		}
-	case 9:
+	case 10:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.node = &ast.InfoStmt{Topic: yyDollar[2].str}
 		}
-	case 10:
+	case 11:
 		yyDollar = yyS[yypt-4 : yypt+1]
 		{
 			yyVAL.node = &ast.CreateSetStmt{SetName: yyDollar[3].str}
 		}
-	case 11:
-		yyDollar = yyS[yypt-7 : yypt+1]
-		{
-			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, From: yyDollar[4].str, Limit: &ast.LimitValueExpr{Value: yyDollar[6].str}, Retrieve: false}
-		}
 	case 12:
 		yyDollar = yyS[yypt-5 : yypt+1]
 		{
-			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, From: yyDollar[4].str, Limit: &ast.NoLimitExpr{}, Retrieve: false}
+			yyVAL.node = &ast.InsertStmt{Into: yyDollar[3].str, Query: yyDollar[4].queryExpr}
 		}
 	case 13:
-		yyDollar = yyS[yypt-11 : yypt+1]
+		yyDollar = yyS[yypt-4 : yypt+1]
 		{
-			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, From: yyDollar[4].str, WhereAttr: yyDollar[6].str, WhereValue: yyDollar[8].str, Limit: &ast.LimitValueExpr{Value: yyDollar[10].str}, Retrieve: false}
+			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, Query: yyDollar[3].queryExpr}
 		}
 	case 14:
-		yyDollar = yyS[yypt-9 : yypt+1]
+		yyDollar = yyS[yypt-4 : yypt+1]
 		{
-			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, From: yyDollar[4].str, WhereAttr: yyDollar[6].str, WhereValue: yyDollar[8].str, Limit: &ast.NoLimitExpr{}, Retrieve: false}
+			yyVAL.queryExpr = &ast.QueryExpr{From: yyDollar[2].str, Limit: &ast.LimitValueExpr{Value: yyDollar[4].str}}
 		}
 	case 15:
-		yyDollar = yyS[yypt-7 : yypt+1]
+		yyDollar = yyS[yypt-2 : yypt+1]
 		{
-			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, From: yyDollar[4].str, Limit: &ast.LimitValueExpr{Value: yyDollar[6].str}, Retrieve: true}
+			yyVAL.queryExpr = &ast.QueryExpr{From: yyDollar[2].str, Limit: &ast.NoLimitExpr{}}
 		}
 	case 16:
-		yyDollar = yyS[yypt-5 : yypt+1]
+		yyDollar = yyS[yypt-8 : yypt+1]
 		{
-			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, From: yyDollar[4].str, Limit: &ast.NoLimitExpr{}, Retrieve: true}
+			yyVAL.queryExpr = &ast.QueryExpr{From: yyDollar[2].str, WhereAttr: yyDollar[4].str, WhereValue: yyDollar[6].str, Limit: &ast.LimitValueExpr{Value: yyDollar[8].str}}
 		}
 	case 17:
-		yyDollar = yyS[yypt-1 : yypt+1]
+		yyDollar = yyS[yypt-6 : yypt+1]
 		{
-			yyVAL.selectExpr = &ast.AttrSelectExpr{Attribute: yyDollar[1].str}
+			yyVAL.queryExpr = &ast.QueryExpr{From: yyDollar[2].str, WhereAttr: yyDollar[4].str, WhereValue: yyDollar[6].str, Limit: &ast.NoLimitExpr{}}
 		}
 	case 18:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.selectExpr = &ast.StarSelectExpr{}
+			yyVAL.selectExpr = &ast.AttrSelectExpr{Attribute: yyDollar[1].str}
 		}
 	case 19:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		{
+			yyVAL.selectExpr = &ast.StarSelectExpr{}
+		}
+	case 20:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.node = &ast.ShowStmt{Name: yyDollar[2].str}
 		}
-	case 20:
+	case 21:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.PingStmt{}
 		}
-	case 21:
+	case 22:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.str = yyDollar[1].str
 		}
-	case 22:
+	case 23:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.str = yyDollar[1].str

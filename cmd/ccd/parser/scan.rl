@@ -50,6 +50,8 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'create'i => { tok = CREATE; fbreak; };
 			'from'i => { tok = FROM; fbreak; };
 			'info'i => { tok = INFO; fbreak; };
+			'insert'i => { tok = INSERT; fbreak; };
+			'into'i => { tok = INTO; fbreak; };
 			'limit'i => { tok = LIMIT; fbreak; };
 			'retrieve'i => { tok = RETRIEVE; fbreak; };
 			'set'i => { tok = SET; fbreak; };

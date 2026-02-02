@@ -4,6 +4,8 @@
 
 include::createset.adoc[]
 
+include::insert.adoc[]
+
 include::select.adoc[]
 
 include::show.adoc[]

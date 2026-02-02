@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -13,23 +14,6 @@ import (
 )
 
 func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandResponse {
-	if cmd.Retrieve {
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: "\"retrieve\" is no longer supported; use \"select\"",
-		}
-	}
-
-	if !strings.ContainsRune(cmd.From, '.') {
-		cmd.From = "ccms." + cmd.From
-	}
-	if !s.cat.SetExists(cmd.From) {
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: "set \"" + cmd.From + "\" does not exist",
-		}
-	}
-
 	switch cmd.Select.(type) {
 	case *ast.AttrSelectExpr:
 		return &protocol.CommandResponse{
@@ -39,16 +23,16 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 	case *ast.StarSelectExpr:
 	}
 
-	if cmd.WhereAttr != "" && !catalog.IsAttribute(cmd.WhereAttr) {
+	if err := processQuery(s, rqid, cmd.Query); err != nil {
 		return &protocol.CommandResponse{
 			Status:  "error",
-			Message: "attribute \"" + cmd.WhereAttr + "\" does not exist",
+			Message: err.Error(),
 		}
 	}
 
-	switch l := cmd.Limit.(type) {
+	switch l := cmd.Query.Limit.(type) {
 	case *ast.NoLimitExpr:
-		cmd.Limit = &ast.LimitValueExpr{Value: "30"} // temporary maximum
+		cmd.Query.Limit = &ast.LimitValueExpr{Value: "30"} // temporary maximum
 	case *ast.LimitValueExpr:
 		lim, _ := strconv.Atoi(l.Value)
 		if lim < 0 {
@@ -58,7 +42,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 			}
 		}
 		if lim > 30 {
-			cmd.Limit = &ast.LimitValueExpr{Value: "30"} // temporary maximum
+			cmd.Query.Limit = &ast.LimitValueExpr{Value: "30"} // temporary maximum
 		}
 	}
 
@@ -108,4 +92,18 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		},
 		Data: data,
 	}
+}
+
+func processQuery(s *svr, rqid int64, query *ast.QueryExpr) error {
+	if !strings.ContainsRune(query.From, '.') {
+		query.From = "ccms." + query.From
+	}
+	if !s.cat.SetExists(query.From) {
+		return errors.New("set \"" + query.From + "\" does not exist")
+	}
+
+	if query.WhereAttr != "" && !catalog.IsAttribute(query.WhereAttr) {
+		return errors.New("attribute \"" + query.WhereAttr + "\" does not exist")
+	}
+	return nil
 }
