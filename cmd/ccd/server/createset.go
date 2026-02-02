@@ -19,11 +19,17 @@ func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *protocol.Command
 	if !strings.ContainsRune(cmd.SetName, '.') {
 		return &protocol.CommandResponse{
 			Status:  "error",
-			Message: "set \"" + cmd.SetName + "\" does not have a project name",
+			Message: "project not specified in \"" + cmd.SetName + "\"",
 		}
 	}
 
 	sp := strings.Split(cmd.SetName, ".")
+	if len(sp) < 2 {
+		return &protocol.CommandResponse{
+			Status:  "error",
+			Message: "project not specified in \"" + cmd.SetName + "\"",
+		}
+	}
 	if sp[0] != "test" {
 		return &protocol.CommandResponse{
 			Status:  "error",

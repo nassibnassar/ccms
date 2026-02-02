@@ -516,7 +516,9 @@ returned.</p>
 </td>
 <td class="content">
 At present the CCMS server returns a maximum of 30 records to
-the client, even if a higher maximum is specified using <code>limit</code>.
+the client, even if a higher maximum is specified using <code>limit</code>.  This
+maximum applies only to the <code>select</code> command; it does not apply to the
+<code>insert</code> command, which does not return records to the client.
 </td>
 </tr>
 </table>
@@ -534,7 +536,7 @@ the client, even if a higher maximum is specified using <code>limit</code>.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-02-01 20:03:45 -0500
+Last updated 2026-02-01 21:05:13 -0500
 </div>
 </div>
 </body>

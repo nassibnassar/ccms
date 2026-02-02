@@ -44,7 +44,9 @@ The `limit` clause specifies a maximum number of objects that will be
 returned.
 
 NOTE:  At present the CCMS server returns a maximum of 30 records to
-the client, even if a higher maximum is specified using `limit`.
+the client, even if a higher maximum is specified using `limit`.  This
+maximum applies only to the `select` command; it does not apply to the
+`insert` command, which does not return records to the client.
 
 [discrete]
 ===== Examples

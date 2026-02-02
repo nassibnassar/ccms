@@ -35,7 +35,7 @@ The limit clause specifies a maximum number of objects that will be returned.
 
 Examples
 
-To select objects in stock from the reserve set and insert them into a set
+To select items in stock from the reserve set and insert them into a set
 test.myset:
 
 insert into test.myset from reserve where availability = 'In stock';

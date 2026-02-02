@@ -95,9 +95,18 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 }
 
 func processQuery(s *svr, rqid int64, query *ast.QueryExpr) error {
+	if strings.HasPrefix(query.From, "ccms.") {
+		return errors.New("invalid set \"" + query.From + "\"")
+	}
+
+	if !strings.HasPrefix(query.From, "test.") && strings.ContainsRune(query.From, '.') {
+		return errors.New("invalid set \"" + query.From + "\"")
+	}
+
 	if !strings.ContainsRune(query.From, '.') {
 		query.From = "ccms." + query.From
 	}
+
 	if !s.cat.SetExists(query.From) {
 		return errors.New("set \"" + query.From + "\" does not exist")
 	}

@@ -10,3 +10,64 @@ include::select.adoc[]
 
 include::show.adoc[]
 
+=== Protocol
+
+Non-query commands such as `create set` return a diagnostic status:
+
+[source,json]
+----
+{
+  "command": "create set test.myset;"
+}
+----
+
+[source,json]
+----
+{
+  "status": "create set"
+}
+----
+
+The status may be an error:
+
+[source,json]
+----
+{
+  "status": "error",
+  "message": "set test.myset already exists"
+}
+----
+
+Query commands such as `select` also return tabular data sets, with
+the attribute names described under `"fields"`, e.g.:
+
+[source,json]
+----
+{
+  "command": "select id from test.myset;"
+}
+----
+
+[source,json]
+----
+{
+  "status": "select",
+  "fields": [
+    {
+      "name": "id"
+    }
+  ],
+  "data": [
+    [
+      "053e4063-d70c-4a41-a968-e6900e6b47d5"
+    ],
+    [
+      "ac256496-111a-4e13-9d3b-a55ac3d0f676"
+    ]
+  ]
+}
+----
+
+NOTE:  Selecting individual attributes, as in the example above, is
+not yet supported.  However, `select *` is supported.
+
