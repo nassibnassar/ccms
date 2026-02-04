@@ -34,13 +34,39 @@ func (c *Catalog) initSets() error {
 func (c *Catalog) SetExists(setName string) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if setName == "reserve" {
+		return true
+	}
 	_, ok := c.sets[setName]
 	return ok
 }
 
+func IsValidTargetSet(setName string) bool {
+	if setName == "reserve" {
+		return false
+	}
+	if !strings.ContainsRune(setName, '.') {
+		return false
+	}
+	if strings.HasPrefix(setName, ".") || strings.HasSuffix(setName, ".") {
+		return false
+	}
+	return ProjectExists(setName)
+}
+
+// return table containing set
+func SetTable(setName string) string {
+	if setName == "reserve" {
+		return "ccms.reserve"
+	}
+	return setName
+}
+
 func (c *Catalog) AllSets() []string {
-	sets := make([]string, len(c.sets))
+	sets := make([]string, len(c.sets)+1)
 	i := 0
+	sets[i] = "reserve"
+	i++
 	for k := range c.sets {
 		sets[i] = k
 		i++

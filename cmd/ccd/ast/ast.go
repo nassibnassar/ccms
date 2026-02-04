@@ -1,5 +1,7 @@
 package ast
 
+import "github.com/indexdata/ccms/cmd/ccd/catalog"
+
 type Option struct {
 	Action string
 	Name   string
@@ -113,7 +115,7 @@ func (q *QueryExpr) SQL() string {
 	case *LimitValueExpr:
 		limit = " limit " + l.Value
 	}
-	return "from " + q.From + " t join ccms.attr a on t.id=a.id" + where + limit
+	return "from " + catalog.SetTable(q.From) + " t join ccms.attr a on t.id=a.id" + where + limit
 }
 
 func (i *InsertStmt) SQL() string {

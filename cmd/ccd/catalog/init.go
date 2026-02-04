@@ -141,10 +141,6 @@ func createTableSets(tx pgx.Tx) error {
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.sets: %v", err)
 	}
-	q = "insert into ccms.sets (setname) values ('ccms.reserve')"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.sets: %v", err)
-	}
 	return nil
 }
 

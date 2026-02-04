@@ -383,7 +383,11 @@ func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 }
 
 func setDatabaseParameters(ctx context.Context, dc *pgx.Conn) error {
-	q := "SET idle_in_transaction_session_timeout=0"
+	q := "SET search_path = ''"
+	if _, err := dc.Exec(ctx, q); err != nil {
+		return err
+	}
+	q = "SET idle_in_transaction_session_timeout=0"
 	if _, err := dc.Exec(ctx, q); err != nil {
 		return err
 	}

@@ -166,7 +166,7 @@ func runClient() error {
 		}
 		//fmt.Printf("%#v\n\n", resp)
 		if resp.Status == "error" {
-			eout.Error("%s", resp.Message)
+			eout.Error("error: %s", resp.Message)
 			continue
 		}
 		header := true
