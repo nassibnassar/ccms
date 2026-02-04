@@ -7,6 +7,7 @@ Retrieve objects from a set
 select *
     from `*_set_name_*`
     [ where `*_condition_*` ]
+    [ order by `*_attribute_*` [ asc | desc ] ]
     [ limit `*_count_*` ]
 ----
 
@@ -38,6 +39,14 @@ NOTE:  Currently the only supported form of `*_condition_*` is
 `_attribute_ = '_value_'`.
 
 [discrete]
+====== order by
+
+The `order by` clause specifies a sort order for objects to be
+returned.  The objects are sorted by the specified `*_attribute_*`,
+with `asc` for ascending order (the default) or `desc` for descending
+order.
+
+[discrete]
 ====== limit
 
 The `limit` clause specifies a maximum number of objects that will be
@@ -54,6 +63,6 @@ maximum applies only to the `select` command; it does not apply to the
 To retrieve items in stock from the set `test.myset`:
 
 ----
-select * from test.myset where availability = 'In stock';
+select * from test.myset where availability = 'In stock' order by title;
 ----
 

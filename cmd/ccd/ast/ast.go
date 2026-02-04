@@ -39,9 +39,32 @@ func (*WhereConditionExpr) node()          {}
 func (*WhereConditionExpr) exprNode()      {}
 func (*WhereConditionExpr) whereExprNode() {}
 
+type OrderExpr interface {
+	Node
+	exprNode()
+	orderExprNode()
+}
+
+type NoOrderExpr struct {
+}
+
+func (*NoOrderExpr) node()          {}
+func (*NoOrderExpr) exprNode()      {}
+func (*NoOrderExpr) orderExprNode() {}
+
+type OrderValueExpr struct {
+	Attribute string
+	Desc      bool
+}
+
+func (*OrderValueExpr) node()          {}
+func (*OrderValueExpr) exprNode()      {}
+func (*OrderValueExpr) orderExprNode() {}
+
 type QueryExpr struct {
 	From  string
 	Where WhereExpr
+	Order OrderExpr
 	Limit LimitExpr
 }
 
@@ -132,13 +155,23 @@ func (q *QueryExpr) SQL() string {
 	case *WhereConditionExpr:
 		where = " and " + w.WhereAttr + "='" + w.WhereValue + "'"
 	}
+	var order string
+	switch o := q.Order.(type) {
+	case *NoOrderExpr:
+	case *OrderValueExpr:
+		if o.Desc {
+			order = " order by " + o.Attribute + " desc"
+		} else {
+			order = " order by " + o.Attribute
+		}
+	}
 	var limit string
 	switch l := q.Limit.(type) {
 	case *NoLimitExpr:
 	case *LimitValueExpr:
 		limit = " limit " + l.Value
 	}
-	return "from " + catalog.SetTable(q.From) + " t join ccms.attr a on t.id=a.id" + where + limit
+	return "from " + catalog.SetTable(q.From) + " t join ccms.attr a on t.id=a.id" + where + order + limit
 }
 
 func (i *InsertStmt) SQL() string {

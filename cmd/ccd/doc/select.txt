@@ -5,6 +5,7 @@ Retrieve objects from a set
 select *
     from set_name
     [ where condition ]
+    [ order by attribute [ asc | desc ] ]
     [ limit count ]
 
 Description
@@ -27,6 +28,12 @@ Only objects that satisfy this condition will be retrieved.
 
 Note Currently the only supported form of condition is attribute = 'value'.
 
+order by
+
+The order by clause specifies a sort order for objects to be returned. The
+objects are sorted by the specified attribute, with asc for ascending order
+(the default) or desc for descending order.
+
 limit
 
 The limit clause specifies a maximum number of objects that will be returned.
@@ -40,5 +47,5 @@ Examples
 
 To retrieve items in stock from the set test.myset:
 
-select * from test.myset where availability = 'In stock';
+select * from test.myset where availability = 'In stock' order by title;
 

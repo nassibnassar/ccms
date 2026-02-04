@@ -467,6 +467,7 @@ h1, h2, h3, h4, h5, h6, #toctitle,
 <pre class="highlight"><code>select *
     from <code><strong><em>set_name</em></strong></code>
     [ where <code><strong><em>condition</em></strong></code> ]
+    [ order by <code><strong><em>attribute</em></strong></code> [ asc | desc ] ]
     [ limit <code><strong><em>count</em></strong></code> ]</code></pre>
 </div>
 </div>
@@ -503,6 +504,13 @@ Currently the only supported form of <code><strong><em>condition</em></strong></
 </tr>
 </table>
 </div>
+<h6 id="_order_by" class="discrete">order by</h6>
+<div class="paragraph">
+<p>The <code>order by</code> clause specifies a sort order for objects to be
+returned.  The objects are sorted by the specified <code><strong><em>attribute</em></strong></code>,
+with <code>asc</code> for ascending order (the default) or <code>desc</code> for descending
+order.</p>
+</div>
 <h6 id="_limit" class="discrete">limit</h6>
 <div class="paragraph">
 <p>The <code>limit</code> clause specifies a maximum number of objects that will be
@@ -529,14 +537,14 @@ maximum applies only to the <code>select</code> command; it does not apply to th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>select * from test.myset where availability = 'In stock';</pre>
+<pre>select * from test.myset where availability = 'In stock' order by title;</pre>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-02-01 22:27:12 -0500
+Last updated 2026-02-04 00:16:30 -0500
 </div>
 </div>
 </body>

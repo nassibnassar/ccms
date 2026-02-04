@@ -14,6 +14,7 @@ import (
 	selectExpr ast.SelectExpr
 	queryExpr *ast.QueryExpr
 	whereExpr ast.WhereExpr
+	orderExpr ast.OrderExpr
 	limitExpr ast.LimitExpr
 	pass bool
 }
@@ -30,14 +31,19 @@ import (
 %type <selectExpr> select_expression
 %type <queryExpr> query_expression
 %type <whereExpr> where_expression
+%type <orderExpr> order_expression
 %type <limitExpr> limit_expression
 
+%token ASC
+%token BY
 %token CREATE
+%token DESC
 %token FROM
 %token INFO
 %token INSERT
 %token INTO
 %token LIMIT
+%token ORDER
 %token PING
 %token RETRIEVE
 %token SELECT
@@ -123,9 +129,9 @@ select_stmt:
 		}
 
 query_expression:
-	FROM name where_expression limit_expression
+	FROM name where_expression order_expression limit_expression
 		{
-			$$ = &ast.QueryExpr{From: $2, Where: $3, Limit: $4}
+			$$ = &ast.QueryExpr{From: $2, Where: $3, Order: $4, Limit: $5}
 		}
 
 where_expression:
@@ -136,6 +142,24 @@ where_expression:
 	|
 		{
 			$$ = &ast.NoWhereExpr{}
+		}
+
+order_expression:
+	ORDER BY name
+		{
+			$$ = &ast.OrderValueExpr{Attribute: $3, Desc: false}
+		}
+	| ORDER BY name ASC
+		{
+			$$ = &ast.OrderValueExpr{Attribute: $3, Desc: false}
+		}
+	| ORDER BY name DESC
+		{
+			$$ = &ast.OrderValueExpr{Attribute: $3, Desc: true}
+		}
+	|
+		{
+			$$ = &ast.NoOrderExpr{}
 		}
 
 limit_expression:

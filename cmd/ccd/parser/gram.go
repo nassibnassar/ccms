@@ -15,37 +15,46 @@ type yySymType struct {
 	selectExpr ast.SelectExpr
 	queryExpr  *ast.QueryExpr
 	whereExpr  ast.WhereExpr
+	orderExpr  ast.OrderExpr
 	limitExpr  ast.LimitExpr
 	pass       bool
 }
 
-const CREATE = 57346
-const FROM = 57347
-const INFO = 57348
-const INSERT = 57349
-const INTO = 57350
-const LIMIT = 57351
-const PING = 57352
-const RETRIEVE = 57353
-const SELECT = 57354
-const SET = 57355
-const SHOW = 57356
-const WHERE = 57357
-const VERSION = 57358
-const IDENT = 57359
-const NUMBER = 57360
-const SLITERAL = 57361
+const ASC = 57346
+const BY = 57347
+const CREATE = 57348
+const DESC = 57349
+const FROM = 57350
+const INFO = 57351
+const INSERT = 57352
+const INTO = 57353
+const LIMIT = 57354
+const ORDER = 57355
+const PING = 57356
+const RETRIEVE = 57357
+const SELECT = 57358
+const SET = 57359
+const SHOW = 57360
+const WHERE = 57361
+const VERSION = 57362
+const IDENT = 57363
+const NUMBER = 57364
+const SLITERAL = 57365
 
 var yyToknames = [...]string{
 	"$end",
 	"error",
 	"$unk",
+	"ASC",
+	"BY",
 	"CREATE",
+	"DESC",
 	"FROM",
 	"INFO",
 	"INSERT",
 	"INTO",
 	"LIMIT",
+	"ORDER",
 	"PING",
 	"RETRIEVE",
 	"SELECT",
@@ -75,55 +84,59 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 48
+const yyLast = 54
 
 var yyAct = [...]int8{
-	21, 31, 25, 23, 45, 38, 18, 17, 22, 36,
-	34, 33, 29, 27, 46, 26, 10, 28, 11, 12,
-	30, 44, 15, 40, 13, 19, 14, 25, 23, 16,
-	42, 32, 35, 37, 1, 24, 41, 39, 20, 8,
-	7, 43, 6, 9, 5, 4, 3, 2,
+	21, 31, 25, 23, 47, 38, 18, 17, 22, 36,
+	34, 33, 29, 27, 50, 26, 48, 28, 10, 40,
+	30, 11, 12, 25, 23, 16, 15, 42, 13, 45,
+	14, 19, 35, 37, 51, 32, 46, 52, 1, 24,
+	44, 43, 41, 39, 20, 8, 7, 49, 6, 9,
+	5, 4, 3, 2,
 }
 
 var yyPact = [...]int16{
 	12, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	16, -13, 17, -14, 11, -7, 11, -1000, -8, 11,
-	26, -1000, -1000, -1000, -1000, -1000, -9, -1000, -10, -1000,
-	26, -11, 11, -1000, -1000, -15, -1000, 8, -1000, 21,
-	11, -1000, 3, -17, -1000, -5, -1000,
+	8, -17, 20, -18, 3, -11, 3, -1000, -12, 3,
+	27, -1000, -1000, -1000, -1000, -1000, -13, -1000, -14, -1000,
+	27, -15, 3, -1000, -1000, -19, -1000, 0, -1000, 14,
+	3, 17, 31, -21, -1000, -6, 3, -9, -1000, 30,
+	-1000, -1000, -1000,
 }
 
 var yyPgo = [...]int8{
-	0, 47, 46, 45, 44, 43, 42, 40, 39, 38,
-	1, 37, 36, 0, 35, 34,
+	0, 53, 52, 51, 50, 49, 48, 46, 45, 44,
+	1, 43, 42, 40, 0, 39, 38,
 }
 
 var yyR1 = [...]int8{
-	0, 15, 1, 2, 2, 2, 2, 2, 2, 4,
-	4, 3, 6, 7, 10, 11, 11, 12, 12, 9,
-	9, 8, 5, 13, 13, 14,
+	0, 16, 1, 2, 2, 2, 2, 2, 2, 4,
+	4, 3, 6, 7, 10, 11, 11, 12, 12, 12,
+	12, 13, 13, 9, 9, 8, 5, 14, 14, 15,
 }
 
 var yyR2 = [...]int8{
 	0, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-	3, 4, 5, 4, 4, 4, 0, 2, 0, 1,
-	1, 3, 2, 1, 1, 1,
+	3, 4, 5, 4, 5, 4, 0, 3, 4, 4,
+	0, 2, 0, 1, 1, 3, 2, 1, 1, 1,
 }
 
 var yyChk = [...]int16{
-	-1000, -15, -1, -2, -3, -4, -6, -7, -8, -5,
-	4, 6, 7, 12, 14, 10, 13, 20, 19, 8,
-	-9, -13, 22, 17, -14, 16, -13, 20, -13, 20,
-	-13, -10, 5, 20, 20, -10, 20, -13, 20, -11,
-	15, -12, 9, -13, 18, 21, 19,
+	-1000, -16, -1, -2, -3, -4, -6, -7, -8, -5,
+	6, 9, 10, 16, 18, 14, 17, 24, 23, 11,
+	-9, -14, 26, 21, -15, 20, -14, 24, -14, 24,
+	-14, -10, 8, 24, 24, -10, 24, -14, 24, -11,
+	19, -12, 13, -14, -13, 12, 5, 25, 22, -14,
+	23, 4, 7,
 }
 
 var yyDef = [...]int8{
 	0, -2, 1, 2, 3, 4, 5, 6, 7, 8,
 	0, 0, 0, 0, 0, 0, 0, 9, 0, 0,
-	0, 19, 20, 23, 24, 25, 0, 22, 0, 10,
-	0, 0, 0, 21, 11, 0, 13, 16, 12, 18,
-	0, 14, 0, 0, 17, 0, 15,
+	0, 23, 24, 27, 28, 29, 0, 26, 0, 10,
+	0, 0, 0, 25, 11, 0, 13, 16, 12, 20,
+	0, 22, 0, 0, 14, 0, 0, 0, 21, 17,
+	15, 18, 19,
 }
 
 var yyTok1 = [...]int8{
@@ -131,14 +144,15 @@ var yyTok1 = [...]int8{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 22, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 20,
-	3, 21,
+	3, 3, 26, 3, 3, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 24,
+	3, 25,
 }
 
 var yyTok2 = [...]int8{
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-	12, 13, 14, 15, 16, 17, 18, 19,
+	12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+	22, 23,
 }
 
 var yyTok3 = [...]int8{
@@ -546,9 +560,9 @@ yydefault:
 			yyVAL.node = &ast.SelectStmt{Select: yyDollar[2].selectExpr, Query: yyDollar[3].queryExpr}
 		}
 	case 14:
-		yyDollar = yyS[yypt-4 : yypt+1]
+		yyDollar = yyS[yypt-5 : yypt+1]
 		{
-			yyVAL.queryExpr = &ast.QueryExpr{From: yyDollar[2].str, Where: yyDollar[3].whereExpr, Limit: yyDollar[4].limitExpr}
+			yyVAL.queryExpr = &ast.QueryExpr{From: yyDollar[2].str, Where: yyDollar[3].whereExpr, Order: yyDollar[4].orderExpr, Limit: yyDollar[5].limitExpr}
 		}
 	case 15:
 		yyDollar = yyS[yypt-4 : yypt+1]
@@ -561,41 +575,61 @@ yydefault:
 			yyVAL.whereExpr = &ast.NoWhereExpr{}
 		}
 	case 17:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.orderExpr = &ast.OrderValueExpr{Attribute: yyDollar[3].str, Desc: false}
+		}
+	case 18:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		{
+			yyVAL.orderExpr = &ast.OrderValueExpr{Attribute: yyDollar[3].str, Desc: false}
+		}
+	case 19:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		{
+			yyVAL.orderExpr = &ast.OrderValueExpr{Attribute: yyDollar[3].str, Desc: true}
+		}
+	case 20:
+		yyDollar = yyS[yypt-0 : yypt+1]
+		{
+			yyVAL.orderExpr = &ast.NoOrderExpr{}
+		}
+	case 21:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.limitExpr = &ast.LimitValueExpr{Value: yyDollar[2].str}
 		}
-	case 18:
+	case 22:
 		yyDollar = yyS[yypt-0 : yypt+1]
 		{
 			yyVAL.limitExpr = &ast.NoLimitExpr{}
 		}
-	case 19:
+	case 23:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.selectExpr = &ast.AttrSelectExpr{Attribute: yyDollar[1].str}
 		}
-	case 20:
+	case 24:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.selectExpr = &ast.StarSelectExpr{}
 		}
-	case 21:
+	case 25:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.node = &ast.ShowStmt{Name: yyDollar[2].str}
 		}
-	case 22:
+	case 26:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.PingStmt{}
 		}
-	case 23:
+	case 27:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.str = yyDollar[1].str
 		}
-	case 24:
+	case 28:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.str = yyDollar[1].str
