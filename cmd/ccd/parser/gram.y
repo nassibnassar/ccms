@@ -13,6 +13,8 @@ import (
 	node ast.Node
 	selectExpr ast.SelectExpr
 	queryExpr *ast.QueryExpr
+	whereExpr ast.WhereExpr
+	limitExpr ast.LimitExpr
 	pass bool
 }
 
@@ -27,6 +29,8 @@ import (
 
 %type <selectExpr> select_expression
 %type <queryExpr> query_expression
+%type <whereExpr> where_expression
+%type <limitExpr> limit_expression
 
 %token CREATE
 %token FROM
@@ -119,21 +123,29 @@ select_stmt:
 		}
 
 query_expression:
-	FROM name LIMIT NUMBER
+	FROM name where_expression limit_expression
 		{
-			$$ = &ast.QueryExpr{From: $2, Limit: &ast.LimitValueExpr{Value: $4}}
+			$$ = &ast.QueryExpr{From: $2, Where: $3, Limit: $4}
 		}
-	| FROM name
+
+where_expression:
+	WHERE name '=' SLITERAL
 		{
-			$$ = &ast.QueryExpr{From: $2, Limit: &ast.NoLimitExpr{}}
+			$$ = &ast.WhereConditionExpr{WhereAttr: $2, WhereValue: $4}
 		}
-	| FROM name WHERE name '=' SLITERAL LIMIT NUMBER
+	|
 		{
-			$$ = &ast.QueryExpr{From: $2,  WhereAttr: $4, WhereValue: $6, Limit: &ast.LimitValueExpr{Value: $8}}
+			$$ = &ast.NoWhereExpr{}
 		}
-	| FROM name WHERE name '=' SLITERAL
+
+limit_expression:
+	LIMIT NUMBER
 		{
-			$$ = &ast.QueryExpr{From: $2,  WhereAttr: $4, WhereValue: $6, Limit: &ast.NoLimitExpr{}}
+			$$ = &ast.LimitValueExpr{Value: $2}
+		}
+	|
+		{
+			$$ = &ast.NoLimitExpr{}
 		}
 
 select_expression:

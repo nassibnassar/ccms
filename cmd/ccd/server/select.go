@@ -88,8 +88,13 @@ func processQuery(s *svr, rqid int64, query *ast.QueryExpr) error {
 		return errors.New("set \"" + query.From + "\" does not exist")
 	}
 
-	if query.WhereAttr != "" && !catalog.IsAttribute(query.WhereAttr) {
-		return errors.New("attribute \"" + query.WhereAttr + "\" does not exist")
+	// TODO attribute validation will have to be part of generating SQL
+	switch w := query.Where.(type) {
+	case *ast.NoWhereExpr:
+	case *ast.WhereConditionExpr:
+		if !catalog.IsAttribute(w.WhereAttr) {
+			return errors.New("attribute \"" + w.WhereAttr + "\" does not exist")
+		}
 	}
 	return nil
 }

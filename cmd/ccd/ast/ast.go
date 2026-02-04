@@ -17,11 +17,32 @@ type Expr interface {
 	exprNode()
 }
 
-type QueryExpr struct {
-	From       string
+type WhereExpr interface {
+	Node
+	exprNode()
+	whereExprNode()
+}
+
+type NoWhereExpr struct {
+}
+
+func (*NoWhereExpr) node()          {}
+func (*NoWhereExpr) exprNode()      {}
+func (*NoWhereExpr) whereExprNode() {}
+
+type WhereConditionExpr struct {
 	WhereAttr  string
 	WhereValue string
-	Limit      LimitExpr
+}
+
+func (*WhereConditionExpr) node()          {}
+func (*WhereConditionExpr) exprNode()      {}
+func (*WhereConditionExpr) whereExprNode() {}
+
+type QueryExpr struct {
+	From  string
+	Where WhereExpr
+	Limit LimitExpr
 }
 
 func (*QueryExpr) node()     {}
@@ -106,8 +127,10 @@ func (*SelectStmt) stmtNode() {}
 
 func (q *QueryExpr) SQL() string {
 	var where string
-	if q.WhereAttr != "" {
-		where = " and " + q.WhereAttr + "='" + q.WhereValue + "'"
+	switch w := q.Where.(type) {
+	case *NoWhereExpr:
+	case *WhereConditionExpr:
+		where = " and " + w.WhereAttr + "='" + w.WhereValue + "'"
 	}
 	var limit string
 	switch l := q.Limit.(type) {
