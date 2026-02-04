@@ -253,6 +253,13 @@ skipParse:
 	}
 }
 
+func cmderr(message string) *protocol.CommandResponse {
+	return &protocol.CommandResponse{
+		Status:  "error",
+		Message: message,
+	}
+}
+
 func returnError(w http.ResponseWriter, errString string, statusCode int) {
 	HTTPError(w, errString, statusCode)
 }

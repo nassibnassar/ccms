@@ -33,10 +33,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *protocol.CommandResponse {
 			Data: data(s.cat),
 		}
 	default:
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: "unknown variable \"" + cmd.Name + "\"",
-		}
+		return cmderr("unknown variable \"" + cmd.Name + "\"")
 	}
 }
 

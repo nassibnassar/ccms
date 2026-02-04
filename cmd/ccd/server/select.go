@@ -14,18 +14,12 @@ import (
 func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandResponse {
 	switch cmd.Select.(type) {
 	case *ast.AttrSelectExpr:
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: "selecting attributes is not yet supported",
-		}
+		return cmderr("selecting attributes is not yet supported")
 	case *ast.StarSelectExpr:
 	}
 
 	if err := processQuery(s, rqid, cmd.Query); err != nil {
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: err.Error(),
-		}
+		return cmderr(err.Error())
 	}
 
 	switch l := cmd.Query.Limit.(type) {
@@ -34,10 +28,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 	case *ast.LimitValueExpr:
 		lim, _ := strconv.Atoi(l.Value)
 		if lim < 0 {
-			return &protocol.CommandResponse{
-				Status:  "error",
-				Message: "limit must not be negative",
-			}
+			return cmderr("limit must not be negative")
 		}
 		if lim > 30 {
 			cmd.Query.Limit = &ast.LimitValueExpr{Value: "30"} // temporary maximum

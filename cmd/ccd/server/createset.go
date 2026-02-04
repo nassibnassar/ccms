@@ -9,32 +9,20 @@ import (
 
 func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *protocol.CommandResponse {
 	if s.cat.SetExists(cmd.SetName) {
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: "set \"" + cmd.SetName + "\" already exists",
-		}
+		return cmderr("set \"" + cmd.SetName + "\" already exists")
 	}
 
 	if !catalog.IsValidTargetSet(cmd.SetName) {
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: "invalid set name \"" + cmd.SetName + "\"",
-		}
+		return cmderr("invalid set name \"" + cmd.SetName + "\"")
 	}
 
 	if !catalog.ProjectExists(cmd.SetName) {
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: "invalid project in  \"" + cmd.SetName + "\"",
-		}
+		return cmderr("invalid project in  \"" + cmd.SetName + "\"")
 	}
 
 	if err := s.cat.CreateSet(cmd.SetName); err != nil {
 		log.Info("[%d] %v", rqid, err)
-		return &protocol.CommandResponse{
-			Status:  "error",
-			Message: "error writing set \"" + cmd.SetName + "\"",
-		}
+		return cmderr("error writing set \"" + cmd.SetName + "\"")
 	}
 
 	return &protocol.CommandResponse{
