@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
+	"github.com/indexdata/ccms/cmd/ccd/catalog"
 	"github.com/indexdata/ccms/internal/protocol"
 )
 
@@ -18,6 +19,13 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 
 	if err := processQuery(s, rqid, cmd.Query.(*ast.QueryClause)); err != nil {
 		return cmderr(err.Error())
+	}
+
+	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
+	if o.Valid {
+		if !catalog.IsAttr(o.Attr) {
+			return cmderr("attribute \"" + o.Attr + "\" does not exist")
+		}
 	}
 
 	q := cmd.Query.(*ast.QueryClause)
