@@ -178,14 +178,16 @@ func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int64) {
-	// read request
+	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
+
 	var req protocol.CommandRequest
-	var ok bool
-	if ok = ReadRequest(w, r, &req); !ok {
+	if err := ReadRequest(w, r, &req); err != nil {
+		log.Info("[%d] %s - error: %v", rqid, addr, err)
+		if err1 := sendResponse(w, cmderr(err.Error())); err1 != nil {
+			log.Info("[%d] internal error: %v", rqid, err1)
+		}
 		return
 	}
-
-	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
 	log.Info("[%d] %s - %s", rqid, addr, req.Command)
 
 	var resp *protocol.CommandResponse
@@ -248,12 +250,18 @@ skipParse:
 	if resp.Status == "error" {
 		log.Info("[%d] error: %s", rqid, resp.Message)
 	}
+	if err := sendResponse(w, resp); err != nil {
+		log.Info("[%d] internal error: %v", rqid, err)
+	}
+}
+
+func sendResponse(w http.ResponseWriter, resp *protocol.CommandResponse) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err = json.NewEncoder(w).Encode(*resp); err != nil {
-		// TODO error handling
-		_ = err
+	if err := json.NewEncoder(w).Encode(*resp); err != nil {
+		return err
 	}
+	return nil
 }
 
 func cmderr(message string) *protocol.CommandResponse {
@@ -267,52 +275,37 @@ func returnError(w http.ResponseWriter, errString string, statusCode int) {
 	HTTPError(w, errString, statusCode)
 }
 
-func ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct interface{}) bool {
-	// Authenticate user.
-	var user string
-	var ok bool
-	if user, ok = HandleBasicAuth(w, r); !ok {
-		return false
+func ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct interface{}) error {
+	user, err := HandleBasicAuth(w, r)
+	if err != nil {
+		return err
 	}
-	_ = user
-	// Read the json request.
+	_ = user // TODO retain user in server state
+
 	var body []byte
-	var err error
 	if body, err = ioutil.ReadAll(r.Body); err != nil {
 		HandleError(w, err, http.StatusBadRequest)
-		return false
+		return err
 	}
 	if err = json.Unmarshal(body, requestStruct); err != nil {
 		HandleError(w, err, http.StatusBadRequest)
-		return false
+		return err
 	}
 	log.Trace("request %s %v\n", r.RemoteAddr, requestStruct)
-	return true
+	return nil
 }
 
-func HandleBasicAuth(w http.ResponseWriter, r *http.Request) (string, bool) {
-	host := osutil.AddrHost(r.RemoteAddr)
+func HandleBasicAuth(w http.ResponseWriter, r *http.Request) (string, error) {
+	//host := osutil.AddrHost(r.RemoteAddr)
 	var user, password string
 	var ok bool
 	user, password, ok = r.BasicAuth()
 	if !ok {
-		e := "invalid HTTP basic authentication"
-		log.Info("%s from %s", e, host)
-		//http.Error(w, e, http.StatusForbidden)
-		returnError(w, e, http.StatusForbidden)
-		return user, false
+		return "", fmt.Errorf("authentication failed")
+		//returnError(w, e, http.StatusForbidden)
 	}
 	if user != "nemo" || password != "testpass" {
-		e := fmt.Sprintf("authentication failed")
-		//
-		// TODO include user name as follows, once we support
-		//      multiple users:
-		// e := fmt.Sprintf("authentication failed for user %q", user)
-		//
-		log.Info("%s from %s", e, host)
-		//http.Error(w, e, http.StatusForbidden)
-		returnError(w, e, http.StatusForbidden)
-		return user, false
+		return "", fmt.Errorf("authentication failed for user %q", user)
 	}
 	//var match bool
 	//var err error
@@ -332,7 +325,7 @@ func HandleBasicAuth(w http.ResponseWriter, r *http.Request) (string, bool) {
 			return user, false
 		}
 	*/
-	return user, true
+	return user, nil
 }
 
 /*
