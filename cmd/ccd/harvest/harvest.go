@@ -125,6 +125,11 @@ func Harvest(dp *pgxpool.Pool) {
 		//        placeOfPublication = &placePub
 		//}
 
+		// temporarily skip records with no author to give us better example data
+		if author == nil {
+			return
+		}
+
 		tx, err := dp.Begin(context.TODO())
 		if err != nil {
 			panic(err)

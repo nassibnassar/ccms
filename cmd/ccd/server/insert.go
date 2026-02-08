@@ -18,17 +18,20 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *protocol.CommandRespon
 		return cmderr("set \"" + cmd.Into + "\" does not exist")
 	}
 
-	if err := processQuery(s, rqid, cmd.Query); err != nil {
+	if err := processQuery(s, rqid, cmd.Query.(*ast.QueryClause)); err != nil {
 		return cmderr(err.Error())
 	}
 
-	switch cmd.Query.Order.(type) {
-	case *ast.OrderValueExpr:
+	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
+	if o.Valid {
 		return cmderr("\"order by\" is not supported with insert")
 	}
 
-	//log.Info("[%d] %s", rqid, cmd.SQL())
-	sql := cmd.SQL()
+	sql, err := cmd.SQL()
+	if err != nil {
+		return cmderr(err.Error())
+	}
+	//log.Info("[%d] %s", rqid, sql)
 	if _, err := s.dp.Exec(context.TODO(), sql); err != nil {
 		return cmderr(fmt.Sprintf("inserting data into %q: %v", cmd.Into, err))
 	}

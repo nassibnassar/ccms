@@ -17,7 +17,7 @@ func Init() {
 	}
 }
 
-func IsAttribute(attr string) bool {
+func IsAttr(attr string) bool {
 	_, ok := AttributeMap[attr]
 	return ok
 }

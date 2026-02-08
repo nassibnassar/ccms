@@ -4,7 +4,7 @@ Retrieve objects from a set
 
 select *
     from set_name
-    [ where condition ]
+    [ where search_condition ]
     [ order by attribute [ asc | desc ] ]
     [ limit count ]
 
@@ -23,10 +23,10 @@ The from clause specifies the desired set that will be the source of data.
 
 where
 
-The where clause specifies a condition in the form of a Boolean expression.
-Only objects that satisfy this condition will be retrieved.
+The where clause specifies a search condition in the form of a Boolean
+expression. Only objects that satisfy this condition will be retrieved.
 
-Note Currently the only supported form of condition is attribute = 'value'.
+See also Reference > Queries.
 
 order by
 

@@ -4,7 +4,7 @@ Insert objects into a set
 
 insert into target_set_name
     from source_set_name
-    [ where condition ]
+    [ where search_condition ]
     [ limit count ]
 
 Description
@@ -24,10 +24,10 @@ The from clause specifies the source set.
 
 where
 
-The where clause specifies a condition in the form of a Boolean expression.
-Only objects that satisfy this condition will be selected.
+The where clause specifies a search condition in the form of a Boolean
+expression. Only objects that satisfy this condition will be selected.
 
-Note Currently the only supported form of condition is attribute = 'value'.
+See also Reference > Queries.
 
 limit
 

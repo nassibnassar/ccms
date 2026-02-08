@@ -1,9 +1,11 @@
 module github.com/indexdata/ccms
 
-go 1.25.6
+go 1.26rc3
 
 require (
 	github.com/chzyer/readline v1.5.1
+	github.com/davecgh/go-spew v1.1.1
+	github.com/essentialkaos/ek/v13 v13.38.3
 	github.com/fatih/color v1.18.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/mattn/go-isatty v0.0.20
@@ -13,9 +15,6 @@ require (
 )
 
 require (
-	github.com/essentialkaos/depsy v1.3.1 // indirect
-	github.com/essentialkaos/ek/v13 v13.38.3 // indirect
-	github.com/essentialkaos/go-linenoise/v3 v3.7.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
@@ -31,6 +30,7 @@ require (
 	golang.org/x/telemetry v0.0.0-20251203150158-8fff8a5912fc // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/tools v0.40.0 // indirect
+	golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated // indirect
 	golang.org/x/vuln v1.1.4 // indirect
 )
 

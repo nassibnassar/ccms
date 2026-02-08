@@ -6,7 +6,7 @@ Insert objects into a set
 ----
 insert into `*_target_set_name_*`
     from `*_source_set_name_*`
-    [ where `*_condition_*` ]
+    [ where `*_search_condition_*` ]
     [ limit `*_count_*` ]
 ----
 
@@ -33,12 +33,11 @@ The `from` clause specifies the source set.
 [discrete]
 ====== where
 
-The `where` clause specifies a condition in the form of a Boolean
-expression.  Only objects that satisfy this condition will be
+The `where` clause specifies a search condition in the form of a
+Boolean expression.  Only objects that satisfy this condition will be
 selected.
 
-NOTE:  Currently the only supported form of `*_condition_*` is
-`_attribute_ = '_value_'`.
+See also *Reference > Queries*.
 
 [discrete]
 ====== limit

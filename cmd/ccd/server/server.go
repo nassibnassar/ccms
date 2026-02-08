@@ -244,7 +244,9 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		}
 	}
 skipParse:
-	// success response
+	if resp.Status == "error" {
+		log.Info("[%d] error: %s", rqid, resp.Message)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err = json.NewEncoder(w).Encode(*resp); err != nil {

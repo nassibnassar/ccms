@@ -10,6 +10,62 @@ include::select.adoc[]
 
 include::show.adoc[]
 
+=== Queries
+
+==== Value expressions
+
+The `where` clause in a query is followed by a search condition.  This
+condition is a Boolean expression consisting of operators and
+operands.
+
+The supported operators, in order of precedence, are:
+
+[%header,width=75%,cols="4,3,5"]
+|===
+|Operator
+|Associativity
+|Description
+
+|`=` `<>` `<` `>` `\<=` `>=`
+|
+|comparison operators
+
+|`not`
+|right
+|logical negation
+
+|`and`
+|left
+|logical conjunction
+
+|`or`
+|left
+|logical disjunction
+|===
+
+Parentheses may be used to override these precedence rules.
+
+Supported operand types are:
+
+[%header,width=75%,cols="3,4,5"]
+|===
+|Operand type
+|Example
+|Description
+
+|name
+|`author`
+|attribute name
+
+|string literal
+|`'Thomas à Kempis'`
+|string constant
+
+|number
+|`33`
+|numeric constant
+|===
+
 === Protocol
 
 Non-query commands such as `create set` return a diagnostic status:
