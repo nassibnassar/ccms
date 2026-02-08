@@ -12,5 +12,6 @@
   `select` and `insert` commands.  See also:
   https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/#_queries
 
-* Added support for `order by` in the `select` command.
+* Added support for `order by` in the `select` command.  See also:
+  https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/#_select
 

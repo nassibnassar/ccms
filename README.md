@@ -7,9 +7,7 @@ Public License version 3.  See the file "LICENSE" for more information.
 
 See the file "CHANGELOG.md" for release notes.
 
-Documentation:
-[https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/](https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/)
+Documentation:  https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/
 
-API:
-[https://pkg.go.dev/github.com/indexdata/ccms](https://pkg.go.dev/github.com/indexdata/ccms)
+API:  https://pkg.go.dev/github.com/indexdata/ccms
 
