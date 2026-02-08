@@ -17,5 +17,5 @@ type FieldDescription struct {
 }
 
 type DataRow struct {
-	Values []string `json:"values"`
+	Values []any `json:"values"`
 }

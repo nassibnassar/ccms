@@ -42,7 +42,7 @@ func data(cat *catalog.Catalog) []protocol.DataRow {
 	sets := cat.AllSets()
 	sortSetNames(sets)
 	for i := range sets {
-		rows = append(rows, protocol.DataRow{Values: []string{sets[i]}})
+		rows = append(rows, protocol.DataRow{Values: []any{sets[i]}})
 	}
 	return rows
 }

@@ -40,7 +40,7 @@ type FieldDescription struct {
 
 // a row of data
 type DataRow struct {
-	Values []string `json:"values"` // data values
+	Values []any `json:"values"` // data values
 }
 
 // send a command to the server and return the response
@@ -82,7 +82,7 @@ func (c *Client) Send(cmd string) (*Response, error) {
 	}
 	data := make([]DataRow, 0)
 	for i := range cmdr.Data {
-		values := make([]string, 0)
+		values := make([]any, 0)
 		for j := range cmdr.Data[i].Values {
 			values = append(values, cmdr.Data[i].Values[j])
 		}

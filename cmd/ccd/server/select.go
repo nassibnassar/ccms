@@ -61,9 +61,8 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		if err != nil {
 			panic(fmt.Sprintf("reading from reserve: %v", err))
 		}
-		ids := strconv.FormatInt(id, 10)
 		data = append(data, protocol.DataRow{
-			Values: []string{ids, author, title, full_vendor_name, availability},
+			Values: []any{id, author, title, full_vendor_name, availability},
 		})
 	}
 	if err = rows.Err(); err != nil {

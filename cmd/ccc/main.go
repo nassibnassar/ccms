@@ -164,7 +164,6 @@ func runClient() error {
 			eout.Error("%v", err)
 			continue
 		}
-		//fmt.Printf("%#v\n\n", resp)
 		if resp.Status == "error" {
 			eout.Error("error: %s", resp.Message)
 			continue

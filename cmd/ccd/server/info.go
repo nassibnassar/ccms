@@ -19,7 +19,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 			},
 			Data: []protocol.DataRow{
 				{
-					Values: []string{"" +
+					Values: []any{"" +
 						"SQL commands:\n" +
 						"        create set  define a new set\n" +
 						//"        info    show supported commands\n" +
@@ -56,7 +56,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 		},
 		Data: []protocol.DataRow{
 			{
-				Values: []string{docstr},
+				Values: []any{docstr},
 			},
 		},
 	}

@@ -100,7 +100,7 @@ the attribute names described under `"fields"`, e.g.:
 [source,json]
 ----
 {
-  "command": "select id from test.myset;"
+  "command": "select id from test.myset limit 2;"
 }
 ----
 
@@ -115,10 +115,10 @@ the attribute names described under `"fields"`, e.g.:
   ],
   "data": [
     [
-      "053e4063-d70c-4a41-a968-e6900e6b47d5"
+      41
     ],
     [
-      "ac256496-111a-4e13-9d3b-a55ac3d0f676"
+      63
     ]
   ]
 }
