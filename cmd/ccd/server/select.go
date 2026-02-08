@@ -74,18 +74,23 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		Fields: []protocol.FieldDescription{
 			{
 				Name: "id",
+				Type: "bigint",
 			},
 			{
 				Name: "author",
+				Type: "text",
 			},
 			{
 				Name: "title",
+				Type: "text",
 			},
 			{
 				Name: "full_vendor_name",
+				Type: "text",
 			},
 			{
 				Name: "availability",
+				Type: "text",
 			},
 		},
 		Data: data,

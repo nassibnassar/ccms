@@ -211,6 +211,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	node, err, pass = parser.Parse(req.Command)
 	//fmt.Printf("### %#v --- %v\n", node, err)
 	if err != nil {
+		log.Info("[%d] error: %s", rqid, strings.Split(err.Error(), "\n")[0])
 		returnError(w, err.Error(), http.StatusOK /* http.StatusBadRequest */)
 		return
 	}

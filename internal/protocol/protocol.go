@@ -13,7 +13,7 @@ type CommandResponse struct {
 
 type FieldDescription struct {
 	Name string `json:"name"`
-	// DataType int
+	Type string `json:"type"`
 }
 
 type DataRow struct {

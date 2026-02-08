@@ -36,6 +36,7 @@ type Response struct {
 // metadata for an attribute
 type FieldDescription struct {
 	Name string `json:"name"` // attribute name
+	Type string `json:"type"` // data type
 }
 
 // a row of data
@@ -77,7 +78,7 @@ func (c *Client) Send(cmd string) (*Response, error) {
 
 	fields := make([]FieldDescription, 0)
 	for i := range cmdr.Fields {
-		fd := FieldDescription{Name: cmdr.Fields[i].Name}
+		fd := FieldDescription{Name: cmdr.Fields[i].Name, Type: cmdr.Fields[i].Type}
 		fields = append(fields, fd)
 	}
 	data := make([]DataRow, 0)

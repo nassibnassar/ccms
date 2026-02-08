@@ -18,6 +18,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *protocol.CommandResponse {
 			Fields: []protocol.FieldDescription{
 				{
 					Name: "filter",
+					Type: "text",
 				},
 			},
 			Data: []protocol.DataRow{},
@@ -28,6 +29,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *protocol.CommandResponse {
 			Fields: []protocol.FieldDescription{
 				{
 					Name: "set",
+					Type: "text",
 				},
 			},
 			Data: data(s.cat),

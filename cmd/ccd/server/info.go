@@ -15,6 +15,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 			Fields: []protocol.FieldDescription{
 				{
 					Name: "info",
+					Type: "text",
 				},
 			},
 			Data: []protocol.DataRow{
@@ -52,6 +53,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 		Fields: []protocol.FieldDescription{
 			{
 				Name: "info",
+				Type: "text",
 			},
 		},
 		Data: []protocol.DataRow{

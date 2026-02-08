@@ -110,7 +110,8 @@ the attribute names described under `"fields"`, e.g.:
   "status": "select",
   "fields": [
     {
-      "name": "id"
+      "name": "id",
+      "type": "bigint"
     }
   ],
   "data": [
