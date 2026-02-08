@@ -5,8 +5,8 @@
   See also: https://pkg.go.dev/github.com/indexdata/ccms
 
 * Attribute data types are provided by the `Type` field in
-  `client.FieldDescription`.  `Type` can be `text` (`string`) or
-  `bigint` (`int64`).
+  `client.FieldDescription`.  `Type` can be `"text"` (`string`) or
+  `"bigint"` (`int64`).
 
 * Added support for Boolean expressions in the `where` clause of
   `select` and `insert` commands.  See also:
