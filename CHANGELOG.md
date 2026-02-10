@@ -1,3 +1,8 @@
+# main branch
+
+* Added support for `offset` in the `select` command.  See also:
+  https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/#_select
+
 # v0.0.16
 
 * Breaking change:  Data rows may contain both `string` and `int64`
