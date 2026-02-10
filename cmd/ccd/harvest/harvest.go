@@ -91,6 +91,7 @@ func Harvest(dp *pgxpool.Pool) {
 		m, err := marcxml.Unmarshal(record.Metadata.Body)
 		//m, err := marcxml.Unmarshal(rs.GetRecord.Record.Metadata.Body)
 		if err != nil {
+			fmt.Printf("----\n%s\n----\n", string(record.Metadata.Body))
 			panic(err)
 		}
 		metadata := strings.TrimSpace(string(record.Metadata.Body))
