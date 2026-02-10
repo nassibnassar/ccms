@@ -9,6 +9,7 @@ select *
     [ where `*_search_condition_*` ]
     [ order by `*_attribute_*` [ asc | desc ] ]
     [ limit `*_count_*` ]
+    [ offset `*_start_*` ]
 ----
 
 [discrete]
@@ -55,6 +56,14 @@ NOTE:  At present the CCMS server returns a maximum of 30 records to
 the client, even if a higher maximum is specified using `limit`.  This
 maximum applies only to the `select` command; it does not apply to the
 `insert` command, which does not return records to the client.
+
+[discrete]
+====== offset
+
+The `offset` clause specifies a number of objects that will be skipped
+and not returned as part of the result.  This can be useful for
+retrieving objects one page of data a time.  Note that the `order by`
+clause is required whenever `offset` is used.
 
 [discrete]
 ===== Examples

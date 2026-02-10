@@ -7,6 +7,7 @@ select *
     [ where search_condition ]
     [ order by attribute [ asc | desc ] ]
     [ limit count ]
+    [ offset start ]
 
 Description
 
@@ -42,6 +43,13 @@ The limit clause specifies a maximum number of objects that will be returned.
 Note even if a higher maximum is specified using limit. This maximum applies
      only to the select command; it does not apply to the insert command, which
      does not return records to the client.
+
+offset
+
+The offset clause specifies a number of objects that will be skipped and not
+returned as part of the result. This can be useful for retrieving objects one
+page of data a time. Note that the order by clause is required whenever offset
+is used.
 
 Examples
 

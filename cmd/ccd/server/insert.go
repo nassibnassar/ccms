@@ -10,6 +10,15 @@ import (
 )
 
 func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *protocol.CommandResponse {
+	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
+	if o.Valid {
+		return cmderr("\"order by\" is not supported with insert")
+	}
+	f := cmd.Query.(*ast.QueryClause).Offset.(*ast.OffsetClause)
+	if f.Valid {
+		return cmderr("\"offset\" is not supported with insert")
+	}
+
 	if !catalog.IsValidTargetSet(cmd.Into) {
 		return cmderr("invalid target set \"" + cmd.Into + "\"")
 	}
@@ -20,15 +29,6 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *protocol.CommandRespon
 
 	if err := processQuery(s, rqid, cmd.Query.(*ast.QueryClause)); err != nil {
 		return cmderr(err.Error())
-	}
-
-	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
-	if o.Valid {
-		return cmderr("\"order by\" is not supported with insert")
-	}
-	f := cmd.Query.(*ast.QueryClause).Offset.(*ast.OffsetClause)
-	if f.Valid {
-		return cmderr("\"offset\" is not supported with insert")
 	}
 
 	sql, err := cmd.SQL()

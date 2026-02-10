@@ -12,6 +12,14 @@ import (
 )
 
 func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandResponse {
+	f := cmd.Query.(*ast.QueryClause).Offset.(*ast.OffsetClause)
+	if f.Valid {
+		o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
+		if !o.Valid {
+			return cmderr("\"order by\" is required when \"offset\" is used")
+		}
+	}
+
 	a := cmd.AttrList.(*ast.SelectAttrList)
 	if a.Attr != "*" {
 		return cmderr("selecting attributes is not yet supported; use \"select *\"")
