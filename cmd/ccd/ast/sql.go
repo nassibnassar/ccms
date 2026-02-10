@@ -38,7 +38,7 @@ func (s *SelectStmt) SQL() (string, error) {
 }
 
 func (s *SelectStmt) sql(b *strings.Builder) error {
-	b.WriteString("select a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability ")
+	b.WriteString("select aa.id, coalesce(aa.author, '') as author, coalesce(aa.title, '') as title, coalesce(aa.full_vendor_name, '') as full_vendor_name, coalesce(aa.availability, '') as availability ")
 	if err := s.Query.(*QueryClause).sql(b); err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (s *SelectStmt) sql(b *strings.Builder) error {
 }
 
 func (q *QueryClause) sql(b *strings.Builder) error {
-	b.WriteString("from ")
+	b.WriteString("from (select t.id from ")
 	b.WriteString(catalog.SetTable(q.From))
 	b.WriteString(" t join ccms.attr a on t.id=a.id")
 	w := q.Where.(*WhereClause)
@@ -69,6 +69,7 @@ func (q *QueryClause) sql(b *strings.Builder) error {
 		b.WriteString(" limit ")
 		b.WriteString(q.Limit.(*LimitClause).Value)
 	}
+	b.WriteString(") tt join ccms.attr aa on tt.id=aa.id")
 	return nil
 }
 
