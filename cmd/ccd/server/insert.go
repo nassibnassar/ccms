@@ -6,7 +6,6 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
-	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/internal/protocol"
 )
 
@@ -36,7 +35,7 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *protocol.CommandRespon
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	log.Info("[%d] %s", rqid, sql)
+	//log.Info("[%d] %s", rqid, sql)
 	if _, err := s.dp.Exec(context.TODO(), sql); err != nil {
 		return cmderr(fmt.Sprintf("inserting data into %q: %v", cmd.Into, err))
 	}

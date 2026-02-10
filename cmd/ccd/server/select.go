@@ -8,7 +8,6 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
-	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/internal/protocol"
 )
 
@@ -47,7 +46,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	log.Info("[%d] %s", rqid, sql)
+	//log.Info("[%d] %s", rqid, sql)
 	rows, err := s.dp.Query(context.TODO(), sql)
 	if err != nil {
 		fmt.Println(sql)
