@@ -468,7 +468,7 @@ h1, h2, h3, h4, h5, h6, #toctitle,
     from <code><strong><em>set_name</em></strong></code>
     [ where <code><strong><em>search_condition</em></strong></code> ]
     [ order by <code><strong><em>attribute</em></strong></code> [ asc | desc ] ]
-    [ limit <code><strong><em>count</em></strong></code> ]
+    limit <code><strong><em>count</em></strong></code>
     [ offset <code><strong><em>start</em></strong></code> ]</code></pre>
 </div>
 </div>
@@ -514,10 +514,7 @@ returned.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-At present the CCMS server returns a maximum of 30 records to
-the client, even if a higher maximum is specified using <code>limit</code>.  This
-maximum applies only to the <code>select</code> command; it does not apply to the
-<code>insert</code> command, which does not return records to the client.
+At present the <code>limit</code> clause is required for <code>select</code>.
 </td>
 </tr>
 </table>
@@ -542,7 +539,7 @@ clause is required when <code>offset</code> is used.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-02-09 23:10:59 -0500
+Last updated 2026-02-10 11:17:06 -0500
 </div>
 </div>
 </body>

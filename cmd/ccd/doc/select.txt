@@ -6,7 +6,7 @@ select *
     from set_name
     [ where search_condition ]
     [ order by attribute [ asc | desc ] ]
-    [ limit count ]
+    limit count
     [ offset start ]
 
 Description
@@ -39,10 +39,7 @@ limit
 
 The limit clause specifies a maximum number of objects that will be returned.
 
-     At present the CCMS server returns a maximum of 30 records to the client,
-Note even if a higher maximum is specified using limit. This maximum applies
-     only to the select command; it does not apply to the insert command, which
-     does not return records to the client.
+Note At present the limit clause is required for select.
 
 offset
 

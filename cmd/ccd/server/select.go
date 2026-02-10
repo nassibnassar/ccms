@@ -12,6 +12,7 @@ import (
 )
 
 func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandResponse {
+
 	f := cmd.Query.(*ast.QueryClause).Offset.(*ast.OffsetClause)
 	if f.Valid {
 		o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
@@ -43,11 +44,8 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		if lim < 0 {
 			return cmderr("limit must not be negative")
 		}
-		if lim > 30 {
-			q.Limit = &ast.LimitClause{Valid: true, Count: "30"} // temporary maximum
-		}
 	} else {
-		q.Limit = &ast.LimitClause{Valid: true, Count: "30"} // temporary maximum
+		return cmderr("\"select\" currently requires a \"limit\" clause")
 	}
 
 	sql, err := cmd.SQL()
