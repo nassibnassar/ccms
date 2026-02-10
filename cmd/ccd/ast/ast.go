@@ -48,10 +48,11 @@ type SelectAttrList struct {
 func (*SelectAttrList) node() {}
 
 type QueryClause struct {
-	From  string
-	Where Node
-	Order Node
-	Limit Node
+	From   string
+	Where  Node
+	Order  Node
+	Limit  Node
+	Offset Node
 }
 
 func (*QueryClause) node() {}
@@ -73,10 +74,17 @@ func (*OrderClause) node() {}
 
 type LimitClause struct {
 	Valid bool
-	Value string
+	Count string
 }
 
 func (*LimitClause) node() {}
+
+type OffsetClause struct {
+	Valid bool
+	Start string
+}
+
+func (*OffsetClause) node() {}
 
 /* expressions */
 

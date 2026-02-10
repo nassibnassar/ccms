@@ -27,6 +27,7 @@ import (
 %type <node> where_clause
 %type <node> order_clause
 %type <node> limit_clause
+%type <node> offset_clause
 
 %type <node> expression
 %type <node> logical_or_expr
@@ -55,6 +56,7 @@ import (
 %token INTO
 %token LIMIT
 %token NOT
+%token OFFSET
 %token OR
 %token ORDER
 %token PING
@@ -164,9 +166,9 @@ select_attr_list:
 		}
 
 query_clause:
-	FROM name where_clause order_clause limit_clause
+	FROM name where_clause order_clause limit_clause offset_clause
 		{
-			$$ = &ast.QueryClause{From: $2, Where: $3, Order: $4, Limit: $5}
+			$$ = &ast.QueryClause{From: $2, Where: $3, Order: $4, Limit: $5, Offset: $6}
 		}
 
 where_clause:
@@ -200,11 +202,21 @@ order_clause:
 limit_clause:
 	LIMIT NUMBER
 		{
-			$$ = &ast.LimitClause{Valid: true, Value: $2}
+			$$ = &ast.LimitClause{Valid: true, Count: $2}
 		}
 	|
 		{
 			$$ = &ast.LimitClause{}
+		}
+
+offset_clause:
+	OFFSET NUMBER
+		{
+			$$ = &ast.OffsetClause{Valid: true, Start: $2}
+		}
+	|
+		{
+			$$ = &ast.OffsetClause{}
 		}
 
 expression:

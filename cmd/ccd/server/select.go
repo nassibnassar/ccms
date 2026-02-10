@@ -8,6 +8,7 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
+	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/internal/protocol"
 )
 
@@ -31,22 +32,22 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 	q := cmd.Query.(*ast.QueryClause)
 	l := q.Limit.(*ast.LimitClause)
 	if l.Valid {
-		lim, _ := strconv.Atoi(l.Value)
+		lim, _ := strconv.Atoi(l.Count)
 		if lim < 0 {
 			return cmderr("limit must not be negative")
 		}
 		if lim > 30 {
-			q.Limit = &ast.LimitClause{Valid: true, Value: "30"} // temporary maximum
+			q.Limit = &ast.LimitClause{Valid: true, Count: "30"} // temporary maximum
 		}
 	} else {
-		q.Limit = &ast.LimitClause{Valid: true, Value: "30"} // temporary maximum
+		q.Limit = &ast.LimitClause{Valid: true, Count: "30"} // temporary maximum
 	}
 
 	sql, err := cmd.SQL()
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	//log.Info("[%d] %s", rqid, sql)
+	log.Info("[%d] %s", rqid, sql)
 	rows, err := s.dp.Query(context.TODO(), sql)
 	if err != nil {
 		fmt.Println(sql)

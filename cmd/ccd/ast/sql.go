@@ -21,7 +21,7 @@ func (i *InsertStmt) SQL() (string, error) {
 func (i *InsertStmt) sql(b *strings.Builder) error {
 	b.WriteString("insert into ")
 	b.WriteString(i.Into)
-	b.WriteString(" select a.id ")
+	b.WriteString(" select aa.id ")
 	if err := i.Query.(*QueryClause).sql(b); err != nil {
 		return err
 	}
@@ -67,7 +67,11 @@ func (q *QueryClause) sql(b *strings.Builder) error {
 	}
 	if q.Limit.(*LimitClause).Valid {
 		b.WriteString(" limit ")
-		b.WriteString(q.Limit.(*LimitClause).Value)
+		b.WriteString(q.Limit.(*LimitClause).Count)
+	}
+	if q.Offset.(*OffsetClause).Valid {
+		b.WriteString(" offset ")
+		b.WriteString(q.Offset.(*OffsetClause).Start)
 	}
 	b.WriteString(") tt join ccms.attr aa on tt.id=aa.id")
 	return nil

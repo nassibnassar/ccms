@@ -64,6 +64,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'into'i => { tok = INTO; fbreak; };
 			'limit'i => { tok = LIMIT; fbreak; };
 			'not'i => { tok = NOT; fbreak; };
+			'offset'i => { tok = OFFSET; fbreak; };
 			'or'i => { tok = OR; fbreak; };
 			'order'i => { tok = ORDER; fbreak; };
 			'retrieve'i => { tok = RETRIEVE; fbreak; };
