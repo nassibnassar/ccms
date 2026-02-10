@@ -44,6 +44,10 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		if lim < 0 {
 			return cmderr("limit must not be negative")
 		}
+		maxlim := 100000
+		if lim > maxlim {
+			return cmderr("limit currently must be no more than " + strconv.Itoa(maxlim))
+		}
 	} else {
 		return cmderr("\"select\" currently requires a \"limit\" clause")
 	}
