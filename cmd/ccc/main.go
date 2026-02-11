@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/chzyer/readline"
 	"github.com/essentialkaos/ek/v13/pager"
@@ -27,6 +28,7 @@ var option struct {
 	NoTLS         bool
 	TLSSkipVerify bool
 	Version       bool
+	Timing        bool
 }
 
 func main() {
@@ -77,6 +79,7 @@ func run() {
 	_ = noTLSFlag(rootCmd, &option.NoTLS)
 	_ = skipVerifyFlag(rootCmd, &option.TLSSkipVerify)
 	_ = versionFlag(rootCmd, &option.Version)
+	_ = timingFlag(rootCmd, &option.Timing)
 	if err := rootCmd.Execute(); err != nil {
 		errorExit(err)
 	}
@@ -159,7 +162,10 @@ func runClient() error {
 		if l == "quit" || l == "quit;" || l == "exit" || l == "exit;" {
 			break
 		}
+		startTime := time.Now()
 		resp, err := client.Send(line)
+		elapsedTime := time.Since(startTime).Seconds()
+		elapsedTimeStr := fmt.Sprintf("[%.4f s]", elapsedTime)
 		if err != nil {
 			eout.Error("%v", err)
 			continue
@@ -207,6 +213,9 @@ func runClient() error {
 				}
 				fmt.Fprint(w, "\n")
 			}
+			if option.Timing {
+				fmt.Fprint(w, elapsedTimeStr)
+			}
 			_ = w.Flush()
 			if line == "info;" {
 				fmt.Printf("Type \"\\h <command>\" for more information.\n")
@@ -214,6 +223,9 @@ func runClient() error {
 			pager.Complete()
 		default:
 			fmt.Println(resp.Status)
+			if option.Timing {
+				fmt.Println(elapsedTimeStr)
+			}
 		}
 	}
 
@@ -236,6 +248,7 @@ func printHelp() {
 		noTLSFlag(nil, nil) +
 		skipVerifyFlag(nil, nil) +
 		versionFlag(nil, nil) +
+		timingFlag(nil, nil) +
 		"")
 	os.Exit(0)
 }
@@ -254,6 +267,14 @@ func verboseFlag(cmd *cobra.Command, verbose *bool) string {
 	}
 	return "" +
 		"  -v, --verbose               enable verbose output\n"
+}
+
+func timingFlag(cmd *cobra.Command, timing *bool) string {
+	if cmd != nil {
+		cmd.Flags().BoolVarP(timing, "timing", "t", false, "")
+	}
+	return "" +
+		"  -t, --timing                enable timing of commands\n"
 }
 
 func hostFlag(cmd *cobra.Command, host *string) string {
