@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
-	"github.com/indexdata/ccms/internal/protocol"
 )
 
-func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandResponse {
+func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 
 	f := cmd.Query.(*ast.QueryClause).Offset.(*ast.OffsetClause)
 	if f.Valid {
@@ -44,7 +44,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		if lim < 0 {
 			return cmderr("limit must not be negative")
 		}
-		maxlim := 100000
+		maxlim := 100
 		if lim > maxlim {
 			return cmderr("limit currently must be no more than " + strconv.Itoa(maxlim))
 		}
@@ -63,7 +63,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		panic(fmt.Sprintf("selecting from reserve: %v", err))
 	}
 	defer rows.Close()
-	data := make([]protocol.DataRow, 0)
+	data := make([]*ccms.DataRow, 0)
 	for rows.Next() {
 		var id int64
 		var author, title, full_vendor_name, availability string
@@ -71,7 +71,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		if err != nil {
 			panic(fmt.Sprintf("reading from reserve: %v", err))
 		}
-		data = append(data, protocol.DataRow{
+		data = append(data, &ccms.DataRow{
 			Values: []any{id, author, title, full_vendor_name, availability},
 		})
 	}
@@ -79,9 +79,9 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *protocol.CommandRespon
 		panic(fmt.Sprintf("reading from reserve: %v", err))
 	}
 
-	return &protocol.CommandResponse{
+	return &ccms.Result{
 		Status: "select",
-		Fields: []protocol.FieldDescription{
+		Fields: []*ccms.FieldDescription{
 			{
 				Name: "id",
 				Type: "bigint",

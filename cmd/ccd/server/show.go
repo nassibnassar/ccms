@@ -5,29 +5,29 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
-	"github.com/indexdata/ccms/internal/protocol"
 )
 
-func showStmt(s *svr, cmd *ast.ShowStmt) *protocol.CommandResponse {
+func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	switch cmd.Name {
 	case "filters":
-		return &protocol.CommandResponse{
+		return &ccms.Result{
 			Status: "show",
-			Fields: []protocol.FieldDescription{
-				{
+			Fields: []*ccms.FieldDescription{
+				&ccms.FieldDescription{
 					Name: "filter",
 					Type: "text",
 				},
 			},
-			Data: []protocol.DataRow{},
+			Data: []*ccms.DataRow{},
 		}
 	case "sets":
-		return &protocol.CommandResponse{
+		return &ccms.Result{
 			Status: "show",
-			Fields: []protocol.FieldDescription{
-				{
+			Fields: []*ccms.FieldDescription{
+				&ccms.FieldDescription{
 					Name: "set",
 					Type: "text",
 				},
@@ -39,12 +39,12 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *protocol.CommandResponse {
 	}
 }
 
-func data(cat *catalog.Catalog) []protocol.DataRow {
-	rows := make([]protocol.DataRow, 0)
+func data(cat *catalog.Catalog) []*ccms.DataRow {
+	rows := make([]*ccms.DataRow, 0)
 	sets := cat.AllSets()
 	sortSetNames(sets)
 	for i := range sets {
-		rows = append(rows, protocol.DataRow{Values: []any{sets[i]}})
+		rows = append(rows, &ccms.DataRow{Values: []any{sets[i]}})
 	}
 	return rows
 }

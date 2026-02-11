@@ -25,12 +25,17 @@ type Client struct {
 	TLSSkipVerify bool   // do not verify server certificate chain and host name (insecure)
 }
 
-// response from a CCMS server
+// response from CCMS server
 type Response struct {
-	Status  string             `json:"status"`            // status of command, or "error"
-	Message string             `json:"message,omitempty"` // error message
-	Fields  []FieldDescription `json:"fields,omitempty"`  // attribute metadata for query result
-	Data    []DataRow          `json:"data,omitempty"`    // query result data
+	Results []*Result `json:"results"` // result for each command
+}
+
+// result of a command
+type Result struct {
+	Status  string              `json:"status"`            // status of command, or "error"
+	Message string              `json:"message,omitempty"` // error message
+	Fields  []*FieldDescription `json:"fields,omitempty"`  // attribute metadata for query result
+	Data    []*DataRow          `json:"data,omitempty"`    // query result data
 }
 
 // metadata for an attribute
@@ -44,9 +49,9 @@ type DataRow struct {
 	Values []any `json:"values"` // data values
 }
 
-// send a command to the server and return the response
+// send one or more commands to the server and return the response
 func (c *Client) Send(cmd string) (*Response, error) {
-	var rq = &protocol.CommandRequest{Command: cmd}
+	var rq = &protocol.Request{Commands: cmd}
 	// send the request
 	var httprs *http.Response
 	var err error
@@ -62,44 +67,52 @@ func (c *Client) Send(cmd string) (*Response, error) {
 		return nil, errors.New(m)
 	}
 
-	var cmdr protocol.CommandResponse
-	if err = readResponse(httprs, &cmdr); err != nil {
+	var resp Response
+	if err = readResponse(httprs, &resp); err != nil {
 		return nil, err
 	}
+	return &resp, nil
 
-	if cmdr.Status == "error" {
-		resp := &Response{Status: cmdr.Status, Message: cmdr.Message}
-		return resp, nil
-	}
+	/*
+		results := make([]Result, 0)
+		for j := range cmdr.Results {
+			r := cmdr.Results[j]
+			//if r.Status == "error" {
+			//        resp := &Result{Status: r.Status, Message: r.Message}
+			//        return resp, nil
+			//}
 
-	if cmdr.Status == "ping" {
-		return &Response{Status: cmdr.Status}, nil
-	}
+			//if r.Status == "ping" {
+			//        return &Result{Status: r.Status}, nil
+			//}
 
-	fields := make([]FieldDescription, 0)
-	for i := range cmdr.Fields {
-		fd := FieldDescription{Name: cmdr.Fields[i].Name, Type: cmdr.Fields[i].Type}
-		fields = append(fields, fd)
-	}
-	data := make([]DataRow, 0)
-	for i := range cmdr.Data {
-		values := make([]any, 0)
-		for j := range cmdr.Data[i].Values {
-			values = append(values, cmdr.Data[i].Values[j])
+			fields := make([]FieldDescription, 0)
+			for i := range r.Fields {
+				fd := FieldDescription{Name: r.Fields[i].Name, Type: r.Fields[i].Type}
+				fields = append(fields, fd)
+			}
+			data := make([]DataRow, 0)
+			for i := range r.Data {
+				values := make([]any, 0)
+				for j := range r.Data[i].Values {
+					values = append(values, r.Data[i].Values[j])
+				}
+				dr := DataRow{Values: values}
+				data = append(data, dr)
+			}
+			results = append(results, Result{
+				Status:  r.Status,
+				Fields:  fields,
+				Data:    data,
+				Message: r.Message,
+			})
 		}
-		dr := DataRow{Values: values}
-		data = append(data, dr)
-	}
-	resp := &Response{
-		Status:  cmdr.Status,
-		Fields:  fields,
-		Data:    data,
-		Message: cmdr.Message,
-	}
-	// fmt.Printf("%#v\n", cmdr)
-	// print confirmation
-	// eout.Info("enabled: %s", rq.Command)
-	return resp, nil
+		resp := &Response{Results: results}
+		// fmt.Printf("%#v\n", cmdr)
+		// print confirmation
+		// eout.Info("enabled: %s", rq.Command)
+		return resp, nil
+	*/
 }
 
 func sendRequest(client *Client, method, url string, requestStruct interface{}) (*http.Response, error) {
@@ -170,7 +183,7 @@ func sendRequest(client *Client, method, url string, requestStruct interface{}) 
 	return hrs, nil
 }
 
-func readResponse(httpResponse *http.Response, responseStruct interface{}) error {
+func readResponse(httpResponse *http.Response, responseStruct any) error {
 	var body []byte
 	var err error
 	if body, err = ioutil.ReadAll(httpResponse.Body); err != nil {

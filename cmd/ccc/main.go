@@ -164,69 +164,77 @@ func runClient() error {
 		}
 		startTime := time.Now()
 		resp, err := client.Send(line)
-		elapsedTime := time.Since(startTime).Seconds()
-		elapsedTimeStr := fmt.Sprintf("[%.4f s]", elapsedTime)
 		if err != nil {
 			eout.Error("%v", err)
 			continue
 		}
-		if resp.Status == "error" {
-			eout.Error("error: %s", resp.Message)
-			continue
-		}
-		header := true
-		if resp.Status == "info" {
-			header = false
-		}
-		if resp.Status == "ping" {
-			continue
-		}
-		if resp.Status == "show" {
-			header = false
-		}
+		elapsedTime := time.Since(startTime).Seconds()
+		elapsedTimeStr := fmt.Sprintf("[%.4f s]", elapsedTime)
 
-		switch resp.Status {
-		case "info":
-			fallthrough
-		case "show":
-			fallthrough
-		case "select":
-			if err = pager.Setup(); err != nil {
-				return err
+		rlen := len(resp.Results)
+		if rlen == 0 {
+			continue
+		}
+		if err = pager.Setup(); err != nil {
+			return err
+		}
+		for i := range resp.Results {
+			if rlen > 1 {
+				fmt.Printf("{%d}\n", i+1)
 			}
-			w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
-			if header {
-				for i := range resp.Fields {
-					if i != 0 {
-						fmt.Fprint(w, "\t")
+			result := resp.Results[i]
+			if result.Status == "error" {
+				eout.Error("error: %s", result.Message)
+				continue
+			}
+			header := true
+			if result.Status == "info" {
+				header = false
+			}
+			if result.Status == "ping" {
+				continue
+			}
+			if result.Status == "show" {
+				header = false
+			}
+
+			switch result.Status {
+			case "info":
+				fallthrough
+			case "show":
+				fallthrough
+			case "select":
+				w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
+				if header {
+					for i := range result.Fields {
+						if i != 0 {
+							fmt.Fprint(w, "\t")
+						}
+						fmt.Fprint(w, result.Fields[i].Name)
 					}
-					fmt.Fprint(w, resp.Fields[i].Name)
+					fmt.Fprint(w, "\n")
 				}
-				fmt.Fprint(w, "\n")
-			}
-			for i := range resp.Data {
-				for j := range resp.Data[i].Values {
-					if j != 0 {
-						fmt.Fprint(w, "\t")
+				for i := range result.Data {
+					for j := range result.Data[i].Values {
+						if j != 0 {
+							fmt.Fprint(w, "\t")
+						}
+						fmt.Fprint(w, result.Data[i].Values[j])
 					}
-					fmt.Fprint(w, resp.Data[i].Values[j])
+					fmt.Fprint(w, "\n")
 				}
-				fmt.Fprint(w, "\n")
-			}
-			if option.Timing {
-				fmt.Fprint(w, elapsedTimeStr)
-			}
-			_ = w.Flush()
-			if line == "info;" {
-				fmt.Printf("Type \"\\h <command>\" for more information.\n")
-			}
-			pager.Complete()
-		default:
-			fmt.Println(resp.Status)
-			if option.Timing {
-				fmt.Println(elapsedTimeStr)
+				_ = w.Flush()
+				if line == "info;" {
+					fmt.Printf("Type \"\\h <command>\" for more information.\n")
+				}
+			default:
+				fmt.Println(result.Status)
 			}
 		}
+		if option.Timing {
+			fmt.Println(elapsedTimeStr)
+		}
+		pager.Complete()
 	}
 
 	return nil

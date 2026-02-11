@@ -1,13 +1,13 @@
 package server
 
 import (
+	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
 	"github.com/indexdata/ccms/cmd/ccd/log"
-	"github.com/indexdata/ccms/internal/protocol"
 )
 
-func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *protocol.CommandResponse {
+func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *ccms.Result {
 	if s.cat.SetExists(cmd.SetName) {
 		return cmderr("set \"" + cmd.SetName + "\" already exists")
 	}
@@ -25,7 +25,7 @@ func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *protocol.Command
 		return cmderr("error writing set \"" + cmd.SetName + "\"")
 	}
 
-	return &protocol.CommandResponse{
+	return &ccms.Result{
 		Status: "create set",
 	}
 }

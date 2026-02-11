@@ -27,7 +27,6 @@ type lexer struct {
 	str string
 	optlist []ast.Option
 	node ast.Node
-	pass bool
 }
 
 func newLexer(data []byte) *lexer {
@@ -36,7 +35,7 @@ func newLexer(data []byte) *lexer {
 		pe: len(data),
 	}
 	
-//line scan.go:36
+//line scan.go:35
 	{
 	 lex.cs = sql_start
 	 lex.ts = 0
@@ -44,7 +43,7 @@ func newLexer(data []byte) *lexer {
 	 lex.act = 0
 	}
 
-//line scan.rl:36
+//line scan.rl:35
 	return lex
 }
 
@@ -52,7 +51,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 	eof := lex.pe
 	tok := 0
 	
-//line scan.go:50
+//line scan.go:49
 	{
 	if ( lex.p) == ( lex.pe) {
 		goto _test_eof
@@ -201,80 +200,80 @@ func (lex *lexer) Lex(out *yySymType) int {
 	}
 	goto st_out
 tr1:
-//line scan.rl:78
+//line scan.rl:77
  lex.te = ( lex.p)+1
 { out.str = string(lex.data[lex.ts+1:lex.te-1]); tok = SLITERAL; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr2:
-//line scan.rl:80
+//line scan.rl:79
  lex.te = ( lex.p)+1
 
 	goto st2
 tr4:
-//line scan.rl:46
+//line scan.rl:45
  lex.te = ( lex.p)+1
 { tok = '('; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr5:
-//line scan.rl:47
+//line scan.rl:46
  lex.te = ( lex.p)+1
 { tok = ')'; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr6:
-//line scan.rl:48
+//line scan.rl:47
  lex.te = ( lex.p)+1
 { tok = '*'; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr7:
-//line scan.rl:45
+//line scan.rl:44
  lex.te = ( lex.p)+1
 { tok = ','; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr9:
-//line scan.rl:44
+//line scan.rl:43
  lex.te = ( lex.p)+1
 { tok = ';'; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr11:
-//line scan.rl:49
+//line scan.rl:48
  lex.te = ( lex.p)+1
 { tok = '='; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr28:
-//line scan.rl:79
+//line scan.rl:78
  lex.te = ( lex.p)
 ( lex.p)--
 { out.str = string(lex.data[lex.ts:lex.te]); tok = NUMBER; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr29:
-//line scan.rl:50
+//line scan.rl:49
  lex.te = ( lex.p)
 ( lex.p)--
 { tok = '<'; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr30:
-//line scan.rl:52
+//line scan.rl:51
  lex.te = ( lex.p)+1
 { tok = LT_OR_EQUAL; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr31:
-//line scan.rl:54
+//line scan.rl:53
  lex.te = ( lex.p)+1
 { tok = NOT_EQUAL; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr32:
-//line scan.rl:51
+//line scan.rl:50
  lex.te = ( lex.p)
 ( lex.p)--
 { tok = '>'; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr33:
-//line scan.rl:53
+//line scan.rl:52
  lex.te = ( lex.p)+1
 { tok = GT_OR_EQUAL; {( lex.p)++;  lex.cs = 2; goto _out } }
 	goto st2
 tr34:
-//line scan.rl:77
+//line scan.rl:76
  lex.te = ( lex.p)
 ( lex.p)--
 { out.str = string(lex.data[lex.ts:lex.te]); tok = IDENT; {( lex.p)++;  lex.cs = 2; goto _out } }
@@ -352,7 +351,7 @@ tr37:
 	
 	goto st2
 tr78:
-//line scan.rl:68
+//line scan.rl:67
  lex.te = ( lex.p)
 ( lex.p)--
 { tok = OR; {( lex.p)++;  lex.cs = 2; goto _out } }
@@ -368,7 +367,7 @@ tr78:
 //line NONE:1
  lex.ts = ( lex.p)
 
-//line scan.go:366
+//line scan.go:365
 		switch  lex.data[( lex.p)] {
 		case 32:
 			goto tr2
@@ -546,154 +545,154 @@ tr17:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:77
+//line scan.rl:76
  lex.act = 34;
 	goto st7
 tr38:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:55
+//line scan.rl:54
  lex.act = 12;
 	goto st7
 tr39:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:56
+//line scan.rl:55
  lex.act = 13;
 	goto st7
 tr40:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:57
+//line scan.rl:56
  lex.act = 14;
 	goto st7
 tr45:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:58
+//line scan.rl:57
  lex.act = 15;
 	goto st7
 tr48:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:59
+//line scan.rl:58
  lex.act = 16;
 	goto st7
 tr54:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:60
+//line scan.rl:59
  lex.act = 17;
 	goto st7
 tr56:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:61
+//line scan.rl:60
  lex.act = 18;
 	goto st7
 tr61:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:62
+//line scan.rl:61
  lex.act = 19;
 	goto st7
 tr64:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:63
+//line scan.rl:62
  lex.act = 20;
 	goto st7
 tr65:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:64
+//line scan.rl:63
  lex.act = 21;
 	goto st7
 tr69:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:65
+//line scan.rl:64
  lex.act = 22;
 	goto st7
 tr71:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:66
+//line scan.rl:65
  lex.act = 23;
 	goto st7
 tr77:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:67
+//line scan.rl:66
  lex.act = 24;
 	goto st7
 tr81:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:69
+//line scan.rl:68
  lex.act = 26;
 	goto st7
 tr84:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:74
+//line scan.rl:73
  lex.act = 31;
 	goto st7
 tr91:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:70
+//line scan.rl:69
  lex.act = 27;
 	goto st7
 tr95:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:71
+//line scan.rl:70
  lex.act = 28;
 	goto st7
 tr98:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:75
+//line scan.rl:74
  lex.act = 32;
 	goto st7
 tr100:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:72
+//line scan.rl:71
  lex.act = 29;
 	goto st7
 tr102:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:73
+//line scan.rl:72
  lex.act = 30;
 	goto st7
 tr106:
 //line NONE:1
  lex.te = ( lex.p)+1
 
-//line scan.rl:76
+//line scan.rl:75
  lex.act = 33;
 	goto st7
 	st7:
@@ -701,7 +700,7 @@ tr106:
 			goto _test_eof7
 		}
 	st_case_7:
-//line scan.go:699
+//line scan.go:698
 		switch  lex.data[( lex.p)] {
 		case 46:
 			goto tr17
@@ -2695,7 +2694,7 @@ tr106:
 	_out: {}
 	}
 
-//line scan.rl:84
+//line scan.rl:83
 
 
 	return tok;

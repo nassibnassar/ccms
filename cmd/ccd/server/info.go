@@ -3,22 +3,22 @@ package server
 import (
 	"fmt"
 
+	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/doc"
-	"github.com/indexdata/ccms/internal/protocol"
 )
 
-func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
+func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 	if cmd.Topic == "" {
-		return &protocol.CommandResponse{
+		return &ccms.Result{
 			Status: "info",
-			Fields: []protocol.FieldDescription{
+			Fields: []*ccms.FieldDescription{
 				{
 					Name: "info",
 					Type: "text",
 				},
 			},
-			Data: []protocol.DataRow{
+			Data: []*ccms.DataRow{
 				{
 					Values: []any{"" +
 						"SQL commands:\n" +
@@ -48,15 +48,15 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *protocol.CommandResponse {
 		docstr = fmt.Sprintf("unknown command %q", cmd.Topic)
 	}
 
-	return &protocol.CommandResponse{
+	return &ccms.Result{
 		Status: "info",
-		Fields: []protocol.FieldDescription{
+		Fields: []*ccms.FieldDescription{
 			{
 				Name: "info",
 				Type: "text",
 			},
 		},
-		Data: []protocol.DataRow{
+		Data: []*ccms.DataRow{
 			{
 				Values: []any{docstr},
 			},

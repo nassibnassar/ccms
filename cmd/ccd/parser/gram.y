@@ -14,7 +14,9 @@ import (
 }
 
 %type <node> top_level_stmt
-%type <node> stmt
+%type <node> basic_stmt
+%type <nodeList> stmt
+%type <nodeList> stmt_list
 %type <node> create_set_stmt
 %type <node> info_stmt
 %type <node> ping_stmt
@@ -84,12 +86,28 @@ main:
 		}
 
 top_level_stmt:
+	stmt_list
+		{
+			$$ = &ast.ParseTree{Commands: $1}
+		}
+
+stmt_list:
 	stmt
 		{
 			$$ = $1
 		}
+	| stmt_list stmt
+		{
+			$$ = append($1, $2...)
+		}
 
 stmt:
+	basic_stmt
+		{
+			$$ = []ast.Node{$1}
+		}
+
+basic_stmt:
 	create_set_stmt
 		{
 			$$ = $1
@@ -114,6 +132,10 @@ stmt:
 		{
 			$$ = $1
 		}
+	| ';'
+		{
+			$$ = nil
+		}
 
 create_set_stmt:
 	CREATE SET name ';'
@@ -132,9 +154,9 @@ info_stmt:
 		}
 
 insert_stmt:
-	INSERT INTO name query_clause ';'
+	INSERT INTO name SELECT '*' query_clause ';'
 		{
-			$$ = &ast.InsertStmt{Into: $3, Query: $4}
+			$$ = &ast.InsertStmt{Into: $3, Query: $6}
 		}
 
 ping_stmt:

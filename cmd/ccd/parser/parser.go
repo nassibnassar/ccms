@@ -74,7 +74,7 @@ func errorMessage(l *lexer) error {
 	return errors.New(s)
 }
 
-func Parse(input string) (ast.Node, error, bool) {
+func Parse(input string) (ast.Node, error) {
 	l := newLexer([]byte(input))
 	e := yyParse(l)
 	var msg error
@@ -88,7 +88,7 @@ func Parse(input string) (ast.Node, error, bool) {
 	} else {
 		msg = errorMessage(l)
 	}
-	return l.node, msg, l.pass
+	return l.node, msg
 }
 
 func WriteCarets(b *strings.Builder, ts, te int) {

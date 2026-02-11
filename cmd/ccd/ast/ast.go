@@ -196,6 +196,12 @@ type Option struct {
 	Val    string
 }
 
+type ParseTree struct {
+	Commands []Node
+}
+
+func (*ParseTree) node() {}
+
 type Node interface {
 	node()
 }

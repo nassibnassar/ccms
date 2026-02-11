@@ -3,9 +3,10 @@ insert
 Insert objects into a set
 
 insert into target_set_name
-    from source_set_name
-    [ where search_condition ]
-    [ limit count ]
+    select *
+        from source_set_name
+        [ where search_condition ]
+        [ limit count ]
 
 Description
 
@@ -38,5 +39,5 @@ Examples
 To select items in stock from the reserve set and insert them into a set
 test.myset:
 
-insert into test.myset from reserve where availability = 'In stock';
+insert into test.myset select * from reserve where availability = 'In stock';
 

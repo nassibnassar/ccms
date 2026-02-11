@@ -24,7 +24,6 @@ type lexer struct {
 	str string
 	optlist []ast.Option
 	node ast.Node
-	pass bool
 }
 
 func newLexer(data []byte) *lexer {

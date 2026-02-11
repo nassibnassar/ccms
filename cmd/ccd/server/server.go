@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
 	"github.com/indexdata/ccms/cmd/ccd/config"
@@ -180,37 +181,24 @@ func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
 func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int64) {
 	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
 
-	var req protocol.CommandRequest
+	var req protocol.Request
 	if err := ReadRequest(w, r, &req); err != nil {
 		log.Info("[%d] %s - error: %v", rqid, addr, err)
-		if err1 := sendResponse(w, cmderr(err.Error())); err1 != nil {
+		resp := &ccms.Response{
+			Results: []*ccms.Result{cmderr(err.Error())},
+		}
+		if err1 := sendResponse(w, resp); err1 != nil {
 			log.Info("[%d] internal error: %v", rqid, err1)
 		}
 		return
 	}
-	log.Info("[%d] %s - %s", rqid, addr, req.Command)
+	log.Info("[%d] %s - %s", rqid, addr, req.Commands)
 
-	var resp *protocol.CommandResponse
 	var node ast.Node
+	var cmds []ast.Node
 	var err error
-	var pass bool
 
-	// check for semicolon; this check can be removed later
-	var lastr rune
-	for _, r := range req.Command {
-		if r != ' ' {
-			lastr = r
-		}
-	}
-	if lastr != ';' {
-		resp = &protocol.CommandResponse{
-			Status:  "error",
-			Message: "missing semicolon at end of statement",
-		}
-		goto skipParse
-	}
-
-	node, err, pass = parser.Parse(req.Command)
+	node, err = parser.Parse(req.Commands)
 	//fmt.Printf("### %#v --- %v\n", node, err)
 	if err != nil {
 		log.Info("[%d] error: %s", rqid, strings.Split(err.Error(), "\n")[0])
@@ -222,40 +210,48 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	//        return
 	//}
 	//log.Info("parsed: %#v", node)
-	_ = pass
-	switch cmd := node.(type) {
-	case *ast.CreateSetStmt:
-		resp = createSetStmt(s, rqid, cmd)
-	case *ast.InfoStmt:
-		resp = infoStmt(s, cmd)
-	case *ast.InsertStmt:
-		resp = insertStmt(s, rqid, cmd)
-	case *ast.PingStmt:
-		resp = &protocol.CommandResponse{Status: "ping"}
-	case *ast.SelectStmt:
-		resp = selectStmt(s, rqid, cmd)
-	case *ast.ShowStmt:
-		resp = showStmt(s, cmd)
-	default:
-		firstField := strings.Fields(req.Command)[0]
-		var b strings.Builder
-		parser.WriteCarets(&b, 0, len(firstField))
-		resp = &protocol.CommandResponse{
-			Status: "error",
-			Message: fmt.Sprintf("syntax error near %s\n%s\n%s",
-				parser.Near(firstField), req.Command, b.String()),
+	var result *ccms.Result
+	results := make([]*ccms.Result, 0)
+	cmds = node.(*ast.ParseTree).Commands
+	for i := range cmds {
+		switch cmd := cmds[i].(type) {
+		case *ast.CreateSetStmt:
+			result = createSetStmt(s, rqid, cmd)
+		case *ast.InfoStmt:
+			result = infoStmt(s, cmd)
+		case *ast.InsertStmt:
+			result = insertStmt(s, rqid, cmd)
+		case *ast.PingStmt:
+			result = &ccms.Result{Status: "ping"}
+		case *ast.SelectStmt:
+			result = selectStmt(s, rqid, cmd)
+		case *ast.ShowStmt:
+			result = showStmt(s, cmd)
+		case nil:
+			continue
+		default:
+			firstField := strings.Fields(req.Commands)[0]
+			var b strings.Builder
+			parser.WriteCarets(&b, 0, len(firstField))
+			result = &ccms.Result{
+				Status: "error",
+				Message: fmt.Sprintf("syntax error near %s\n%s\n%s",
+					parser.Near(firstField), req.Commands, b.String()),
+			}
+		}
+		results = append(results, result)
+		if result.Status == "error" {
+			log.Info("[%d] error: %s", rqid, result.Message)
+			break
 		}
 	}
-skipParse:
-	if resp.Status == "error" {
-		log.Info("[%d] error: %s", rqid, resp.Message)
-	}
+	resp := &ccms.Response{Results: results}
 	if err := sendResponse(w, resp); err != nil {
 		log.Info("[%d] internal error: %v", rqid, err)
 	}
 }
 
-func sendResponse(w http.ResponseWriter, resp *protocol.CommandResponse) error {
+func sendResponse(w http.ResponseWriter, resp *ccms.Response) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(*resp); err != nil {
@@ -264,8 +260,8 @@ func sendResponse(w http.ResponseWriter, resp *protocol.CommandResponse) error {
 	return nil
 }
 
-func cmderr(message string) *protocol.CommandResponse {
-	return &protocol.CommandResponse{
+func cmderr(message string) *ccms.Result {
+	return &ccms.Result{
 		Status:  "error",
 		Message: message,
 	}
@@ -275,7 +271,7 @@ func returnError(w http.ResponseWriter, errString string, statusCode int) {
 	HTTPError(w, errString, statusCode)
 }
 
-func ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct interface{}) error {
+func ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct any) error {
 	user, err := HandleBasicAuth(w, r)
 	if err != nil {
 		return err
@@ -355,9 +351,13 @@ func HTTPError(w http.ResponseWriter, errString string, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
-	m := &protocol.CommandResponse{
-		Status:  "error",
-		Message: errString,
+	m := &ccms.Response{
+		Results: []*ccms.Result{
+			{
+				Status:  "error",
+				Message: errString,
+			},
+		},
 	}
 	if err := json.NewEncoder(w).Encode(m); err != nil {
 		// TODO error handling

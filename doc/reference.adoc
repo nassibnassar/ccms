@@ -73,14 +73,18 @@ Non-query commands such as `create set` return a diagnostic status:
 [source,json]
 ----
 {
-  "command": "create set test.myset;"
+  "commands": "create set test.myset;"
 }
 ----
 
 [source,json]
 ----
 {
-  "status": "create set"
+  "results": [
+    {
+      "status": "create set"
+    }
+  ]
 }
 ----
 
@@ -89,8 +93,12 @@ The status may be an error:
 [source,json]
 ----
 {
-  "status": "error",
-  "message": "set test.myset already exists"
+  "results": [
+    {
+      "status": "error",
+      "message": "set test.myset already exists"
+    }
+  ]
 }
 ----
 
@@ -100,31 +108,45 @@ the attribute names described under `"fields"`, e.g.:
 [source,json]
 ----
 {
-  "command": "select id from test.myset limit 2;"
+  "commands": "select id from test.myset limit 2;"
 }
 ----
 
 [source,json]
 ----
 {
-  "status": "select",
-  "fields": [
+  "results": [
     {
-      "name": "id",
-      "type": "bigint"
+      "status": "select",
+      "fields": [
+        {
+          "name": "id",
+          "type": "bigint"
+        }
+      ],
+      "data": [
+        [
+          41
+        ],
+        [
+          63
+        ]
+      ]
     }
-  ],
-  "data": [
-    [
-      41
-    ],
-    [
-      63
-    ]
   ]
 }
 ----
 
 NOTE:  Selecting individual attributes, as in the example above, is
 not yet supported.  However, `select *` is supported.
+
+Multiple commands can be combined in a single request, separated by
+semicolons:
+
+[source,json]
+----
+{
+  "commands": "create set test.myset; create set test.myset2;"
+}
+----
 

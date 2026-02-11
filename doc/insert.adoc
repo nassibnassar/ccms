@@ -5,9 +5,10 @@ Insert objects into a set
 [source,subs="verbatim,quotes"]
 ----
 insert into `*_target_set_name_*`
-    from `*_source_set_name_*`
-    [ where `*_search_condition_*` ]
-    [ limit `*_count_*` ]
+    select *
+        from `*_source_set_name_*`
+        [ where `*_search_condition_*` ]
+        [ limit `*_count_*` ]
 ----
 
 [discrete]
@@ -52,6 +53,6 @@ To select items in stock from the `reserve` set and insert them into a
 set `test.myset`:
 
 ----
-insert into test.myset from reserve where availability = 'In stock';
+insert into test.myset select * from reserve where availability = 'In stock';
 ----
 

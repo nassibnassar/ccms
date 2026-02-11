@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
-	"github.com/indexdata/ccms/internal/protocol"
 )
 
-func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *protocol.CommandResponse {
+func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
 	if o.Valid {
 		return cmderr("\"order by\" is not supported with insert")
@@ -40,7 +40,7 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *protocol.CommandRespon
 		return cmderr(fmt.Sprintf("inserting data into %q: %v", cmd.Into, err))
 	}
 
-	return &protocol.CommandResponse{
+	return &ccms.Result{
 		Status: "insert",
 	}
 }

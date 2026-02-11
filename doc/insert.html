@@ -465,9 +465,10 @@ h1, h2, h3, h4, h5, h6, #toctitle,
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code>insert into <code><strong><em>target_set_name</em></strong></code>
-    from <code><strong><em>source_set_name</em></strong></code>
-    [ where <code><strong><em>search_condition</em></strong></code> ]
-    [ limit <code><strong><em>count</em></strong></code> ]</code></pre>
+    select *
+        from <code><strong><em>source_set_name</em></strong></code>
+        [ where <code><strong><em>search_condition</em></strong></code> ]
+        [ limit <code><strong><em>count</em></strong></code> ]</code></pre>
 </div>
 </div>
 <h5 id="_description" class="discrete">Description</h5>
@@ -506,14 +507,14 @@ set <code>test.myset</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>insert into test.myset from reserve where availability = 'In stock';</pre>
+<pre>insert into test.myset select * from reserve where availability = 'In stock';</pre>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-02-07 23:01:17 -0500
+Last updated 2026-02-10 23:41:13 -0500
 </div>
 </div>
 </body>
