@@ -59,8 +59,8 @@ NOTE:  At present the `limit` clause is required for `select`.
 
 The `offset` clause specifies a number of objects that will be skipped
 and not returned as part of the result.  This can be useful for
-retrieving objects one page of data a time.  Note that the `order by`
-clause is required when `offset` is used.
+retrieving objects one page of data at a time.  Note that the `order
+by` clause is required when `offset` is used.
 
 [discrete]
 ===== Examples
