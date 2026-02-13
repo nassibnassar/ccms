@@ -102,6 +102,33 @@ func (c *Catalog) CreateSet(setName string) error {
 	return nil
 }
 
+func (c *Catalog) DropSet(setName string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	tx, err := c.dp.Begin(context.TODO())
+	if err != nil {
+		return fmt.Errorf("dropping set %q: opening transaction: %v", setName, err)
+	}
+	defer tx.Rollback(context.TODO())
+
+	sql := "drop table " + setName
+	if _, err := tx.Exec(context.TODO(), sql); err != nil {
+		return fmt.Errorf("dropping set %q: %v", setName, err)
+	}
+	sql = "delete from ccms.sets where setname=$1"
+	if _, err := tx.Exec(context.TODO(), sql, setName); err != nil {
+		return fmt.Errorf("deregistering set %q: %v", setName, PGErr(err))
+	}
+
+	if err := tx.Commit(context.TODO()); err != nil {
+		return fmt.Errorf("dropping set %q: committing changes: %v", setName, err)
+	}
+
+	delete(c.sets, setName)
+	return nil
+}
+
 func PGErr(err error) error {
 	e := err.(*pgconn.PgError)
 	var b strings.Builder

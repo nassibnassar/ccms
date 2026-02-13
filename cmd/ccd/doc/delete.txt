@@ -1,0 +1,34 @@
+delete
+
+Remove objects from membership in a set
+
+delete from set_name
+    [ where condition ]
+
+Description
+
+The delete command removes selected objects from membership in a set.
+
+Parameters
+
+from
+
+The from clause specifies the set.
+
+where
+
+The where clause specifies a search condition in the form of a Boolean
+expression. Only objects that satisfy this condition will be deleted.
+
+See also Reference > Queries.
+
+Examples
+
+To remove items in stock from the set test.myset:
+
+delete from test.myset where availability = 'In stock';
+
+To remove all items from the set test.myset:
+
+delete from test.myset;
+

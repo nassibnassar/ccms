@@ -1,0 +1,32 @@
+==== drop set
+
+Remove a set
+
+[source,subs="verbatim,quotes"]
+----
+drop set `*_set_name_*`
+----
+
+[discrete]
+===== Description
+
+The `drop set` command removes a set from the system.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_set_name_*`
+|The name of the set.
+|===
+
+[discrete]
+===== Examples
+
+Remove a set `test.myset`:
+
+----
+drop set test.myset;
+----
+

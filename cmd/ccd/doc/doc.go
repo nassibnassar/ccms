@@ -12,6 +12,20 @@ func CreateSet() string {
 	return strings.TrimSpace(createSetTxt)
 }
 
+//go:embed delete.txt
+var deleteTxt string
+
+func Delete() string {
+	return strings.TrimSpace(deleteTxt)
+}
+
+//go:embed dropset.txt
+var dropSetTxt string
+
+func DropSet() string {
+	return strings.TrimSpace(dropSetTxt)
+}
+
 /*
 //go:embed info.txt
 var infoTxt string

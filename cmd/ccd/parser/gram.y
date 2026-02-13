@@ -18,6 +18,8 @@ import (
 %type <nodeList> stmt
 %type <nodeList> stmt_list
 %type <node> create_set_stmt
+%type <node> delete_stmt
+%type <node> drop_set_stmt
 %type <node> info_stmt
 %type <node> ping_stmt
 %type <node> insert_stmt
@@ -50,7 +52,9 @@ import (
 %token ASC
 %token BY
 %token CREATE
+%token DELETE
 %token DESC
+%token DROP
 %token FILTER
 %token FROM
 %token INFO
@@ -112,6 +116,14 @@ basic_stmt:
 		{
 			$$ = $1
 		}
+	| delete_stmt
+		{
+			$$ = $1
+		}
+	| drop_set_stmt
+		{
+			$$ = $1
+		}
 	| info_stmt
 		{
 			$$ = $1
@@ -141,6 +153,18 @@ create_set_stmt:
 	CREATE SET name ';'
 		{
 			$$ = &ast.CreateSetStmt{SetName: $3}
+		}
+
+delete_stmt:
+	DELETE FROM name where_clause ';'
+		{
+			$$ = &ast.DeleteStmt{From: $3, Where: $4}
+		}
+
+drop_set_stmt:
+	DROP SET name ';'
+		{
+			$$ = &ast.DropSetStmt{SetName: $3}
 		}
 
 info_stmt:

@@ -217,6 +217,10 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		switch cmd := cmds[i].(type) {
 		case *ast.CreateSetStmt:
 			result = createSetStmt(s, rqid, cmd)
+		case *ast.DeleteStmt:
+			result = deleteStmt(s, rqid, cmd)
+		case *ast.DropSetStmt:
+			result = dropSetStmt(s, rqid, cmd)
 		case *ast.InfoStmt:
 			result = infoStmt(s, cmd)
 		case *ast.InsertStmt:

@@ -10,6 +10,28 @@ import (
 
 // conversion to SQL
 
+func (d *DeleteStmt) SQL() (string, error) {
+	var b strings.Builder
+	if err := d.sql(&b); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
+
+func (d *DeleteStmt) sql(b *strings.Builder) error {
+	b.WriteString("delete from ")
+	b.WriteString(catalog.SetTable(d.From))
+	w := d.Where.(*WhereClause)
+	if w.Valid {
+		b.WriteString(" t using ccms.attr a where t.id=a.id and (")
+		if err := evalExpr(b, w.Condition); err != nil {
+			return err
+		}
+		b.WriteRune(')')
+	}
+	return nil
+}
+
 func (i *InsertStmt) SQL() (string, error) {
 	var b strings.Builder
 	if err := i.sql(&b); err != nil {

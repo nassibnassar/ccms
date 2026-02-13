@@ -8,6 +8,19 @@ type CreateSetStmt struct {
 
 func (*CreateSetStmt) node() {}
 
+type DeleteStmt struct {
+	From  string
+	Where Node
+}
+
+func (*DeleteStmt) node() {}
+
+type DropSetStmt struct {
+	SetName string
+}
+
+func (*DropSetStmt) node() {}
+
 type InfoStmt struct {
 	Topic string
 }

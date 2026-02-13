@@ -4,6 +4,10 @@
 
 include::createset.adoc[]
 
+include::delete.adoc[]
+
+include::dropset.adoc[]
+
 include::insert.adoc[]
 
 include::select.adoc[]

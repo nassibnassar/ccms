@@ -1,0 +1,48 @@
+==== delete
+
+Remove objects from membership in a set
+
+[source,subs="verbatim,quotes"]
+----
+delete from `*_set_name_*`
+    [ where `*_condition_*` ]
+----
+
+[discrete]
+===== Description
+
+The `delete` command removes selected objects from membership in a
+set.
+
+[discrete]
+===== Parameters
+
+[discrete]
+====== from
+
+The `from` clause specifies the set.
+
+[discrete]
+====== where
+
+The `where` clause specifies a search condition in the form of a
+Boolean expression.  Only objects that satisfy this condition will be
+deleted.
+
+See also *Reference > Queries*.
+
+[discrete]
+===== Examples
+
+To remove items in stock from the set `test.myset`:
+
+----
+delete from test.myset where availability = 'In stock';
+----
+
+To remove all items from the set `test.myset`:
+
+----
+delete from test.myset;
+----
+
