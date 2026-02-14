@@ -42,7 +42,7 @@ func (i *InsertStmt) SQL() (string, error) {
 
 func (i *InsertStmt) sql(b *strings.Builder) error {
 	b.WriteString("insert into ")
-	b.WriteString(i.Into)
+	b.WriteString(catalog.SetTable(i.Into))
 	b.WriteString(" select a.id ")
 	if err := i.Query.(*QueryClause).sql(b); err != nil {
 		return err

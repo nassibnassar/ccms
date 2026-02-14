@@ -59,7 +59,8 @@ func SetTable(setName string) string {
 	if setName == "reserve" {
 		return "ccms.reserve"
 	}
-	return setName
+	sp := strings.Split(setName, ".")
+	return sp[0] + ".s_" + sp[1]
 }
 
 func (c *Catalog) AllSets() []string {
@@ -84,7 +85,7 @@ func (c *Catalog) CreateSet(setName string) error {
 	}
 	defer tx.Rollback(context.TODO())
 
-	sql := "create table " + setName + "(" +
+	sql := "create table " + SetTable(setName) + "(" +
 		"id bigint primary key)"
 	if _, err := tx.Exec(context.TODO(), sql); err != nil {
 		return fmt.Errorf("creating set %q: %v", setName, err)
@@ -112,7 +113,7 @@ func (c *Catalog) DropSet(setName string) error {
 	}
 	defer tx.Rollback(context.TODO())
 
-	sql := "drop table " + setName
+	sql := "drop table " + SetTable(setName)
 	if _, err := tx.Exec(context.TODO(), sql); err != nil {
 		return fmt.Errorf("dropping set %q: %v", setName, err)
 	}

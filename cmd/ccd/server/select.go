@@ -49,7 +49,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 			return cmderr("limit currently must be no more than " + strconv.Itoa(maxlim))
 		}
 	} else {
-		return cmderr("\"select\" currently requires a \"limit\" clause")
+		return cmderr("\"select\" statement requires a \"limit\" clause")
 	}
 
 	sql, err := cmd.SQL()
