@@ -227,14 +227,13 @@ func runClient() error {
 			}
 			i++
 		}
-		if i == 0 {
-			continue
-		}
-		if i > 1 {
-			fmt.Println()
-		}
-		if option.Timing {
-			fmt.Println(elapsedTimeStr)
+		if i > 0 {
+			if i > 1 {
+				fmt.Println()
+			}
+			if option.Timing {
+				fmt.Println(elapsedTimeStr)
+			}
 		}
 		pager.Complete()
 	}
