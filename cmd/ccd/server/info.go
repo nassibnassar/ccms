@@ -21,6 +21,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 			"        insert      insert objects into a set\n" +
 			"        select      retrieve objects from a set\n" +
 			"        show        list existing filters or sets\n"})
+		return result
 	}
 
 	var docstr string
