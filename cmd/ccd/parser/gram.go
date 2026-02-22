@@ -4,6 +4,8 @@ package parser
 import __yyfmt__ "fmt"
 
 import (
+	"strings"
+
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 )
 
@@ -857,7 +859,7 @@ yydefault:
 	case 62:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.str = yyDollar[1].str
+			yyVAL.str = strings.ToLower(yyDollar[1].str)
 		}
 	}
 	goto yystack /* stack new state and value */

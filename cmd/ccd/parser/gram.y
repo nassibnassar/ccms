@@ -2,6 +2,8 @@
 package parser
 
 import (
+	"strings"
+
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 )
 
@@ -388,7 +390,7 @@ arg_expr:
 name:
 	IDENT
 		{
-			$$ = $1
+			$$ = strings.ToLower($1)
 		}
 
 /*
