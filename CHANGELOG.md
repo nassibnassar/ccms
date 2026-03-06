@@ -1,3 +1,11 @@
+# v0.0.20
+
+* Added `create user` command.
+
+* Added `show users` command.
+
+* Added user authentication.
+
 # v0.0.19
 
 * Upgraded to Go 1.26.

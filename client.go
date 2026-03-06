@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/indexdata/ccms/internal/crypto"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/protocol"
 )
@@ -295,6 +296,11 @@ func (c *Client) Send(cmd string) (*Response, error) {
 	*/
 }
 
+// return a hashed password for use with the "create user" command
+func (c *Client) HashPassword(password string) string {
+	return crypto.HashPassword(password, nil, nil)
+}
+
 func sendRequest(client *Client, method, url string, requestStruct interface{}) (*http.Response, error) {
 	var rqj []byte
 	var err error
@@ -331,7 +337,7 @@ func sendRequest(client *Client, method, url string, requestStruct interface{}) 
 	if httprq, err = http.NewRequest(method, remote+url, bytes.NewBuffer(rqj)); err != nil {
 		return nil, err
 	}
-	httprq.SetBasicAuth(client.User, client.Password)
+	httprq.SetBasicAuth(client.User, crypto.HashPassword(client.Password, nil, nil))
 	httprq.Header.Set("Content-Type", "application/json")
 	var hrs *http.Response
 	if hrs, err = httpClient.Do(httprq); err != nil {

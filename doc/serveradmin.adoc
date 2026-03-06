@@ -79,7 +79,7 @@ following structure:
 
 [source,ini,subs="verbatim,quotes"]
 ----
-[main]
+[db.main]
 host = _host name of the PostgreSQL server_
 port = _port number of the PostgreSQL server_
 user = _database user that is the owner of the database_
@@ -93,7 +93,7 @@ example:
 
 [source,ini,subs="verbatim,quotes"]
 ----
-[main]
+[db.main]
 host = ccms.indexdata.com
 port = 5432
 user = ccms

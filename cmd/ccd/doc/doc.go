@@ -12,6 +12,13 @@ func CreateSet() string {
 	return strings.TrimSpace(createSetTxt)
 }
 
+//go:embed createuser.txt
+var createUserTxt string
+
+func CreateUser() string {
+	return strings.TrimSpace(createUserTxt)
+}
+
 //go:embed delete.txt
 var deleteTxt string
 

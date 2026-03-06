@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.26">
-<title>show</title>
+<title>create user</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -458,56 +458,63 @@ h1, h2, h3, h4, h5, h6, #toctitle,
 </div>
 <div id="content">
 <div class="sect3">
-<h4 id="_show">show</h4>
+<h4 id="_create_user">create user</h4>
 <div class="paragraph">
-<p>List the values of a system variable</p>
+<p>Define a new database user</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>show <code><strong><em>name</em></strong></code></code></pre>
+<pre class="highlight"><code>create user <code><strong><em>user_name</em></strong></code> with <strong><em>option</em></strong> '<strong><em>value</em></strong>' [, ... ]</code></pre>
 </div>
 </div>
 <h5 id="_description" class="discrete">Description</h5>
 <div class="paragraph">
-<p><code>show</code> lists the current values of system configurations or other
-variables.</p>
+<p><code>create user</code> defines a new database user.</p>
 </div>
 <h5 id="_parameters" class="discrete">Parameters</h5>
 <table class="tableblock frame-none grid-none stretch">
 <colgroup>
-<col style="width: 8.3333%;">
-<col style="width: 25%;">
+<col style="width: 33.3333%;">
 <col style="width: 66.6667%;">
 </colgroup>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>name</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>user_name</em></strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the new user.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sets</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Currently defined sets.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>with ( <strong><em>option</em></strong> '<strong><em>value</em></strong>' [, &#8230;&#8203; ] )</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configuration options for the new user.</p></td>
 </tr>
+</tbody>
+</table>
+<h5 id="_options" class="discrete">Options</h5>
+<table class="tableblock frame-none grid-none stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 75%;">
+</colgroup>
+<tbody>
 <tr>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>users</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Currently defined users.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>encrypted password</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sets the cryptographic hash of the user&#8217;s password.</p></td>
 </tr>
 </tbody>
 </table>
 <h5 id="_examples" class="discrete">Examples</h5>
+<div class="paragraph">
+<p>Create a user <code>anna</code>:</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre>show sets;</pre>
+<pre>create user anna with encrypted password 'GSDDdftAsLcbPQXynZYBnM4ZT8wPMmdY9Ws3SZWVs2I';</pre>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-03 20:19:41 -0500
+Last updated 2026-03-02 16:54:42 -0500
 </div>
 </div>
 </body>

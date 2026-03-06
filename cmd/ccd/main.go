@@ -108,6 +108,7 @@ func run() error {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 			serverOpt.Global = globalOpt
+			serverOpt.Program = os.Args[0]
 			var logf, csvlogf *os.File
 			if logf, csvlogf, err = setupLog(logfile, serverOpt.Debug, serverOpt.Trace); err != nil {
 				return err
@@ -390,7 +391,7 @@ func initSystem(opt *option.Init) error {
 }
 
 func initColor(colorMode string) {
-	eout.Init(global.ServerProgram)
+	eout.Init(os.Args[0])
 	switch colorMode {
 	case "always":
 		eout.AlwaysColor()

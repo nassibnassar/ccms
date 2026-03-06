@@ -1,0 +1,26 @@
+create user
+
+Define a new database user
+
+create user user_name with option 'value' [, ... ]
+
+Description
+
+create user defines a new database user.
+
+Parameters
+
+user_name                       The name of the new user.
+
+with ( option 'value' [, …​ ] ) Configuration options for the new user.
+
+Options
+
+encrypted password Sets the cryptographic hash of the user’s password.
+
+Examples
+
+Create a user anna:
+
+create user anna with encrypted password 'GSDDdftAsLcbPQXynZYBnM4ZT8wPMmdY9Ws3SZWVs2I';
+

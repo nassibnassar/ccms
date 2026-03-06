@@ -17,18 +17,29 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("filter_name", "text")
 	case "sets":
 		result.AddField("set_name", "text")
-		addData(s.cat, result)
+		addShowSetsData(s.cat, result)
+	case "users":
+		result.AddField("user_name", "text")
+		addShowUsersData(s.cat, result)
 	default:
 		return cmderr("unknown variable \"" + cmd.Name + "\"")
 	}
 	return result
 }
 
-func addData(cat *catalog.Catalog, result *ccms.Result) {
+func addShowSetsData(cat *catalog.Catalog, result *ccms.Result) {
 	sets := cat.AllSets()
 	sortSetNames(sets)
 	for i := range sets {
 		result.AddData([]any{sets[i]})
+	}
+}
+
+func addShowUsersData(cat *catalog.Catalog, result *ccms.Result) {
+	users := cat.AllUsers()
+	slices.Sort(users)
+	for i := range users {
+		result.AddData([]any{users[i]})
 	}
 }
 

@@ -25,6 +25,10 @@ variables.
 |
 |`sets`
 |Currently defined sets.
+
+|
+|`users`
+|Currently defined users.
 |===
 
 [discrete]

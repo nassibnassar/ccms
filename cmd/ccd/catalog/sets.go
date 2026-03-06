@@ -2,11 +2,10 @@ package catalog
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/indexdata/ccms/internal/global"
 )
 
 func (c *Catalog) initSets() error {
@@ -92,7 +91,7 @@ func (c *Catalog) CreateSet(setName string) error {
 	}
 	sql = "insert into ccms.sets (setname) values ($1)"
 	if _, err := tx.Exec(context.TODO(), sql, setName); err != nil {
-		return fmt.Errorf("registering set %q: %v", setName, PGErr(err))
+		return fmt.Errorf("registering set %q: %v", setName, global.PGErr(err))
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
@@ -119,7 +118,7 @@ func (c *Catalog) DropSet(setName string) error {
 	}
 	sql = "delete from ccms.sets where setname=$1"
 	if _, err := tx.Exec(context.TODO(), sql, setName); err != nil {
-		return fmt.Errorf("deregistering set %q: %v", setName, PGErr(err))
+		return fmt.Errorf("deregistering set %q: %v", setName, global.PGErr(err))
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
@@ -128,20 +127,4 @@ func (c *Catalog) DropSet(setName string) error {
 
 	delete(c.sets, setName)
 	return nil
-}
-
-func PGErr(err error) error {
-	e := err.(*pgconn.PgError)
-	var b strings.Builder
-	b.WriteString(e.Message)
-	if e.Detail != "" {
-		b.WriteString(": ")
-		b.WriteString(e.Detail)
-	}
-	if e.Hint != "" {
-		b.WriteString(" (")
-		b.WriteString(e.Hint)
-		b.WriteRune(')')
-	}
-	return errors.New(b.String())
 }

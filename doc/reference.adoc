@@ -4,6 +4,8 @@
 
 include::createset.adoc[]
 
+include::createuser.adoc[]
+
 include::delete.adoc[]
 
 include::dropset.adoc[]

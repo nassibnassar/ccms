@@ -12,7 +12,9 @@ Parameters
 
 name
 
-     sets Currently defined sets.
+     sets  Currently defined sets.
+
+     users Currently defined users.
 
 Examples
 

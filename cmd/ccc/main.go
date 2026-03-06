@@ -12,9 +12,11 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/essentialkaos/ek/v13/pager"
 	"github.com/indexdata/ccms"
+	"github.com/indexdata/ccms/internal/crypto"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/global"
 	"github.com/spf13/cobra"
+	"gopkg.in/ini.v1"
 )
 
 var colorMode string
@@ -25,10 +27,49 @@ var colorInitialized bool
 var option struct {
 	Host          string
 	Port          string
+	User          string
 	NoTLS         bool
 	TLSSkipVerify bool
 	Version       bool
 	Timing        bool
+}
+
+type config struct {
+	user     string
+	password string
+}
+
+func newConfig() (*config, error) {
+	configFile := filepath.Join(os.Getenv("HOME"), ".ccc_config")
+	exists, err := fileExists(configFile)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return &config{}, nil
+	}
+
+	c, err := ini.Load(configFile)
+	if err != nil {
+		return nil, err
+	}
+
+	s := c.Section("default")
+	return &config{
+		user:     s.Key("user").String(),
+		password: s.Key("password").String(),
+	}, nil
+}
+
+func fileExists(file string) (bool, error) {
+	_, err := os.Stat(file)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
 
 func main() {
@@ -37,7 +78,7 @@ func main() {
 }
 
 func cccMain() {
-	eout.Init(global.ClientProgram)
+	eout.Init(os.Args[0])
 	run()
 }
 
@@ -76,6 +117,7 @@ func run() {
 	rootCmd.PersistentFlags().BoolVarP(&helpFlag, "help", "", false, "Help for ccc")
 	_ = hostFlag(rootCmd, &option.Host)
 	_ = portFlag(rootCmd, &option.Port)
+	_ = userFlag(rootCmd, &option.User)
 	_ = noTLSFlag(rootCmd, &option.NoTLS)
 	_ = skipVerifyFlag(rootCmd, &option.TLSSkipVerify)
 	_ = versionFlag(rootCmd, &option.Version)
@@ -90,6 +132,51 @@ func runClient() error {
 		fmt.Printf("%s %s\n", global.ClientProgram, global.Version)
 		return nil
 	}
+
+	conf, err := newConfig()
+	if err != nil {
+		return err
+	}
+
+	user := option.User
+	password := ""
+	if strings.TrimSpace(user) == "" {
+		user = conf.user
+		password = conf.password
+	}
+	if strings.TrimSpace(user) == "" {
+		return fmt.Errorf("user name must be specified")
+	}
+	if strings.TrimSpace(password) == "" {
+		password, err = crypto.InputPassword("Password for \""+user+"\": ", false)
+		if err != nil {
+			return err
+		}
+		if strings.TrimSpace(password) == "" {
+			return fmt.Errorf("password must be specified")
+		}
+	}
+
+	client := &ccms.Client{
+		Host:          option.Host,
+		Port:          option.Port,
+		User:          user,
+		Password:      password,
+		NoTLS:         option.NoTLS,
+		TLSSkipVerify: option.TLSSkipVerify,
+	}
+
+	//resp, err := client.Send("ping;")
+	//if err != nil {
+	//        errorExit(err)
+	//}
+	//for result := range resp.Results() {
+	//        if result.Status() == "error" {
+	//                //eout.Error("error: %s", result.Message())
+	//                errorExit(fmt.Errorf("%s", result.Message()))
+	//        }
+	//        break
+	//}
 
 	pager.AllowEnv = true
 	eout.Interactive()
@@ -110,17 +197,6 @@ func runClient() error {
 	}
 	defer rl.Close()
 
-	client := &ccms.Client{
-		Host:          option.Host,
-		Port:          option.Port,
-		User:          "nemo",
-		Password:      "testpass",
-		NoTLS:         option.NoTLS,
-		TLSSkipVerify: option.TLSSkipVerify,
-	}
-	//if _, err = client.Send("ping"); err != nil {
-	//        errorExit(err)
-	//}
 	for {
 		rline, err := rl.Readline()
 		if err != nil {
@@ -133,19 +209,22 @@ func runClient() error {
 		if line == "" {
 			continue
 		}
+		fields := strings.Fields(line)
 		if line[0] == '\\' {
-			switch line[0:2] {
+			switch fields[0] {
 			case "\\h":
 			case "\\q":
+			case "\\createuser":
 			default:
-				eout.Error("unknown command: %s", line)
+				eout.Error("unknown command: %s", fields[0])
 				continue
 			}
 		}
 		if line == "help" {
 			fmt.Printf("" +
 				"Type:  \\h for help with SQL commands\n" +
-				"       \\q to quit\n")
+				"       \\q to quit\n" +
+				"       \\createuser <username>\n")
 			continue
 		}
 		if strings.HasPrefix(line, "\\h") {
@@ -158,7 +237,15 @@ func runClient() error {
 		if line == "\\q" {
 			break
 		}
-		l := strings.Join(strings.Fields(line), "")
+		if strings.HasPrefix(line, "\\createuser") {
+			line, err = createUser(client, fields)
+			if err != nil {
+				eout.Error("%s", err)
+				continue
+			}
+			fields = strings.Fields(line)
+		}
+		l := strings.Join(fields, "")
 		if l == "quit" || l == "quit;" || l == "exit" || l == "exit;" {
 			break
 		}
@@ -241,6 +328,21 @@ func runClient() error {
 	return nil
 }
 
+func createUser(client *ccms.Client, fields []string) (string, error) {
+	if len(fields) == 1 {
+		return "", fmt.Errorf("user name not specified")
+	}
+	userName := fields[1]
+	pw, err := crypto.InputPassword("Password for \""+userName+"\": ", true)
+	if err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(pw) == "" {
+		return "", fmt.Errorf("password is required")
+	}
+	return "create user " + userName + " with encrypted password '" + client.HashPassword(pw) + "';", nil
+}
+
 func help(cmd *cobra.Command, commandLine []string) {
 	printHelp()
 }
@@ -254,6 +356,7 @@ func printHelp() {
 		"Options:\n" +
 		hostFlag(nil, nil) +
 		portFlag(nil, nil) +
+		userFlag(nil, nil) +
 		noTLSFlag(nil, nil) +
 		skipVerifyFlag(nil, nil) +
 		versionFlag(nil, nil) +
@@ -300,6 +403,14 @@ func portFlag(cmd *cobra.Command, port *string) string {
 	}
 	return "" +
 		"  -p, --port <p>              server port (default: " + global.DefaultPort + ")\n"
+}
+
+func userFlag(cmd *cobra.Command, user *string) string {
+	if cmd != nil {
+		cmd.Flags().StringVarP(user, "username", "U", "", "")
+	}
+	return "" +
+		"  -U, --username <u>          user name\n"
 }
 
 func noTLSFlag(cmd *cobra.Command, noTLS *bool) string {
@@ -359,12 +470,10 @@ var completer = readline.NewPrefixCompleter(
 	readline.PcItem("drop set"),
 	readline.PcItem("insert into"),
 	readline.PcItem("select * from"),
-	readline.PcItem("show sets ;"),
-	//readline.PcItem("show",
-	//        readline.PcItem("sets",
-	//                readline.PcItem(";"),
-	//        ),
-	//),
+	readline.PcItem("show",
+		readline.PcItem("sets"),
+		readline.PcItem("users"),
+	),
 	readline.PcItem("\\h",
 		readline.PcItem("create set"),
 		readline.PcItem("delete"),
@@ -373,4 +482,5 @@ var completer = readline.NewPrefixCompleter(
 		readline.PcItem("select"),
 		readline.PcItem("show"),
 	),
+	readline.PcItem("\\createuser"),
 )

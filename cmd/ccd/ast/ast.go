@@ -8,6 +8,13 @@ type CreateSetStmt struct {
 
 func (*CreateSetStmt) node() {}
 
+type CreateUserStmt struct {
+	UserName          string
+	EncryptedPassword string
+}
+
+func (*CreateUserStmt) node() {}
+
 type DeleteStmt struct {
 	From  string
 	Where Node

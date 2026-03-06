@@ -18,6 +18,7 @@ type Server struct {
 	TLSKey    string
 	NoTLS     bool
 	NoHarvest bool
+	Program   string
 	Global
 }
 

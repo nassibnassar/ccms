@@ -20,6 +20,7 @@ import (
 %type <nodeList> stmt
 %type <nodeList> stmt_list
 %type <node> create_set_stmt
+%type <node> create_user_stmt
 %type <node> delete_stmt
 %type <node> drop_set_stmt
 %type <node> info_stmt
@@ -57,6 +58,7 @@ import (
 %token DELETE
 %token DESC
 %token DROP
+%token ENCRYPTED
 %token FILTER
 %token FROM
 %token INFO
@@ -67,13 +69,16 @@ import (
 %token OFFSET
 %token OR
 %token ORDER
+%token PASSWORD
 %token PING
 %token RETRIEVE
 %token SELECT
 %token SET
 %token SHOW
 %token TAG
+%token USER
 %token WHERE
+%token WITH
 
 %type <str> name
 
@@ -118,6 +123,10 @@ basic_stmt:
 		{
 			$$ = $1
 		}
+	| create_user_stmt
+		{
+			$$ = $1
+		}
 	| delete_stmt
 		{
 			$$ = $1
@@ -155,6 +164,12 @@ create_set_stmt:
 	CREATE SET name ';'
 		{
 			$$ = &ast.CreateSetStmt{SetName: $3}
+		}
+
+create_user_stmt:
+	CREATE USER name WITH ENCRYPTED PASSWORD SLITERAL ';'
+		{
+			$$ = &ast.CreateUserStmt{UserName: $3, EncryptedPassword: $7}
 		}
 
 delete_stmt:

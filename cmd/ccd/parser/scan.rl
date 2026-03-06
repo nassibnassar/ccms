@@ -58,6 +58,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'delete'i => { tok = DELETE; fbreak; };
 			'desc'i => { tok = DESC; fbreak; };
 			'drop'i => { tok = DROP; fbreak; };
+			'encrypted'i => { tok = ENCRYPTED; fbreak; };
 			'filter'i => { tok = FILTER; fbreak; };
 			'from'i => { tok = FROM; fbreak; };
 			'info'i => { tok = INFO; fbreak; };
@@ -68,13 +69,16 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'offset'i => { tok = OFFSET; fbreak; };
 			'or'i => { tok = OR; fbreak; };
 			'order'i => { tok = ORDER; fbreak; };
+			'password'i => { tok = PASSWORD; fbreak; };
 			'retrieve'i => { tok = RETRIEVE; fbreak; };
 			'set'i => { tok = SET; fbreak; };
 			'show'i => { tok = SHOW; fbreak; };
 			'tag'i => { tok = TAG; fbreak; };
 			'ping'i => { tok = PING; fbreak; };
 			'select'i => { tok = SELECT; fbreak; };
+			'user'i => { tok = USER; fbreak; };
 			'where'i => { tok = WHERE; fbreak; };
+			'with'i => { tok = WITH; fbreak; };
 			identifier => { out.str = string(lex.data[lex.ts:lex.te]); tok = IDENT; fbreak; };
 			sliteral => { out.str = string(lex.data[lex.ts+1:lex.te-1]); tok = SLITERAL; fbreak; };
 			digit+ => { out.str = string(lex.data[lex.ts:lex.te]); tok = NUMBER; fbreak; };

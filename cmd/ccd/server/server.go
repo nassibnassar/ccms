@@ -87,7 +87,7 @@ func databaseServer(opt *option.Server) error {
 	defer dp.Close()
 
 	// ensure database is initialized and compatible
-	cat, err := catalog.Initialize(dp)
+	cat, err := catalog.Initialize(opt.Program, dp, conf.Security)
 	if err != nil {
 		return err
 	}
@@ -182,7 +182,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
 
 	var req protocol.Request
-	if err := ReadRequest(w, r, &req); err != nil {
+	user, err := s.ReadRequest(w, r, &req)
+	if err != nil {
 		log.Info("[%d] %s - error: %v", rqid, addr, err)
 		resp := ccms.NewResponse()
 		resp.AddResult(cmderr(err.Error()))
@@ -191,14 +192,12 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		}
 		return
 	}
-	log.Info("[%d] %s - %s", rqid, addr, req.Commands)
 
 	var node ast.Node
 	var cmds []ast.Node
-	var err error
 
-	node, err = parser.Parse(req.Commands)
 	//fmt.Printf("### %#v --- %v\n", node, err)
+	node, err = parser.Parse(req.Commands)
 	if err != nil {
 		log.Info("[%d] error: %s", rqid, strings.Split(err.Error(), "\n")[0])
 		returnError(w, err.Error(), http.StatusOK /* http.StatusBadRequest */)
@@ -212,10 +211,24 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	resp := ccms.NewResponse()
 	var result *ccms.Result
 	cmds = node.(*ast.ParseTree).Commands
+
+	var noLog bool
+	if len(cmds) == 1 {
+		_, ok := cmds[0].(*ast.PingStmt)
+		if ok {
+			noLog = true
+		}
+	}
+	if !noLog {
+		log.Info("[%d] %s (%s) - %s", rqid, addr, user, req.Commands)
+	}
+
 	for i := range cmds {
 		switch cmd := cmds[i].(type) {
 		case *ast.CreateSetStmt:
 			result = createSetStmt(s, rqid, cmd)
+		case *ast.CreateUserStmt:
+			result = createUserStmt(s, rqid, cmd)
 		case *ast.DeleteStmt:
 			result = deleteStmt(s, rqid, cmd)
 		case *ast.DropSetStmt:
@@ -242,7 +255,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		}
 		resp.AddResult(result)
 		if result.Status() == "error" {
-			log.Info("[%d] error: %s", rqid, result.Message())
+			log.Info("[%d] error: %s", rqid, strings.Split(result.Message(), "\n")[0])
 			break
 		}
 	}
@@ -270,56 +283,33 @@ func returnError(w http.ResponseWriter, errString string, statusCode int) {
 	HTTPError(w, errString, statusCode)
 }
 
-func ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct any) error {
-	user, err := HandleBasicAuth(w, r)
+func (s *svr) ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct any) (string, error) {
+	user, err := s.HandleBasicAuth(w, r)
 	if err != nil {
-		return err
+		return "", err
 	}
-	_ = user // TODO retain user in server state
 
 	var body []byte
 	if body, err = ioutil.ReadAll(r.Body); err != nil {
 		HandleError(w, err, http.StatusBadRequest)
-		return err
+		return "", err
 	}
 	if err = json.Unmarshal(body, requestStruct); err != nil {
 		HandleError(w, err, http.StatusBadRequest)
-		return err
+		return "", err
 	}
 	log.Trace("request %s %v\n", r.RemoteAddr, requestStruct)
-	return nil
+	return user, nil
 }
 
-func HandleBasicAuth(w http.ResponseWriter, r *http.Request) (string, error) {
-	//host := osutil.AddrHost(r.RemoteAddr)
-	var user, password string
-	var ok bool
-	user, password, ok = r.BasicAuth()
+func (s *svr) HandleBasicAuth(w http.ResponseWriter, r *http.Request) (string, error) {
+	user, password, ok := r.BasicAuth()
 	if !ok {
 		return "", fmt.Errorf("authentication failed")
-		//returnError(w, e, http.StatusForbidden)
 	}
-	if user != "nemo" || password != "testpass" {
+	if !s.cat.Authenticate(user, password) {
 		return "", fmt.Errorf("authentication failed for user %q", user)
 	}
-	//var match bool
-	//var err error
-	//match, err = srv.storage.Authenticate(user, password)
-	//if err != nil {
-	//        var m = "Unauthorized (user '" + user + "')"
-	//        log.Println(m + ": " + err.Error())
-	//        //w.Header().Set("WWW-Authenticate", "Basic")
-	//        http.Error(w, m, http.StatusForbidden)
-	//        return user, false
-	//}
-	/*	if !match {
-			var m = "Unauthorized (user '" + user + "'): " + "Unable to authenticate username/password"
-			log.Info(m)
-			//w.Header().Set("WWW-Authenticate", "Basic")
-			http.Error(w, m, http.StatusForbidden)
-			return user, false
-		}
-	*/
 	return user, nil
 }
 

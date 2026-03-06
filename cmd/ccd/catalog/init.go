@@ -4,32 +4,41 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 
+	"github.com/indexdata/ccms/cmd/ccd/config"
+	"github.com/indexdata/ccms/internal/crypto"
+	"github.com/indexdata/ccms/internal/eout"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Catalog struct {
-	mu   sync.Mutex
-	sets map[string]struct{}
-	dp   *pgxpool.Pool
+	mu        sync.Mutex
+	secretKey []byte
+	users     map[string]auth
+	sets      map[string]struct{}
+	dp        *pgxpool.Pool
 }
 
-func Initialize(dp *pgxpool.Pool) (*Catalog, error) {
+func Initialize(program string, dp *pgxpool.Pool, security *config.Security) (*Catalog, error) {
 	exists, err := initSchemaExists(dp)
 	if err != nil {
 		return nil, fmt.Errorf("checking if database initialized: %w", err)
 	}
 	if !exists {
-		if err = createSystemSchema(dp); err != nil {
+		if err = createSystemSchema(program, dp, security); err != nil {
 			return nil, err
 		}
 	} else {
 		// TODO check that database version is compatible;
 		// for now we assume it is compatible
 	}
-	c := &Catalog{dp: dp}
+	c := &Catalog{secretKey: security.SecretKey, dp: dp}
+	if err := c.initAuth(); err != nil {
+		return nil, err
+	}
 	if err := c.initSets(); err != nil {
 		return nil, err
 	}
@@ -49,6 +58,7 @@ var systemTables = []systemTableDef{
 	{table: "md", create: createTableMD},
 	{table: "attr", create: createTableAttr},
 	{table: "reserve", create: createTableReserve},
+	{table: "auth", create: createTableAuth},
 	{table: "project", create: createTableProject},
 	{table: "sets", create: createTableSets},
 }
@@ -118,6 +128,17 @@ func createTableReserve(tx pgx.Tx) error {
 	return nil
 }
 
+func createTableAuth(tx pgx.Tx) error {
+	q := "create table ccms.auth (" +
+		"username text primary key," +
+		"password text not null," +
+		"salt text not null)"
+	if _, err := tx.Exec(context.TODO(), q); err != nil {
+		return fmt.Errorf("creating table ccms.auth: %v", err)
+	}
+	return nil
+}
+
 func createTableProject(tx pgx.Tx) error {
 	q := "create table ccms.project (" +
 		"projname text primary key)"
@@ -159,7 +180,7 @@ func initSchemaExists(dp *pgxpool.Pool) (bool, error) {
 	}
 }
 
-func createSystemSchema(dp *pgxpool.Pool) error {
+func createSystemSchema(program string, dp *pgxpool.Pool, security *config.Security) error {
 	tx, err := dp.Begin(context.TODO())
 	if err != nil {
 		return err
@@ -177,9 +198,41 @@ func createSystemSchema(dp *pgxpool.Pool) error {
 			return fmt.Errorf("creating table ccms.%s: %v", t.table, err)
 		}
 	}
+	if err = writeAdminUser(tx, security); err != nil {
+		return fmt.Errorf("adding admin user: %v", err)
+	}
 
 	if err = tx.Commit(context.TODO()); err != nil {
 		return fmt.Errorf("initializing system database: committing changes: %v", err)
 	}
+	return nil
+}
+
+func writeAdminUser(tx pgx.Tx, security *config.Security) error {
+	eout.Info("setting up new \"admin\" user")
+	adminPassword, err := crypto.InputPassword("Password for \"admin\": ", true)
+	if err != nil {
+		return err
+	}
+	if strings.TrimSpace(adminPassword) == "" {
+		return errors.New("password is required")
+	}
+
+	salt := crypto.RandomKey()
+	hash := crypto.HashPassword(crypto.HashPassword(adminPassword, nil, nil), salt, security.SecretKey)
+	q := "insert into ccms.auth (username, password, salt) values ($1, $2, $3)"
+	if _, err := tx.Exec(context.TODO(), q, "admin", hash, crypto.EncodeToHexString(salt)); err != nil {
+		return fmt.Errorf("writing to table ccms.auth: %v", err)
+	}
+
+	//// temporary: add nemo user
+	salt = crypto.RandomKey()
+	hash = crypto.HashPassword(crypto.HashPassword("testpass", nil, nil), salt, security.SecretKey)
+	q = "insert into ccms.auth (username, password, salt) values ($1, $2, $3)"
+	if _, err := tx.Exec(context.TODO(), q, "nemo", hash, crypto.EncodeToHexString(salt)); err != nil {
+		return fmt.Errorf("writing user \"nemo\" to table ccms.auth: %v", err)
+	}
+	////
+
 	return nil
 }
