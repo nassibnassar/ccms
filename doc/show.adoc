@@ -22,6 +22,10 @@ variables.
 |
 |
 
+//|
+//|`roles`
+//|Currently defined roles.
+
 |
 |`sets`
 |Currently defined sets.

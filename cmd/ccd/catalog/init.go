@@ -17,9 +17,21 @@ import (
 type Catalog struct {
 	mu        sync.Mutex
 	secretKey []byte
+	roles     map[string]roleUsers
 	users     map[string]auth
 	sets      map[string]struct{}
 	dp        *pgxpool.Pool
+}
+
+type roleUsers struct {
+	users map[string]struct{}
+}
+
+type auth struct {
+	superuser bool
+	login     bool
+	password  string
+	salt      []byte
 }
 
 func Initialize(program string, dp *pgxpool.Pool, security *config.Security) (*Catalog, error) {
@@ -37,6 +49,9 @@ func Initialize(program string, dp *pgxpool.Pool, security *config.Security) (*C
 	}
 	c := &Catalog{secretKey: security.SecretKey, dp: dp}
 	if err := c.initAuth(); err != nil {
+		return nil, err
+	}
+	if err := c.initRoles(); err != nil {
 		return nil, err
 	}
 	if err := c.initSets(); err != nil {
@@ -58,7 +73,10 @@ var systemTables = []systemTableDef{
 	{table: "md", create: createTableMD},
 	{table: "attr", create: createTableAttr},
 	{table: "reserve", create: createTableReserve},
+	{table: "acl", create: createTableACL},
 	{table: "auth", create: createTableAuth},
+	{table: "role", create: createTableRole},
+	{table: "roleuser", create: createTableRoleUser},
 	{table: "project", create: createTableProject},
 	{table: "sets", create: createTableSets},
 }
@@ -128,9 +146,24 @@ func createTableReserve(tx pgx.Tx) error {
 	return nil
 }
 
+func createTableACL(tx pgx.Tx) error {
+	q := "create table ccms.acl (" +
+		"objectname text not null," +
+		"objecttype char not null check (objecttype IN ('p', 's'))," +
+		"privilege char not null check (privilege IN ('r', 'w'))," +
+		"rolename text not null," +
+		"primary key (objectname, objecttype, privilege, rolename))"
+	if _, err := tx.Exec(context.TODO(), q); err != nil {
+		return fmt.Errorf("creating table ccms.acl: %v", err)
+	}
+	return nil
+}
+
 func createTableAuth(tx pgx.Tx) error {
 	q := "create table ccms.auth (" +
 		"username text primary key," +
+		"superuser bool," +
+		"login bool," +
 		"password text not null," +
 		"salt text not null)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
@@ -161,6 +194,26 @@ func createTableSets(tx pgx.Tx) error {
 		"setname text primary key)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.sets: %v", err)
+	}
+	return nil
+}
+
+func createTableRole(tx pgx.Tx) error {
+	q := "create table ccms.role (" +
+		"rolename text primary key)"
+	if _, err := tx.Exec(context.TODO(), q); err != nil {
+		return fmt.Errorf("creating table ccms.role: %v", err)
+	}
+	return nil
+}
+
+func createTableRoleUser(tx pgx.Tx) error {
+	q := "create table ccms.roleuser (" +
+		"rolename text not null references ccms.role (rolename)," +
+		"username text not null references ccms.auth (username)," +
+		"primary key (rolename, username))"
+	if _, err := tx.Exec(context.TODO(), q); err != nil {
+		return fmt.Errorf("creating table ccms.roleuser: %v", err)
 	}
 	return nil
 }
@@ -220,7 +273,7 @@ func writeAdminUser(tx pgx.Tx, security *config.Security) error {
 
 	salt := crypto.RandomKey()
 	hash := crypto.HashPassword(crypto.HashPassword(adminPassword, nil, nil), salt, security.SecretKey)
-	q := "insert into ccms.auth (username, password, salt) values ($1, $2, $3)"
+	q := "insert into ccms.auth (username, superuser, login, password, salt) values ($1, true, true, $2, $3)"
 	if _, err := tx.Exec(context.TODO(), q, "admin", hash, crypto.EncodeToHexString(salt)); err != nil {
 		return fmt.Errorf("writing to table ccms.auth: %v", err)
 	}
@@ -228,7 +281,7 @@ func writeAdminUser(tx pgx.Tx, security *config.Security) error {
 	//// temporary: add nemo user
 	salt = crypto.RandomKey()
 	hash = crypto.HashPassword(crypto.HashPassword("testpass", nil, nil), salt, security.SecretKey)
-	q = "insert into ccms.auth (username, password, salt) values ($1, $2, $3)"
+	q = "insert into ccms.auth (username, superuser, login, password, salt) values ($1, false, true, $2, $3)"
 	if _, err := tx.Exec(context.TODO(), q, "nemo", hash, crypto.EncodeToHexString(salt)); err != nil {
 		return fmt.Errorf("writing user \"nemo\" to table ccms.auth: %v", err)
 	}

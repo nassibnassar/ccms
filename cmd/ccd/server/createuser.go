@@ -16,7 +16,7 @@ func createUserStmt(s *svr, rqid int64, cmd *ast.CreateUserStmt) *ccms.Result {
 		return cmderr("password is required")
 	}
 
-	if err := s.cat.CreateUser(cmd.UserName, cmd.EncryptedPassword); err != nil {
+	if err := s.cat.CreateUser(cmd.UserName, cmd.EncryptedPassword, false, true); err != nil {
 		return cmderr("error writing user \"" + cmd.UserName + "\"")
 	}
 

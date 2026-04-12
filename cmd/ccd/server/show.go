@@ -1,8 +1,6 @@
 package server
 
 import (
-	"cmp"
-	"slices"
 	"strings"
 
 	"github.com/indexdata/ccms"
@@ -15,11 +13,17 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	switch cmd.Name {
 	case "filters":
 		result.AddField("filter_name", "text")
+	//case "roles":
+	//        result.AddField("role_name", "text")
+	//        result.AddField("user_names", "text")
+	//        addShowRolesData(s.cat, result)
 	case "sets":
 		result.AddField("set_name", "text")
 		addShowSetsData(s.cat, result)
 	case "users":
 		result.AddField("user_name", "text")
+		result.AddField("superuser", "boolean")
+		result.AddField("login", "boolean")
 		addShowUsersData(s.cat, result)
 	default:
 		return cmderr("unknown variable \"" + cmd.Name + "\"")
@@ -27,9 +31,16 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	return result
 }
 
+func addShowRolesData(cat *catalog.Catalog, result *ccms.Result) {
+	roles := cat.AllRoles()
+	for i := range roles {
+		users := strings.Join(roles[i].UserNames, ", ")
+		result.AddData([]any{roles[i].RoleName, users})
+	}
+}
+
 func addShowSetsData(cat *catalog.Catalog, result *ccms.Result) {
 	sets := cat.AllSets()
-	sortSetNames(sets)
 	for i := range sets {
 		result.AddData([]any{sets[i]})
 	}
@@ -37,22 +48,7 @@ func addShowSetsData(cat *catalog.Catalog, result *ccms.Result) {
 
 func addShowUsersData(cat *catalog.Catalog, result *ccms.Result) {
 	users := cat.AllUsers()
-	slices.Sort(users)
 	for i := range users {
-		result.AddData([]any{users[i]})
+		result.AddData([]any{users[i].UserName, users[i].Superuser, users[i].Login})
 	}
-}
-
-func sortSetNames(sets []string) {
-	slices.SortFunc(sets, func(x, y string) int {
-		a := !strings.ContainsRune(x, '.')
-		b := !strings.ContainsRune(y, '.')
-		if a && !b {
-			return -1
-		}
-		if !a && b {
-			return 1
-		}
-		return cmp.Compare(x, y)
-	})
 }

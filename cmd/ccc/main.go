@@ -240,7 +240,7 @@ func runClient() error {
 		if strings.HasPrefix(line, "\\createuser") {
 			line, err = createUser(client, fields)
 			if err != nil {
-				eout.Error("%s", err)
+				eout.Error("error: %s", err)
 				continue
 			}
 			fields = strings.Fields(line)
@@ -248,6 +248,10 @@ func runClient() error {
 		l := strings.Join(fields, "")
 		if l == "quit" || l == "quit;" || l == "exit" || l == "exit;" {
 			break
+		}
+		if line[len(line)-1] != ';' {
+			eout.Error("error: missing semicolon")
+			continue
 		}
 		startTime := time.Now()
 		resp, err := client.Send(line)
@@ -471,6 +475,7 @@ var completer = readline.NewPrefixCompleter(
 	readline.PcItem("insert into"),
 	readline.PcItem("select * from"),
 	readline.PcItem("show",
+		//readline.PcItem("roles"),
 		readline.PcItem("sets"),
 		readline.PcItem("users"),
 	),

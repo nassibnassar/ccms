@@ -1,8 +1,10 @@
 package catalog
 
 import (
+	"cmp"
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/indexdata/ccms/internal/global"
@@ -63,6 +65,8 @@ func SetTable(setName string) string {
 }
 
 func (c *Catalog) AllSets() []string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	sets := make([]string, len(c.sets)+1)
 	i := 0
 	sets[i] = "reserve"
@@ -71,7 +75,22 @@ func (c *Catalog) AllSets() []string {
 		sets[i] = k
 		i++
 	}
+	sortSetNames(sets)
 	return sets
+}
+
+func sortSetNames(sets []string) {
+	slices.SortFunc(sets, func(x, y string) int {
+		a := !strings.ContainsRune(x, '.')
+		b := !strings.ContainsRune(y, '.')
+		if a && !b {
+			return -1
+		}
+		if !a && b {
+			return 1
+		}
+		return cmp.Compare(x, y)
+	})
 }
 
 func (c *Catalog) CreateSet(setName string) error {
