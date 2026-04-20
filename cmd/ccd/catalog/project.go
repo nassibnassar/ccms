@@ -8,7 +8,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/indexdata/ccms/internal/global"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -79,8 +78,8 @@ func sortProjectNames(projects []Project) {
 
 func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
 	var title, action, mouLink, funds string
-	q := "select p.title, p.action, p.mou_link, " +
-		"string_agg('\"'||f.title||'\" ('||f.name||')', ', ') funds " +
+	q := "select coalesce(p.title, ''), coalesce(p.action, ''), coalesce(p.mou_link, ''), " +
+		"coalesce(string_agg('\"'||f.title||'\" ('||f.name||')', ', '), '') funds " +
 		"from ccms.project p " +
 		"left join ccms.project_fund pf on p.id=pf.project_id " +
 		"left join ccms.fund f on pf.fund_id=f.id " +
@@ -91,7 +90,7 @@ func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return nil, fmt.Errorf("project %q does not exist", projectName)
 	case err != nil:
-		return nil, global.PGErr(err)
+		return nil, err
 	default:
 	}
 	prop := [][2]string{
