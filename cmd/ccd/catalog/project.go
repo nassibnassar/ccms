@@ -79,7 +79,7 @@ func sortProjectNames(projects []Project) {
 func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
 	var title, action, mouLink, funds string
 	q := "select coalesce(p.title, ''), coalesce(p.action, ''), coalesce(p.mou_link, ''), " +
-		"coalesce(string_agg('\"'||f.title||'\" ('||f.name||')', ', '), '') funds " +
+		"coalesce(string_agg(f.name||':'||f.title, '|'), '') funds " +
 		"from ccms.project p " +
 		"left join ccms.project_fund pf on p.id=pf.project_id " +
 		"left join ccms.fund f on pf.fund_id=f.id " +
