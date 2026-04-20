@@ -60,6 +60,7 @@ import (
 %token DROP
 %token ENCRYPTED
 %token FILTER
+%token FILTERS
 %token FROM
 %token INFO
 %token INSERT
@@ -79,6 +80,7 @@ import (
 %token SETS
 %token SHOW
 %token TAG
+%token TAGS
 %token USER
 %token USERS
 %token WHERE
@@ -225,9 +227,17 @@ show_stmt:
 		{
 			$$ = &ast.ShowStmt{Type: "project", Name: $3}
 		}
+	| SHOW FILTERS ';'
+		{
+			$$ = &ast.ShowStmt{Type: "filters"}
+		}
 	| SHOW SETS ';'
 		{
 			$$ = &ast.ShowStmt{Type: "sets"}
+		}
+	| SHOW TAGS ';'
+		{
+			$$ = &ast.ShowStmt{Type: "tags"}
 		}
 	| SHOW USERS ';'
 		{

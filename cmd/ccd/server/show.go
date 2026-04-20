@@ -29,6 +29,8 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	case "sets":
 		result.AddField("set_name", "text")
 		addShowSetsData(s.cat, result)
+	case "tags":
+		result.AddField("tag_name", "text")
 	case "users":
 		result.AddField("user_name", "text")
 		result.AddField("superuser", "boolean")
