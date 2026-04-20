@@ -70,13 +70,17 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'or'i => { tok = OR; fbreak; };
 			'order'i => { tok = ORDER; fbreak; };
 			'password'i => { tok = PASSWORD; fbreak; };
+			'project'i => { tok = PROJECT; fbreak; };
+			'projects'i => { tok = PROJECTS; fbreak; };
 			'retrieve'i => { tok = RETRIEVE; fbreak; };
 			'set'i => { tok = SET; fbreak; };
+			'sets'i => { tok = SETS; fbreak; };
 			'show'i => { tok = SHOW; fbreak; };
 			'tag'i => { tok = TAG; fbreak; };
 			'ping'i => { tok = PING; fbreak; };
 			'select'i => { tok = SELECT; fbreak; };
 			'user'i => { tok = USER; fbreak; };
+			'users'i => { tok = USERS; fbreak; };
 			'where'i => { tok = WHERE; fbreak; };
 			'with'i => { tok = WITH; fbreak; };
 			identifier => { out.str = string(lex.data[lex.ts:lex.te]); tok = IDENT; fbreak; };

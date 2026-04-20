@@ -44,12 +44,6 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		if lim < 0 {
 			return cmderr("limit must not be negative")
 		}
-		maxlim := 100
-		if lim > maxlim {
-			return cmderr("limit currently must be no more than " + strconv.Itoa(maxlim))
-		}
-	} else {
-		return cmderr("\"select\" statement requires a \"limit\" clause")
 	}
 
 	sql, err := cmd.SQL()
@@ -77,6 +71,9 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 			panic(fmt.Sprintf("reading from reserve: %v", err))
 		}
 		result.AddData([]any{id, author, title, full_vendor_name, availability})
+		if result.DataLen() > 10000 {
+			return cmderr("result set too large")
+		}
 	}
 	if err = rows.Err(); err != nil {
 		panic(fmt.Sprintf("reading from reserve: %v", err))

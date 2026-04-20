@@ -17,7 +17,7 @@ type User struct {
 }
 
 func (c *Catalog) initAuth() error {
-	sql := "select username, superuser, login, password, salt from ccms.auth"
+	sql := "select name, superuser, login, password, salt from ccms.auth"
 	rows, err := c.dp.Query(context.TODO(), sql)
 	if err != nil {
 		return fmt.Errorf("selecting users: %v", err)
@@ -69,7 +69,7 @@ func (c *Catalog) CreateUser(userName, password string, superuser, login bool) e
 
 	salt := crypto.RandomKey()
 	hash := crypto.HashPassword(password, salt, c.secretKey)
-	sql := "insert into ccms.auth (username, superuser, login, password, salt) values ($1, $2, $3, $4, $5)"
+	sql := "insert into ccms.auth (name, superuser, login, password, salt) values ($1, $2, $3, $4, $5)"
 	if _, err := tx.Exec(context.TODO(), sql, userName, superuser, login, hash, crypto.EncodeToHexString(salt)); err != nil {
 		return fmt.Errorf("registering user %q: %v", userName, global.PGErr(err))
 	}

@@ -3,12 +3,11 @@ package server
 import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 )
 
 func dropSetStmt(s *svr, rqid int64, cmd *ast.DropSetStmt) *ccms.Result {
-	if !catalog.IsValidTargetSet(cmd.SetName) {
+	if !s.cat.IsValidTargetSet(cmd.SetName) {
 		return cmderr("invalid target set \"" + cmd.SetName + "\"")
 	}
 

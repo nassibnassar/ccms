@@ -22,6 +22,10 @@ variables.
 |
 |
 
+|
+|`projects`
+|Currently defined projects.
+
 //|
 //|`roles`
 //|Currently defined roles.

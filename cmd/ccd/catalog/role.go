@@ -11,7 +11,7 @@ import (
 )
 
 func (c *Catalog) initRoles() error {
-	sql := "select u.rolename, u.username from ccms.role r left join ccms.roleuser u on r.rolename=u.rolename"
+	sql := "select r.name, u.name from ccms.role r left join ccms.role_user ru on r.id=ru.role_id left join ccms.auth u on ru.user_id=u.id"
 	rows, err := c.dp.Query(context.TODO(), sql)
 	if err != nil {
 		return fmt.Errorf("selecting roles: %v", err)

@@ -12,9 +12,11 @@ Parameters
 
 name
 
-     sets  Currently defined sets.
+     projects Currently defined projects.
 
-     users Currently defined users.
+     sets     Currently defined sets.
+
+     users    Currently defined users.
 
 Examples
 

@@ -144,6 +144,10 @@ func (r *Result) AddData(values []any) {
 	r.data = append(r.data, DataRow{values: values})
 }
 
+func (r *Result) DataLen() int {
+	return len(r.data)
+}
+
 func (r *Result) jsonFields() []jsonFieldDescription {
 	fields := make([]jsonFieldDescription, 0)
 	for i := range r.fields {

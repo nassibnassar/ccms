@@ -38,18 +38,22 @@ const OFFSET = 57364
 const OR = 57365
 const ORDER = 57366
 const PASSWORD = 57367
-const PING = 57368
-const RETRIEVE = 57369
-const SELECT = 57370
-const SET = 57371
-const SHOW = 57372
-const TAG = 57373
-const USER = 57374
-const WHERE = 57375
-const WITH = 57376
-const IDENT = 57377
-const NUMBER = 57378
-const SLITERAL = 57379
+const PROJECT = 57368
+const PROJECTS = 57369
+const PING = 57370
+const RETRIEVE = 57371
+const SELECT = 57372
+const SET = 57373
+const SETS = 57374
+const SHOW = 57375
+const TAG = 57376
+const USER = 57377
+const USERS = 57378
+const WHERE = 57379
+const WITH = 57380
+const IDENT = 57381
+const NUMBER = 57382
+const SLITERAL = 57383
 
 var yyToknames = [...]string{
 	"$end",
@@ -77,13 +81,17 @@ var yyToknames = [...]string{
 	"OR",
 	"ORDER",
 	"PASSWORD",
+	"PROJECT",
+	"PROJECTS",
 	"PING",
 	"RETRIEVE",
 	"SELECT",
 	"SET",
+	"SETS",
 	"SHOW",
 	"TAG",
 	"USER",
+	"USERS",
 	"WHERE",
 	"WITH",
 	"IDENT",
@@ -113,94 +121,98 @@ var yyExca = [...]int8{
 
 const yyPrivate = 57344
 
-const yyLast = 130
+const yyLast = 137
 
 var yyAct = [...]int8{
-	68, 100, 63, 59, 44, 99, 64, 60, 49, 103,
-	57, 111, 110, 85, 66, 109, 110, 66, 84, 78,
-	62, 72, 33, 36, 83, 82, 38, 39, 40, 41,
-	67, 108, 43, 67, 35, 70, 69, 35, 70, 69,
-	16, 17, 71, 18, 104, 71, 54, 19, 20, 56,
-	35, 30, 29, 77, 34, 53, 23, 51, 21, 47,
-	22, 80, 81, 73, 46, 42, 37, 117, 15, 90,
-	79, 114, 35, 48, 50, 25, 28, 87, 26, 91,
-	93, 94, 86, 52, 92, 101, 101, 95, 96, 97,
-	98, 102, 74, 89, 75, 113, 106, 31, 45, 27,
-	55, 118, 76, 107, 1, 119, 4, 65, 115, 61,
-	24, 101, 116, 58, 112, 105, 88, 32, 13, 12,
-	11, 14, 10, 9, 8, 7, 6, 3, 5, 2,
+	75, 107, 70, 66, 47, 106, 71, 67, 55, 110,
+	64, 73, 118, 117, 92, 73, 91, 69, 116, 117,
+	90, 89, 33, 79, 115, 85, 41, 42, 43, 44,
+	74, 111, 46, 63, 74, 35, 77, 76, 50, 35,
+	77, 76, 35, 78, 61, 97, 34, 78, 59, 60,
+	16, 17, 57, 18, 30, 29, 53, 19, 20, 52,
+	51, 87, 88, 84, 49, 45, 40, 124, 23, 80,
+	21, 121, 35, 22, 54, 37, 36, 86, 56, 25,
+	58, 38, 15, 26, 94, 39, 98, 100, 101, 93,
+	28, 99, 108, 108, 102, 103, 104, 105, 109, 81,
+	96, 82, 120, 113, 31, 48, 27, 62, 125, 83,
+	114, 1, 126, 4, 72, 122, 68, 24, 108, 123,
+	65, 119, 112, 95, 32, 13, 12, 11, 14, 10,
+	9, 8, 7, 6, 3, 5, 2,
 }
 
 var yyPact = [...]int16{
-	30, -1000, -1000, 30, -1000, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, -1000, -1000, -1000, -1000, 46, 83, 47, 14,
-	78, 15, 37, 28, -1000, 37, 37, 37, 37, -1000,
-	27, 37, 82, -1000, -1000, -1000, 26, -1000, 21, 39,
-	41, 19, -1000, 55, 17, 37, -1000, -1000, 86, 11,
-	-1, -1000, -18, -1000, 41, 67, -1000, -1000, 71, 95,
-	-1000, 13, -1, 20, -1000, -1000, -25, -30, -1000, -1000,
-	-1000, -1, 82, 69, 32, -1, -1, 2, 2, -1000,
-	2, 2, 2, 2, 37, 37, -35, 6, 76, 94,
-	-7, 95, -1000, 20, 20, -1000, -1000, -1000, -1000, -29,
-	-1000, -1000, -33, -1000, -1000, 73, 35, 37, -1000, -1000,
-	37, -1000, -1000, 31, -1000, 93, -1000, -1000, -1000, -1000,
+	40, -1000, -1000, 40, -1000, -1000, -1000, -1000, -1000, -1000,
+	-1000, -1000, -1000, -1000, -1000, -1000, 48, 90, 59, 13,
+	85, 3, 49, 24, -1000, 33, 33, 33, 33, -1000,
+	23, 33, 89, -1000, -1000, -1000, 22, 33, 18, 17,
+	-1000, 14, 36, 41, 10, -1000, 50, 6, 33, -1000,
+	2, -1000, -1000, -1000, 93, -9, -4, -1000, -20, -1000,
+	41, -1000, 74, -1000, -1000, 78, 102, -1000, 19, -4,
+	16, -1000, -1000, -31, -33, -1000, -1000, -1000, -4, 89,
+	76, 4, -4, -4, 0, 0, -1000, 0, 0, 0,
+	0, 33, 33, -39, -11, 83, 101, -18, 102, -1000,
+	16, 16, -1000, -1000, -1000, -1000, -30, -1000, -1000, -36,
+	-1000, -1000, 80, 31, 33, -1000, -1000, 33, -1000, -1000,
+	27, -1000, 100, -1000, -1000, -1000, -1000,
 }
 
 var yyPgo = [...]uint8{
-	0, 129, 128, 106, 127, 126, 125, 124, 123, 122,
-	121, 120, 119, 118, 117, 4, 8, 116, 115, 114,
-	10, 113, 3, 109, 2, 7, 6, 107, 5, 1,
-	0, 104,
+	0, 136, 135, 113, 134, 133, 132, 131, 130, 129,
+	128, 127, 126, 125, 124, 4, 8, 123, 122, 121,
+	10, 120, 3, 116, 2, 7, 6, 114, 5, 1,
+	0, 111,
 }
 
 var yyR1 = [...]int8{
 	0, 31, 1, 4, 4, 3, 2, 2, 2, 2,
 	2, 2, 2, 2, 2, 2, 5, 6, 7, 8,
-	9, 9, 11, 10, 12, 13, 14, 14, 15, 16,
-	16, 17, 17, 17, 17, 18, 18, 19, 19, 20,
-	21, 21, 22, 22, 25, 25, 23, 23, 23, 24,
-	24, 24, 24, 24, 26, 26, 26, 27, 27, 27,
-	27, 28, 28, 29, 30,
+	9, 9, 11, 10, 12, 13, 13, 13, 13, 14,
+	14, 15, 16, 16, 17, 17, 17, 17, 18, 18,
+	19, 19, 20, 21, 21, 22, 22, 25, 25, 23,
+	23, 23, 24, 24, 24, 24, 24, 26, 26, 26,
+	27, 27, 27, 27, 28, 28, 29, 30,
 }
 
 var yyR2 = [...]int8{
 	0, 1, 1, 1, 2, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 4, 8, 5, 4,
-	2, 3, 7, 2, 4, 3, 1, 1, 6, 2,
-	0, 3, 4, 4, 0, 2, 0, 2, 0, 1,
-	1, 3, 1, 3, 1, 2, 1, 3, 3, 1,
-	3, 3, 3, 3, 1, 4, 4, 1, 1, 1,
-	3, 1, 3, 1, 1,
+	2, 3, 7, 2, 4, 3, 4, 3, 3, 1,
+	1, 6, 2, 0, 3, 4, 4, 0, 2, 0,
+	2, 0, 1, 1, 3, 1, 3, 1, 2, 1,
+	3, 3, 1, 3, 3, 3, 3, 1, 4, 4,
+	1, 1, 1, 3, 1, 3, 1, 1,
 }
 
 var yyChk = [...]int16{
 	-1000, -31, -1, -4, -3, -2, -5, -6, -7, -8,
-	-9, -11, -12, -13, -10, 38, 10, 11, 13, 17,
-	18, 28, 30, 26, -3, 29, 32, 16, 29, 38,
-	37, 19, -14, -30, 39, 35, -30, 38, -30, -30,
-	-30, -30, 38, -30, -15, 16, 38, 38, 34, -16,
-	33, 38, 28, 38, -30, 14, 38, -20, -21, -22,
-	-25, -23, 21, -24, -26, -27, 15, 31, -30, 37,
-	36, 43, 39, -16, 25, 23, 7, 40, 6, -25,
-	41, 42, 5, 4, 43, 43, -20, -15, -17, 24,
-	37, -22, -25, -24, -24, -26, -26, -26, -26, -28,
-	-29, -30, -28, 44, 38, -18, 20, 9, 38, 44,
-	45, 44, -19, 22, 36, -30, -29, 36, 8, 12,
+	-9, -11, -12, -13, -10, 42, 10, 11, 13, 17,
+	18, 30, 33, 28, -3, 31, 35, 16, 31, 42,
+	41, 19, -14, -30, 43, 39, 27, 26, 32, 36,
+	42, -30, -30, -30, -30, 42, -30, -15, 16, 42,
+	-30, 42, 42, 42, 38, -16, 37, 42, 30, 42,
+	-30, 42, 14, 42, -20, -21, -22, -25, -23, 21,
+	-24, -26, -27, 15, 34, -30, 41, 40, 47, 43,
+	-16, 25, 23, 7, 44, 6, -25, 45, 46, 5,
+	4, 47, 47, -20, -15, -17, 24, 41, -22, -25,
+	-24, -24, -26, -26, -26, -26, -28, -29, -30, -28,
+	48, 42, -18, 20, 9, 42, 48, 49, 48, -19,
+	22, 40, -30, -29, 40, 8, 12,
 }
 
 var yyDef = [...]int8{
 	0, -2, 1, 2, 3, 5, 6, 7, 8, 9,
 	10, 11, 12, 13, 14, 15, 0, 0, 0, 0,
 	0, 0, 0, 0, 4, 0, 0, 0, 0, 20,
-	0, 0, 0, 26, 27, 64, 0, 23, 0, 0,
-	30, 0, 21, 0, 0, 0, 25, 16, 0, 0,
-	0, 19, 0, 24, 30, 0, 18, 29, 39, 40,
-	42, 44, 0, 46, 49, 54, 0, 0, 57, 58,
-	59, 0, 0, 34, 0, 0, 0, 0, 0, 45,
-	0, 0, 0, 0, 0, 0, 0, 0, 36, 0,
-	0, 41, 43, 47, 48, 50, 51, 52, 53, 0,
-	61, 63, 0, 60, 22, 38, 0, 0, 17, 55,
-	0, 56, 28, 0, 35, 31, 62, 37, 32, 33,
+	0, 0, 0, 29, 30, 67, 0, 0, 0, 0,
+	23, 0, 0, 33, 0, 21, 0, 0, 0, 25,
+	0, 27, 28, 16, 0, 0, 0, 19, 0, 24,
+	33, 26, 0, 18, 32, 42, 43, 45, 47, 0,
+	49, 52, 57, 0, 0, 60, 61, 62, 0, 0,
+	37, 0, 0, 0, 0, 0, 48, 0, 0, 0,
+	0, 0, 0, 0, 0, 39, 0, 0, 44, 46,
+	50, 51, 53, 54, 55, 56, 0, 64, 66, 0,
+	63, 22, 41, 0, 0, 17, 58, 0, 59, 31,
+	0, 38, 34, 65, 40, 35, 36,
 }
 
 var yyTok1 = [...]int8{
@@ -208,16 +220,16 @@ var yyTok1 = [...]int8{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	43, 44, 39, 3, 45, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 38,
-	41, 40, 42,
+	47, 48, 43, 3, 49, 3, 3, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 42,
+	45, 44, 46,
 }
 
 var yyTok2 = [...]int8{
 	2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
 	12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
 	22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-	32, 33, 34, 35, 36, 37,
+	32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
 }
 
 var yyTok3 = [...]int8{
@@ -682,87 +694,87 @@ yydefault:
 	case 25:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.node = &ast.ShowStmt{Name: yyDollar[2].str}
+			yyVAL.node = &ast.ShowStmt{Type: "projects"}
 		}
 	case 26:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		{
+			yyVAL.node = &ast.ShowStmt{Type: "project", Name: yyDollar[3].str}
+		}
+	case 27:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.node = &ast.ShowStmt{Type: "sets"}
+		}
+	case 28:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.node = &ast.ShowStmt{Type: "users"}
+		}
+	case 29:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.node = &ast.SelectAttrList{Attr: yyDollar[1].str}
 		}
-	case 27:
+	case 30:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.node = &ast.SelectAttrList{Attr: "*"}
 		}
-	case 28:
+	case 31:
 		yyDollar = yyS[yypt-6 : yypt+1]
 		{
 			yyVAL.node = &ast.QueryClause{From: yyDollar[2].str, Where: yyDollar[3].node, Order: yyDollar[4].node, Limit: yyDollar[5].node, Offset: yyDollar[6].node}
 		}
-	case 29:
+	case 32:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.WhereClause{Valid: true, Condition: yyDollar[2].node}
 		}
-	case 30:
+	case 33:
 		yyDollar = yyS[yypt-0 : yypt+1]
 		{
 			yyVAL.node = &ast.WhereClause{}
 		}
-	case 31:
+	case 34:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.node = &ast.OrderClause{Valid: true, Attr: yyDollar[3].str, Desc: false}
 		}
-	case 32:
+	case 35:
 		yyDollar = yyS[yypt-4 : yypt+1]
 		{
 			yyVAL.node = &ast.OrderClause{Valid: true, Attr: yyDollar[3].str, Desc: false}
 		}
-	case 33:
+	case 36:
 		yyDollar = yyS[yypt-4 : yypt+1]
 		{
 			yyVAL.node = &ast.OrderClause{Valid: true, Attr: yyDollar[3].str, Desc: true}
 		}
-	case 34:
+	case 37:
 		yyDollar = yyS[yypt-0 : yypt+1]
 		{
 			yyVAL.node = &ast.OrderClause{}
 		}
-	case 35:
+	case 38:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.LimitClause{Valid: true, Count: yyDollar[2].str}
 		}
-	case 36:
+	case 39:
 		yyDollar = yyS[yypt-0 : yypt+1]
 		{
 			yyVAL.node = &ast.LimitClause{}
 		}
-	case 37:
+	case 40:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.OffsetClause{Valid: true, Start: yyDollar[2].str}
 		}
-	case 38:
+	case 41:
 		yyDollar = yyS[yypt-0 : yypt+1]
 		{
 			yyVAL.node = &ast.OffsetClause{}
-		}
-	case 39:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		{
-			yyVAL.node = yyDollar[1].node
-		}
-	case 40:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		{
-			yyVAL.node = yyDollar[1].node
-		}
-	case 41:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		{
-			yyVAL.node = &ast.OrExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
 		}
 	case 42:
 		yyDollar = yyS[yypt-1 : yypt+1]
@@ -770,34 +782,34 @@ yydefault:
 			yyVAL.node = yyDollar[1].node
 		}
 	case 43:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		{
+			yyVAL.node = yyDollar[1].node
+		}
+	case 44:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.node = &ast.OrExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
+		}
+	case 45:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		{
+			yyVAL.node = yyDollar[1].node
+		}
+	case 46:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.node = &ast.AndExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
 		}
-	case 44:
+	case 47:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.node = yyDollar[1].node
 		}
-	case 45:
+	case 48:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.node = &ast.NotExpr{Expr: yyDollar[2].node}
-		}
-	case 46:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		{
-			yyVAL.node = yyDollar[1].node
-		}
-	case 47:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		{
-			yyVAL.node = &ast.EqualExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
-		}
-	case 48:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		{
-			yyVAL.node = &ast.NotEqualExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
 		}
 	case 49:
 		yyDollar = yyS[yypt-1 : yypt+1]
@@ -807,74 +819,89 @@ yydefault:
 	case 50:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.node = &ast.LessThanExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
+			yyVAL.node = &ast.EqualExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
 		}
 	case 51:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.node = &ast.GreaterThanExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
+			yyVAL.node = &ast.NotEqualExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
 		}
 	case 52:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		{
-			yyVAL.node = &ast.LessThanOrEqualExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
-		}
-	case 53:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		{
-			yyVAL.node = &ast.GreaterThanOrEqualExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
-		}
-	case 54:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.node = yyDollar[1].node
 		}
-	case 55:
-		yyDollar = yyS[yypt-4 : yypt+1]
+	case 53:
+		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.node = &ast.FilterExpr{ExprList: yyDollar[3].nodeList}
+			yyVAL.node = &ast.LessThanExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
+		}
+	case 54:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.node = &ast.GreaterThanExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
+		}
+	case 55:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.node = &ast.LessThanOrEqualExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
 		}
 	case 56:
-		yyDollar = yyS[yypt-4 : yypt+1]
+		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.node = &ast.TagExpr{ExprList: yyDollar[3].nodeList}
+			yyVAL.node = &ast.GreaterThanOrEqualExpr{Expr1: yyDollar[1].node, Expr2: yyDollar[3].node}
 		}
 	case 57:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.node = &ast.Name{Value: yyDollar[1].str}
+			yyVAL.node = yyDollar[1].node
 		}
 	case 58:
-		yyDollar = yyS[yypt-1 : yypt+1]
+		yyDollar = yyS[yypt-4 : yypt+1]
 		{
-			yyVAL.node = &ast.SLiteral{Value: yyDollar[1].str}
+			yyVAL.node = &ast.FilterExpr{ExprList: yyDollar[3].nodeList}
 		}
 	case 59:
-		yyDollar = yyS[yypt-1 : yypt+1]
+		yyDollar = yyS[yypt-4 : yypt+1]
 		{
-			yyVAL.node = &ast.Number{Value: yyDollar[1].str}
+			yyVAL.node = &ast.TagExpr{ExprList: yyDollar[3].nodeList}
 		}
 	case 60:
-		yyDollar = yyS[yypt-3 : yypt+1]
+		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.node = &ast.ParenExpr{Expr: yyDollar[2].node}
+			yyVAL.node = &ast.Name{Value: yyDollar[1].str}
 		}
 	case 61:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.nodeList = yyDollar[1].nodeList
+			yyVAL.node = &ast.SLiteral{Value: yyDollar[1].str}
 		}
 	case 62:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		{
+			yyVAL.node = &ast.Number{Value: yyDollar[1].str}
+		}
+	case 63:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.node = &ast.ParenExpr{Expr: yyDollar[2].node}
+		}
+	case 64:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		{
+			yyVAL.nodeList = yyDollar[1].nodeList
+		}
+	case 65:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
 			yyVAL.nodeList = append(yyDollar[1].nodeList, yyDollar[3].nodeList...)
 		}
-	case 63:
+	case 66:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.nodeList = []ast.Node{&ast.Name{Value: yyDollar[1].str}}
 		}
-	case 64:
+	case 67:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
 			yyVAL.str = strings.ToLower(yyDollar[1].str)

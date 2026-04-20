@@ -3,7 +3,6 @@ package server
 import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 )
 
@@ -12,11 +11,11 @@ func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *ccms.Result {
 		return cmderr("set \"" + cmd.SetName + "\" already exists")
 	}
 
-	if !catalog.IsValidTargetSet(cmd.SetName) {
+	if !s.cat.IsValidTargetSet(cmd.SetName) {
 		return cmderr("invalid set name \"" + cmd.SetName + "\"")
 	}
 
-	if !catalog.ProjectExists(cmd.SetName) {
+	if !s.cat.ProjectExists(cmd.SetName) {
 		return cmderr("invalid project in  \"" + cmd.SetName + "\"")
 	}
 

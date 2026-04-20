@@ -70,13 +70,17 @@ import (
 %token OR
 %token ORDER
 %token PASSWORD
+%token PROJECT
+%token PROJECTS
 %token PING
 %token RETRIEVE
 %token SELECT
 %token SET
+%token SETS
 %token SHOW
 %token TAG
 %token USER
+%token USERS
 %token WHERE
 %token WITH
 
@@ -213,9 +217,21 @@ select_stmt:
 		}
 
 show_stmt:
-	SHOW name ';'
+	SHOW PROJECTS ';'
 		{
-			$$ = &ast.ShowStmt{Name: $2}
+			$$ = &ast.ShowStmt{Type: "projects"}
+		}
+	| SHOW PROJECT name ';'
+		{
+			$$ = &ast.ShowStmt{Type: "project", Name: $3}
+		}
+	| SHOW SETS ';'
+		{
+			$$ = &ast.ShowStmt{Type: "sets"}
+		}
+	| SHOW USERS ';'
+		{
+			$$ = &ast.ShowStmt{Type: "users"}
 		}
 
 select_attr_list:

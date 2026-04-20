@@ -54,6 +54,7 @@ type SelectStmt struct {
 func (*SelectStmt) node() {}
 
 type ShowStmt struct {
+	Type string
 	Name string
 }
 

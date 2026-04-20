@@ -6,7 +6,6 @@ import (
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
 )
 
 func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
@@ -19,7 +18,7 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 		return cmderr("\"offset\" is not supported with insert")
 	}
 
-	if !catalog.IsValidTargetSet(cmd.Into) {
+	if !s.cat.IsValidTargetSet(cmd.Into) {
 		return cmderr("invalid target set \"" + cmd.Into + "\"")
 	}
 

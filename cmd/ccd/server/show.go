@@ -10,13 +10,22 @@ import (
 
 func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	result := ccms.NewResult("show")
-	switch cmd.Name {
+	switch cmd.Type {
 	case "filters":
 		result.AddField("filter_name", "text")
 	//case "roles":
 	//        result.AddField("role_name", "text")
 	//        result.AddField("user_names", "text")
 	//        addShowRolesData(s.cat, result)
+	case "projects":
+		result.AddField("project_name", "text")
+		addShowProjectsData(s.cat, result)
+	case "project":
+		result.AddField("property", "text")
+		result.AddField("value", "text")
+		if err := addShowProjectData(s.cat, result, cmd.Name); err != nil {
+			return cmderr(err.Error())
+		}
 	case "sets":
 		result.AddField("set_name", "text")
 		addShowSetsData(s.cat, result)
@@ -26,7 +35,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("login", "boolean")
 		addShowUsersData(s.cat, result)
 	default:
-		return cmderr("unknown variable \"" + cmd.Name + "\"")
+		return cmderr("unknown variable \"" + cmd.Type + "\"")
 	}
 	return result
 }
@@ -37,6 +46,24 @@ func addShowRolesData(cat *catalog.Catalog, result *ccms.Result) {
 		users := strings.Join(roles[i].UserNames, ", ")
 		result.AddData([]any{roles[i].RoleName, users})
 	}
+}
+
+func addShowProjectsData(cat *catalog.Catalog, result *ccms.Result) {
+	projects := cat.AllProjects()
+	for i := range projects {
+		result.AddData([]any{projects[i].ProjectName})
+	}
+}
+
+func addShowProjectData(cat *catalog.Catalog, result *ccms.Result, projectName string) error {
+	prop, err := cat.ProjectProperties(projectName)
+	if err != nil {
+		return err
+	}
+	for i := range prop {
+		result.AddData([]any{prop[i][0], prop[i][1]})
+	}
+	return nil
 }
 
 func addShowSetsData(cat *catalog.Catalog, result *ccms.Result) {

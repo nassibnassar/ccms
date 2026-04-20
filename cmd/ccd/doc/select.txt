@@ -6,13 +6,18 @@ select *
     from set_name
     [ where search_condition ]
     [ order by attribute [ asc | desc ] ]
-    limit count
+    [ limit count ]
     [ offset start ]
 
 Description
 
 The select command retrieves a list of objects from a set according to
 specified criteria.
+
+     The CCMS server returns to the client no more than 10000 records per
+Note select command. If a result set is larger than this, the server returns an
+     error. It is a good idea to use a limit clause if the query may return a
+     large result set.
 
 Parameters
 
@@ -37,9 +42,7 @@ objects are sorted by the specified attribute, with asc for ascending order
 
 limit
 
-The limit clause specifies a maximum number of objects that will be returned.
-
-Note At present the limit clause is required for select.
+The limit clause specifies the maximum number of objects that will be returned.
 
 offset
 

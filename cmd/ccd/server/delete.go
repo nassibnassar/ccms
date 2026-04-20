@@ -6,12 +6,11 @@ import (
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
 	"github.com/indexdata/ccms/internal/global"
 )
 
 func deleteStmt(s *svr, rqid int64, cmd *ast.DeleteStmt) *ccms.Result {
-	if !catalog.IsValidTargetSet(cmd.From) {
+	if !s.cat.IsValidTargetSet(cmd.From) {
 		return cmderr("invalid target set \"" + cmd.From + "\"")
 	}
 

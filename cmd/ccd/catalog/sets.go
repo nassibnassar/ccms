@@ -42,7 +42,7 @@ func (c *Catalog) SetExists(setName string) bool {
 	return ok
 }
 
-func IsValidTargetSet(setName string) bool {
+func (c *Catalog) IsValidTargetSet(setName string) bool {
 	if setName == "reserve" {
 		return false
 	}
@@ -52,7 +52,7 @@ func IsValidTargetSet(setName string) bool {
 	if strings.HasPrefix(setName, ".") || strings.HasSuffix(setName, ".") {
 		return false
 	}
-	return ProjectExists(setName)
+	return c.ProjectExists(setName)
 }
 
 // return table containing set

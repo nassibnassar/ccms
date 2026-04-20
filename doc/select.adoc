@@ -8,7 +8,7 @@ select *
     from `*_set_name_*`
     [ where `*_search_condition_*` ]
     [ order by `*_attribute_*` [ asc | desc ] ]
-    limit `*_count_*`
+    [ limit `*_count_*` ]
     [ offset `*_start_*` ]
 ----
 
@@ -17,6 +17,11 @@ select *
 
 The `select` command retrieves a list of objects from a set according
 to specified criteria.
+
+NOTE:  The CCMS server returns to the client no more than 10000
+records per `select` command.  If a result set is larger than this,
+the server returns an error.  It is a good idea to use a `limit`
+clause if the query may return a large result set.
 
 [discrete]
 ===== Parameters
@@ -49,10 +54,8 @@ order.
 [discrete]
 ====== limit
 
-The `limit` clause specifies a maximum number of objects that will be
-returned.
-
-NOTE:  At present the `limit` clause is required for `select`.
+The `limit` clause specifies the maximum number of objects that will
+be returned.
 
 [discrete]
 ====== offset
