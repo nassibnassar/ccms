@@ -475,6 +475,7 @@ var completer = readline.NewPrefixCompleter(
 	readline.PcItem("insert into"),
 	readline.PcItem("select * from"),
 	readline.PcItem("show",
+		readline.PcItem("project"),
 		readline.PcItem("projects"),
 		//readline.PcItem("roles"),
 		readline.PcItem("sets"),

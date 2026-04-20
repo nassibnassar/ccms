@@ -1,10 +1,17 @@
 # v0.0.20
 
+* Added support for projects.
+
+* Added `show projects` and `show project` commands.
+
 * Added `create user` command.
 
 * Added `show users` command.
 
 * Added user authentication.
+
+* The `limit` clause is no longer required with `select`.  Result sets
+  larger than 10000 records per `select` return an error.
 
 # v0.0.19
 

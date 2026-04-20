@@ -4,7 +4,13 @@ List the values of a system variable
 
 [source,subs="verbatim,quotes"]
 ----
-show `*_name_*`
+show projects
+
+show project `*_project_name_*`
+
+show sets
+
+show users
 ----
 
 [discrete]
@@ -12,32 +18,6 @@ show `*_name_*`
 
 `show` lists the current values of system configurations or other
 variables.
-
-[discrete]
-===== Parameters
-
-[frame=none,grid=none,cols="1,3,8"]
-|===
-|`*_name_*`
-|
-|
-
-|
-|`projects`
-|Currently defined projects.
-
-//|
-//|`roles`
-//|Currently defined roles.
-
-|
-|`sets`
-|Currently defined sets.
-
-|
-|`users`
-|Currently defined users.
-|===
 
 [discrete]
 ===== Examples
