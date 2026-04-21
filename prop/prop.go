@@ -5,7 +5,7 @@ import "strings"
 // a name-title pair
 type Prop struct {
 	Name  string // unique identifier
-	Title string // brief title or description
+	Title string // title or brief description
 }
 
 // parse the value of a structured property into a slice of name-title pairs
