@@ -1,3 +1,7 @@
+# v0.0.21
+
+* Added prop.Prop for structured properties.
+
 # v0.0.20
 
 * Added support for projects.
