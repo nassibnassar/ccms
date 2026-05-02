@@ -1,3 +1,5 @@
+# v0.0.22
+
 * Added support for count function.
 
 # v0.0.21
