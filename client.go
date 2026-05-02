@@ -382,6 +382,7 @@ func readResponse(httpResponse *http.Response, responseStruct any) error {
 	if err = json.Unmarshal(body, responseStruct); err != nil {
 		return err
 	}
+	fixDataTypes(responseStruct.(**jsonResponse))
 	return nil
 }
 
@@ -392,6 +393,22 @@ func readResponseMessage(httpResponse *http.Response) (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%v", m["message"]), nil
+}
+
+func fixDataTypes(resp **jsonResponse) {
+	results := (*resp).Results
+	for i := range results {
+		fields := results[i].Fields
+		for j := range results[i].Data {
+			for k := range results[i].Data[j].Values {
+				switch fields[k].DataType {
+				case "bigint":
+					results[i].Data[j].Values[k] = int64(results[i].Data[j].Values[k].(float64))
+				default:
+				}
+			}
+		}
+	}
 }
 
 func readResponseMap(httpResponse *http.Response) (map[string]interface{}, error) {
