@@ -4,12 +4,12 @@ Retrieve objects from a set
 
 [source,subs="verbatim,quotes"]
 ----
-select *
-    from `*_set_name_*`
-    [ where `*_search_condition_*` ]
-    [ order by `*_attribute_*` [ asc | desc ] ]
-    [ limit `*_count_*` ]
-    [ offset `*_start_*` ]
+select { * | count(*) }
+    from `**_set_name_**`
+    [ where `**_search_condition_**` ]
+    [ order by `**_attribute_**` [ asc | desc ] ]
+    [ limit `**_count_**` ]
+    [ offset `**_start_**` ]
 ----
 
 [discrete]
@@ -26,7 +26,8 @@ clause if the query may return a large result set.
 [discrete]
 ===== Parameters
 
-The first argument specifies `*` meaning all available attributes.
+The first argument specifies `\*` meaning all available attributes or
+`count(*)` meaning a count of the number of rows returned.
 
 [discrete]
 ====== from

@@ -1,3 +1,5 @@
+* Added support for count function.
+
 # v0.0.21
 
 * Added prop.Prop for structured properties.

@@ -9,6 +9,7 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
+	"github.com/jackc/pgx/v5"
 )
 
 func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
@@ -22,8 +23,8 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 	}
 
 	a := cmd.AttrList.(*ast.SelectAttrList)
-	if a.Attr != "*" {
-		return cmderr("selecting attributes is not yet supported; use \"select *\"")
+	if a.Attr != "*" && a.Attr != "count(*)" {
+		return cmderr("selecting attributes is not yet supported")
 	}
 
 	if err := processQuery(s, rqid, cmd.Query.(*ast.QueryClause)); err != nil {
@@ -51,6 +52,42 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		return cmderr(err.Error())
 	}
 	//log.Info("[%d] %s", rqid, sql)
+
+	switch a.Attr {
+	case "*":
+		result, err := runQuery(s, sql)
+		if err != nil {
+			return cmderr(err.Error())
+		}
+		return result
+	case "count(*)":
+		result, err := runQueryCount(s, sql)
+		if err != nil {
+			return cmderr(err.Error())
+		}
+		return result
+	default:
+		return cmderr("internal error: invalid projection in select")
+	}
+}
+
+func runQueryCount(s *svr, sql string) (*ccms.Result, error) {
+	var count int64
+	err := s.dp.QueryRow(context.TODO(), sql).Scan(&count)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return nil, errors.New("internal error: no rows in select count(*)")
+	case err != nil:
+		return nil, err
+	default:
+	}
+	result := ccms.NewResult("select")
+	result.AddField("count", "bigint")
+	result.AddData([]any{count})
+	return result, nil
+}
+
+func runQuery(s *svr, sql string) (*ccms.Result, error) {
 	rows, err := s.dp.Query(context.TODO(), sql)
 	if err != nil {
 		fmt.Println(sql)
@@ -72,13 +109,13 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		}
 		result.AddData([]any{id, author, title, full_vendor_name, availability})
 		if result.DataLen() > 10000 {
-			return cmderr("result set too large")
+			return nil, errors.New("result set too large")
 		}
 	}
 	if err = rows.Err(); err != nil {
 		panic(fmt.Sprintf("reading from reserve: %v", err))
 	}
-	return result
+	return result, nil
 }
 
 func processQuery(s *svr, rqid int64, query *ast.QueryClause) error {

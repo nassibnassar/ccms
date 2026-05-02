@@ -60,7 +60,17 @@ func (s *SelectStmt) SQL() (string, error) {
 }
 
 func (s *SelectStmt) sql(b *strings.Builder) error {
-	b.WriteString("select a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability ")
+	var projection string
+	switch s.AttrList.(*SelectAttrList).Attr {
+	case "*":
+		projection = "a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability"
+	case "count(*)":
+		projection = "count(*)"
+	}
+
+	b.WriteString("select ")
+	b.WriteString(projection)
+	b.WriteRune(' ')
 	if err := s.Query.(*QueryClause).sql(b); err != nil {
 		return err
 	}

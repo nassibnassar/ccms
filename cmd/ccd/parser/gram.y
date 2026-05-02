@@ -55,6 +55,7 @@ import (
 %token ASC
 %token BY
 %token CREATE
+%token COUNT
 %token DELETE
 %token DESC
 %token DROP
@@ -252,6 +253,10 @@ select_attr_list:
 	| '*'
 		{
 			$$ = &ast.SelectAttrList{Attr: "*"}
+		}
+	| COUNT '(' '*' ')'
+		{
+			$$ = &ast.SelectAttrList{Attr: "count(*)"}
 		}
 
 query_clause:

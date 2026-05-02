@@ -2,7 +2,7 @@ select
 
 Retrieve objects from a set
 
-select *
+select { * | count(*) }
     from set_name
     [ where search_condition ]
     [ order by attribute [ asc | desc ] ]
@@ -21,7 +21,8 @@ Note select command. If a result set is larger than this, the server returns an
 
 Parameters
 
-The first argument specifies * meaning all available attributes.
+The first argument specifies * meaning all available attributes or count(*)
+meaning a count of the number of rows returned.
 
 from
 
