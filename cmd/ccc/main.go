@@ -390,7 +390,7 @@ func timingFlag(cmd *cobra.Command, timing *bool) string {
 		cmd.Flags().BoolVarP(timing, "timing", "t", false, "")
 	}
 	return "" +
-		"  -t, --timing                enable timing of commands\n"
+		"  -t, --timing                enable timing of requests\n"
 }
 
 func hostFlag(cmd *cobra.Command, host *string) string {
