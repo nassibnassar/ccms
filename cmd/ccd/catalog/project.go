@@ -77,15 +77,43 @@ func sortProjectNames(projects []Project) {
 }
 
 func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
-	var title, action, mouLink, funds string
-	q := "select coalesce(p.title, ''), coalesce(p.action, ''), coalesce(p.mou_link, ''), " +
-		"coalesce(string_agg(f.name||':'||f.title, '|'), '') funds " +
-		"from ccms.project p " +
-		"left join ccms.project_fund pf on p.id=pf.project_id " +
-		"left join ccms.fund f on pf.fund_id=f.id " +
-		"where p.name=$1 " +
-		"group by p.title, p.action, p.mou_link"
-	err := c.dp.QueryRow(context.TODO(), q, projectName).Scan(&title, &action, &mouLink, &funds)
+	var title, action, mouLink, funds, locations, tracks string
+	q := `with fnd as (
+    select p.id project_id,
+           coalesce(string_agg(f.name||':'||f.title, '|'), '') funds
+        from ccms.project p
+            join ccms.project_fund pf on p.id=pf.project_id
+            join ccms.fund f on pf.fund_id=f.id
+        group by p.id
+),
+loc as (
+    select p.id project_id,
+           coalesce(string_agg(l.name||':'||l.title, '|'), '') locations
+        from ccms.project p
+            join ccms.project_location pl on p.id=pl.project_id
+            join ccms.location l on pl.location_id=l.id
+        group by p.id
+),
+trk as (
+    select p.id project_id,
+           coalesce(string_agg(t.name||':'||t.title, '|'), '') tracks
+        from ccms.project p
+            join ccms.project_track pl on p.id=pl.project_id
+            join ccms.track t on pl.track_id=t.id
+        group by p.id
+)
+select coalesce(p.title, '') title,
+       coalesce(p.action, '') action,
+       coalesce(p.mou_link, '') mou_link,
+       fnd.funds,
+       loc.locations,
+       trk.tracks
+       from ccms.project p
+           join fnd on p.id=fnd.project_id
+           join loc on p.id=loc.project_id
+           join trk on p.id=trk.project_id
+       where p.name=$1`
+	err := c.dp.QueryRow(context.TODO(), q, projectName).Scan(&title, &action, &mouLink, &funds, &locations, &tracks)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return nil, fmt.Errorf("project %q does not exist", projectName)
@@ -98,6 +126,8 @@ func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
 		{"action", action},
 		{"mou_link", mouLink},
 		{"funds", funds},
+		{"locations", locations},
+		{"tracks", tracks},
 	}
 	return prop, nil
 }
