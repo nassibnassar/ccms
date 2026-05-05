@@ -469,6 +469,7 @@ func helpCommand(line string) string {
 }
 
 var completer = readline.NewPrefixCompleter(
+	readline.PcItem("create project"),
 	readline.PcItem("create set"),
 	readline.PcItem("delete from"),
 	readline.PcItem("drop set"),
@@ -480,11 +481,11 @@ var completer = readline.NewPrefixCompleter(
 	readline.PcItem("show",
 		readline.PcItem("project"),
 		readline.PcItem("projects"),
-		//readline.PcItem("roles"),
 		readline.PcItem("sets"),
 		readline.PcItem("users"),
 	),
 	readline.PcItem("\\h",
+		readline.PcItem("create project"),
 		readline.PcItem("create set"),
 		readline.PcItem("delete"),
 		readline.PcItem("drop set"),

@@ -1,0 +1,31 @@
+==== create project
+
+Define a new project
+
+[source,subs="verbatim,quotes"]
+----
+create project `*_project_name_*`
+----
+
+[discrete]
+===== Description
+
+The `create project` command creates a new project.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_project_name_*`
+|The name of the new project.
+|===
+
+[discrete]
+===== Examples
+
+Create a new project `myproj`:
+
+----
+create project myproj;
+----

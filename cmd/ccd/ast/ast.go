@@ -2,6 +2,12 @@ package ast
 
 /* statements */
 
+type CreateProjectStmt struct {
+	ProjectName string
+}
+
+func (*CreateProjectStmt) node() {}
+
 type CreateSetStmt struct {
 	SetName string
 }

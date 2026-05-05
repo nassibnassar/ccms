@@ -225,6 +225,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 
 	for i := range cmds {
 		switch cmd := cmds[i].(type) {
+		case *ast.CreateProjectStmt:
+			result = createProjectStmt(s, rqid, cmd)
 		case *ast.CreateSetStmt:
 			result = createSetStmt(s, rqid, cmd)
 		case *ast.CreateUserStmt:

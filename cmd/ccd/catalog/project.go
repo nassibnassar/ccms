@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/indexdata/ccms/internal/global"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -54,6 +55,16 @@ func (c *Catalog) ProjectExists(projectOrFullSetName string) bool {
 	return ok
 }
 
+func (c *Catalog) IsValidTargetProject(projectName string) bool {
+	if projectName == "reserve" {
+		return false
+	}
+	if strings.ContainsRune(projectName, '.') {
+		return false
+	}
+	return true
+}
+
 func (c *Catalog) AllProjects() []Project {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -74,6 +85,33 @@ func sortProjectNames(projects []Project) {
 	slices.SortFunc(projects, func(x, y Project) int {
 		return cmp.Compare(x.ProjectName, y.ProjectName)
 	})
+}
+
+func (c *Catalog) CreateProject(projectName string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	tx, err := c.dp.Begin(context.TODO())
+	if err != nil {
+		return fmt.Errorf("creating project %q: opening transaction: %v", projectName, err)
+	}
+	defer tx.Rollback(context.TODO())
+
+	sql := "create schema " + projectName
+	if _, err := tx.Exec(context.TODO(), sql); err != nil {
+		return fmt.Errorf("creating project %q: %v", projectName, err)
+	}
+	sql = "insert into ccms.project (name) values ($1)"
+	if _, err := tx.Exec(context.TODO(), sql, projectName); err != nil {
+		return fmt.Errorf("registering project %q: %v", projectName, global.PGErr(err))
+	}
+
+	if err := tx.Commit(context.TODO()); err != nil {
+		return fmt.Errorf("creating project %q: committing changes: %v", projectName, err)
+	}
+
+	c.projects[projectName] = struct{}{}
+	return nil
 }
 
 func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
@@ -105,13 +143,13 @@ trk as (
 select coalesce(p.title, '') title,
        coalesce(p.action, '') action,
        coalesce(p.mou_link, '') mou_link,
-       fnd.funds,
-       loc.locations,
-       trk.tracks
+       coalesce(fnd.funds, '') funds,
+       coalesce(loc.locations, '') locations,
+       coalesce(trk.tracks, '') tracks
        from ccms.project p
-           join fnd on p.id=fnd.project_id
-           join loc on p.id=loc.project_id
-           join trk on p.id=trk.project_id
+           left join fnd on p.id=fnd.project_id
+           left join loc on p.id=loc.project_id
+           left join trk on p.id=trk.project_id
        where p.name=$1`
 	err := c.dp.QueryRow(context.TODO(), q, projectName).Scan(&title, &action, &mouLink, &funds, &locations, &tracks)
 	switch {

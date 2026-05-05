@@ -19,6 +19,7 @@ import (
 %type <node> basic_stmt
 %type <nodeList> stmt
 %type <nodeList> stmt_list
+%type <node> create_project_stmt
 %type <node> create_set_stmt
 %type <node> create_user_stmt
 %type <node> delete_stmt
@@ -126,7 +127,11 @@ stmt:
 		}
 
 basic_stmt:
-	create_set_stmt
+	create_project_stmt
+		{
+			$$ = $1
+		}
+	| create_set_stmt
 		{
 			$$ = $1
 		}
@@ -165,6 +170,12 @@ basic_stmt:
 	| ';'
 		{
 			$$ = nil
+		}
+
+create_project_stmt:
+	CREATE PROJECT name ';'
+		{
+			$$ = &ast.CreateProjectStmt{ProjectName: $3}
 		}
 
 create_set_stmt:

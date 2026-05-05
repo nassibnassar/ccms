@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+//go:embed createproject.txt
+var createProjectTxt string
+
+func CreateProject() string {
+	return strings.TrimSpace(createProjectTxt)
+}
+
 //go:embed createset.txt
 var createSetTxt string
 

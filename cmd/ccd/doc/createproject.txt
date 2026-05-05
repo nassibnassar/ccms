@@ -1,0 +1,20 @@
+create project
+
+Define a new project
+
+create project project_name
+
+Description
+
+The create project command creates a new project.
+
+Parameters
+
+project_name The name of the new project.
+
+Examples
+
+Create a new project myproj:
+
+create project myproj;
+
