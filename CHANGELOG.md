@@ -1,3 +1,7 @@
+# v0.0.23
+
+* Added `create project` command.
+
 # v0.0.22
 
 * Added support for count function.
