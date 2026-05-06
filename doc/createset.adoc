@@ -18,11 +18,10 @@ The `create set` command creates a new, empty set.
 [frame=none,grid=none,cols="1,2"]
 |===
 |`*_set_name_*`
-|The name of the new set.
+|The name of the new set, prefixed with the project name and a dot
+ (`.`).  For example, a set `s` in project `p` would be written as
+ `p.s`.
 |===
-
-NOTE:  Currently set names must begin with `test` followed by `.`,
-because `test` is the only available project space for new sets.
 
 [discrete]
 ===== Examples
