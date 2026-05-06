@@ -144,8 +144,7 @@ func (r *Result) AddData(values []any) {
 	r.data = append(r.data, DataRow{values: values})
 }
 
-// return the number of data rows; generally not needed by a client
-// since Data() returns an iterator
+// Deprecated: DataLen will be removed in a future version.
 func (r *Result) DataLen() int {
 	return len(r.data)
 }

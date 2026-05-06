@@ -100,6 +100,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 	result.AddField("title", "text")
 	result.AddField("full_vendor_name", "text")
 	result.AddField("availability", "text")
+	var count int
 	for rows.Next() {
 		var id int64
 		var author, title, full_vendor_name, availability string
@@ -108,7 +109,8 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 			panic(fmt.Sprintf("reading from reserve: %v", err))
 		}
 		result.AddData([]any{id, author, title, full_vendor_name, availability})
-		if result.DataLen() > 10000 {
+		count++
+		if count > 10000 {
 			return nil, errors.New("result set too large")
 		}
 	}
