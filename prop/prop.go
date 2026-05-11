@@ -1,3 +1,4 @@
+// primitives for parsing composite properties
 package prop
 
 import "strings"
@@ -8,10 +9,10 @@ type Prop struct {
 	Title string // title or brief description
 }
 
-// parse the value of a structured property into a slice of name-title pairs
-func Parse(rawProperty string) []Prop {
+// parse the value of a composite property into a list of name-title pairs
+func Parse(property string) []Prop {
 	prop := make([]Prop, 0)
-	pairs := strings.Split(rawProperty, "|")
+	pairs := strings.Split(property, "|")
 	for i := range pairs {
 		p := strings.Split(pairs[i], ":")
 		l := len(p)
@@ -26,3 +27,22 @@ func Parse(rawProperty string) []Prop {
 	}
 	return prop
 }
+
+// possibly not needed
+// a list of name-title pairs
+// type Property []Prop
+
+// possibly not needed
+// assemble a list of name-title pairs into a composite property value
+// func (p Property) String() string {
+// 	var b strings.Builder
+// 	for i := range p {
+// 		if i != 0 {
+// 			b.WriteRune('|')
+// 		}
+// 		b.WriteString(p[i].Name)
+// 		b.WriteRune(':')
+// 		b.WriteString(p[i].Title)
+// 	}
+// 	return b.String()
+// }

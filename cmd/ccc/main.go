@@ -72,6 +72,8 @@ func fileExists(file string) (bool, error) {
 	return false, err
 }
 
+const errorPrefix = "ERROR:"
+
 func main() {
 	colorMode = os.Getenv("CCC_COLOR")
 	cccMain()
@@ -240,7 +242,7 @@ func runClient() error {
 		if strings.HasPrefix(line, "\\createuser") {
 			line, err = createUser(client, fields)
 			if err != nil {
-				eout.Error("error: %s", err)
+				eout.Error(errorPrefix + " " + err.Error())
 				continue
 			}
 			fields = strings.Fields(line)
@@ -250,7 +252,7 @@ func runClient() error {
 			break
 		}
 		if line[len(line)-1] != ';' {
-			eout.Error("error: missing semicolon")
+			eout.Error(errorPrefix + " missing semicolon")
 			continue
 		}
 		startTime := time.Now()
@@ -271,7 +273,7 @@ func runClient() error {
 				fmt.Printf("\n")
 			}
 			if result.Status() == "error" {
-				eout.Error("error: %s", result.Message())
+				eout.Error(errorPrefix + " " + result.Message())
 				continue
 			}
 			header := true
@@ -469,6 +471,7 @@ func helpCommand(line string) string {
 }
 
 var completer = readline.NewPrefixCompleter(
+	readline.PcItem("alter project"),
 	readline.PcItem("create project"),
 	readline.PcItem("create set"),
 	readline.PcItem("delete from"),
@@ -485,8 +488,10 @@ var completer = readline.NewPrefixCompleter(
 		readline.PcItem("users"),
 	),
 	readline.PcItem("\\h",
+		readline.PcItem("alter project"),
 		readline.PcItem("create project"),
 		readline.PcItem("create set"),
+		readline.PcItem("create user"),
 		readline.PcItem("delete"),
 		readline.PcItem("drop set"),
 		readline.PcItem("insert"),

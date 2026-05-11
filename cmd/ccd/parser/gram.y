@@ -19,6 +19,7 @@ import (
 %type <node> basic_stmt
 %type <nodeList> stmt
 %type <nodeList> stmt_list
+%type <node> alter_project_stmt
 %type <node> create_project_stmt
 %type <node> create_set_stmt
 %type <node> create_user_stmt
@@ -52,6 +53,8 @@ import (
 %token LT_OR_EQUAL
 %token NOT_EQUAL
 
+%token ADD
+%token ALTER
 %token AND
 %token ASC
 %token BY
@@ -75,6 +78,7 @@ import (
 %token PASSWORD
 %token PROJECT
 %token PROJECTS
+%token PROPERTY
 %token PING
 %token RETRIEVE
 %token SELECT
@@ -83,6 +87,7 @@ import (
 %token SHOW
 %token TAG
 %token TAGS
+%token TO
 %token USER
 %token USERS
 %token WHERE
@@ -127,7 +132,11 @@ stmt:
 		}
 
 basic_stmt:
-	create_project_stmt
+	alter_project_stmt
+		{
+			$$ = $1
+		}
+	| create_project_stmt
 		{
 			$$ = $1
 		}
@@ -170,6 +179,20 @@ basic_stmt:
 	| ';'
 		{
 			$$ = nil
+		}
+
+alter_project_stmt:
+	ALTER PROJECT name ALTER PROPERTY name SET SLITERAL ';'
+		{
+			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Set, Value: $8}
+		}
+	| ALTER PROJECT name ALTER PROPERTY name ADD SLITERAL ';'
+		{
+			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Add, Value: $8}
+		}
+	| ALTER PROJECT name ALTER PROPERTY name DROP SLITERAL ';'
+		{
+			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Drop, Value: $8}
 		}
 
 create_project_stmt:

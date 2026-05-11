@@ -358,10 +358,9 @@ func createTableRoleUser(tx pgx.Tx) error {
 }
 
 func initSchemaExists(dp *pgxpool.Pool) (bool, error) {
-	var err error
 	var q = "select 1 from pg_namespace where nspname=$1"
 	var n int32
-	err = dp.QueryRow(context.TODO(), q, "ccms").Scan(&n)
+	err := dp.QueryRow(context.TODO(), q, "ccms").Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil

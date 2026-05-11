@@ -1,6 +1,23 @@
 package ast
 
+type AlterAction int
+
+const (
+	Set AlterAction = iota
+	Add
+	Drop
+)
+
 /* statements */
+
+type AlterProjectStmt struct {
+	ProjectName string
+	Property    string
+	Action      AlterAction
+	Value       string
+}
+
+func (*AlterProjectStmt) node() {}
 
 type CreateProjectStmt struct {
 	ProjectName string

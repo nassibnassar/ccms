@@ -1,0 +1,57 @@
+==== alter project
+
+Change the definition of a project
+
+[source,subs="verbatim,quotes"]
+----
+alter project `*_project_name_*`
+    `*_action_*`
+
+where `*_action_*` is one of:
+
+    alter property `*_property_name_*` set `*'_value_'*`
+    alter property `*_property_name_*` add `*'_subvalue_name_'*`
+    alter property `*_property_name_*` drop `*'_subvalue_name_'*`
+----
+
+[discrete]
+===== Description
+
+The `alter project` command changes the definition of a project.
+
+The `alter property` clause changes a property in the project's
+metadata.  The `set` action is used for single value properties, while
+`add` and `drop` are for composite properties.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_project_name_*`
+|The name of the project.
+
+|`*_property_name_*`
+|The name of the property in the project metadata.
+
+|`*'_value_'*`
+|The new value of a property.
+
+|`*'_subvalue_name_'*`
+|The name of a subvalue in a composite property.
+|===
+
+[discrete]
+===== Examples
+
+Set the title of project `myproj` to `My Project`:
+
+----
+alter project myproj alter property title set 'My Project';
+----
+
+Add a fund `cultural` to the project:
+
+----
+alter project myproj alter property funds add 'cultural';
+----

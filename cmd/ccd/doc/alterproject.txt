@@ -1,0 +1,41 @@
+alter project
+
+Change the definition of a project
+
+alter project project_name
+    action
+
+where action is one of:
+
+    alter property property_name set 'value'
+    alter property property_name add 'subvalue_name'
+    alter property property_name drop 'subvalue_name'
+
+Description
+
+The alter project command changes the definition of a project.
+
+The alter property clause changes a property in the project’s metadata. The set
+action is used for single value properties, while add and drop are for
+composite properties.
+
+Parameters
+
+project_name    The name of the project.
+
+property_name   The name of the property in the project metadata.
+
+'value'         The new value of a property.
+
+'subvalue_name' The name of a subvalue in a composite property.
+
+Examples
+
+Set the title of project myproj to My Project:
+
+alter project myproj alter property title set 'My Project';
+
+Add a fund cultural to the project:
+
+alter project myproj alter property funds add 'cultural';
+

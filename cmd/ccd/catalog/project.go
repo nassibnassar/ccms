@@ -114,11 +114,346 @@ func (c *Catalog) CreateProject(projectName string) error {
 	return nil
 }
 
+// AlterProjectAddToProperty does not do synchronization and must not access the catalog cache
+func (c *Catalog) AlterProjectAddToProperty(project, property, value string) error {
+	// look up project id
+	projectID, err := c.selectProjectID(project)
+	if err != nil {
+		return err
+	}
+	if projectID == -1 {
+		return errors.New("project \"" + project + "\" does not exist")
+	}
+
+	switch property {
+	case "funds":
+		if err := c.alterProjectAddFund(project, value, projectID); err != nil {
+			return err
+		}
+	case "locations":
+		if err := c.alterProjectAddLocation(project, value, projectID); err != nil {
+			return err
+		}
+	case "tracks":
+		if err := c.alterProjectAddTrack(project, value, projectID); err != nil {
+			return err
+		}
+	case "title", "action", "mou_link":
+		return errors.New("property \"" + property + "\" is not composite")
+	default:
+		return errors.New("unknown property \"" + property + "\"")
+	}
+	return nil
+}
+
+// AlterProjectDropFromProperty does not do synchronization and must not access the catalog cache
+func (c *Catalog) AlterProjectDropFromProperty(project, property, value string) error {
+	// look up project id
+	projectID, err := c.selectProjectID(project)
+	if err != nil {
+		return err
+	}
+	if projectID == -1 {
+		return errors.New("project \"" + project + "\" does not exist")
+	}
+
+	switch property {
+	case "funds":
+		if err := c.alterProjectDropFund(project, value, projectID); err != nil {
+			return err
+		}
+	case "locations":
+		if err := c.alterProjectDropLocation(project, value, projectID); err != nil {
+			return err
+		}
+	case "tracks":
+		if err := c.alterProjectDropTrack(project, value, projectID); err != nil {
+			return err
+		}
+	case "title", "action", "mou_link":
+		return errors.New("property \"" + property + "\" is not composite")
+	default:
+		return errors.New("unknown property \"" + property + "\"")
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectAddFund(project, fund string, projectID int64) error {
+	// look up fund id
+	fundID, err := c.selectFundID(fund)
+	if err != nil {
+		return err
+	}
+	if fundID == -1 {
+		return errors.New("fund \"" + fund + "\" does not exist")
+	}
+	// check if project fund exists
+	projectFundExists, err := c.projectFundExists(projectID, fundID)
+	if err != nil {
+		return err
+	}
+	if projectFundExists {
+		return errors.New("project \"" + project + "\" already has fund \"" + fund + "\"")
+	}
+	// add project fund
+	q := "insert into ccms.project_fund (project_id, fund_id) values ($1, $2)"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, fundID); err != nil {
+		return global.PGErr(err)
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectDropFund(project, fund string, projectID int64) error {
+	// look up fund id
+	fundID, err := c.selectFundID(fund)
+	if err != nil {
+		return err
+	}
+	if fundID == -1 {
+		return errors.New("fund \"" + fund + "\" does not exist")
+	}
+	// check if project fund exists
+	projectFundExists, err := c.projectFundExists(projectID, fundID)
+	if err != nil {
+		return err
+	}
+	if !projectFundExists {
+		return errors.New("project \"" + project + "\" does not have fund \"" + fund + "\"")
+	}
+	// drop project fund
+	q := "delete from ccms.project_fund where project_id=$1 and fund_id=$2"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, fundID); err != nil {
+		return global.PGErr(err)
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectAddLocation(project, location string, projectID int64) error {
+	// look up location id
+	locationID, err := c.selectLocationID(location)
+	if err != nil {
+		return err
+	}
+	if locationID == -1 {
+		return errors.New("location \"" + location + "\" does not exist")
+	}
+	// check if project location exists
+	projectLocationExists, err := c.projectLocationExists(projectID, locationID)
+	if err != nil {
+		return err
+	}
+	if projectLocationExists {
+		return errors.New("project \"" + project + "\" already has location \"" + location + "\"")
+	}
+	// add project location
+	q := "insert into ccms.project_location (project_id, location_id) values ($1, $2)"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, locationID); err != nil {
+		return global.PGErr(err)
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectDropLocation(project, location string, projectID int64) error {
+	// look up location id
+	locationID, err := c.selectLocationID(location)
+	if err != nil {
+		return err
+	}
+	if locationID == -1 {
+		return errors.New("location \"" + location + "\" does not exist")
+	}
+	// check if project location exists
+	projectLocationExists, err := c.projectLocationExists(projectID, locationID)
+	if err != nil {
+		return err
+	}
+	if !projectLocationExists {
+		return errors.New("project \"" + project + "\" does not have location \"" + location + "\"")
+	}
+	// drop project location
+	q := "delete from ccms.project_location where project_id=$1 and location_id=$2"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, locationID); err != nil {
+		return global.PGErr(err)
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectAddTrack(project, track string, projectID int64) error {
+	// look up track id
+	trackID, err := c.selectTrackID(track)
+	if err != nil {
+		return err
+	}
+	if trackID == -1 {
+		return errors.New("track \"" + track + "\" does not exist")
+	}
+	// check if project track exists
+	projectTrackExists, err := c.projectTrackExists(projectID, trackID)
+	if err != nil {
+		return err
+	}
+	if projectTrackExists {
+		return errors.New("project \"" + project + "\" already has track \"" + track + "\"")
+	}
+	// add project track
+	q := "insert into ccms.project_track (project_id, track_id) values ($1, $2)"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, trackID); err != nil {
+		return global.PGErr(err)
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectDropTrack(project, track string, projectID int64) error {
+	// look up track id
+	trackID, err := c.selectTrackID(track)
+	if err != nil {
+		return err
+	}
+	if trackID == -1 {
+		return errors.New("track \"" + track + "\" does not exist")
+	}
+	// check if project track exists
+	projectTrackExists, err := c.projectTrackExists(projectID, trackID)
+	if err != nil {
+		return err
+	}
+	if !projectTrackExists {
+		return errors.New("project \"" + project + "\" does not have track \"" + track + "\"")
+	}
+	// drop project track
+	q := "delete from ccms.project_track where project_id=$1 and track_id=$2"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, trackID); err != nil {
+		return global.PGErr(err)
+	}
+	return nil
+}
+
+// returns project id, or -1 if project does not exist
+func (c *Catalog) selectProjectID(project string) (int64, error) {
+	var q = "select id from ccms.project where name=$1"
+	var id int64
+	err := c.dp.QueryRow(context.TODO(), q, project).Scan(&id)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return -1, nil
+	case err != nil:
+		return 0, global.PGErr(err)
+	default:
+		return id, nil
+	}
+}
+
+// returns fund id, or -1 if fund does not exist
+func (c *Catalog) selectFundID(fund string) (int64, error) {
+	var q = "select id from ccms.fund where name=$1"
+	var id int64
+	err := c.dp.QueryRow(context.TODO(), q, fund).Scan(&id)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return -1, nil
+	case err != nil:
+		return 0, global.PGErr(err)
+	default:
+		return id, nil
+	}
+}
+
+// returns location id, or -1 if location does not exist
+func (c *Catalog) selectLocationID(location string) (int64, error) {
+	var q = "select id from ccms.location where name=$1"
+	var id int64
+	err := c.dp.QueryRow(context.TODO(), q, location).Scan(&id)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return -1, nil
+	case err != nil:
+		return 0, global.PGErr(err)
+	default:
+		return id, nil
+	}
+}
+
+// returns track id, or -1 if track does not exist
+func (c *Catalog) selectTrackID(track string) (int64, error) {
+	var q = "select id from ccms.track where name=$1"
+	var id int64
+	err := c.dp.QueryRow(context.TODO(), q, track).Scan(&id)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return -1, nil
+	case err != nil:
+		return 0, global.PGErr(err)
+	default:
+		return id, nil
+	}
+}
+
+func (c *Catalog) projectFundExists(projectID, fundID int64) (bool, error) {
+	var q = "select 1 from ccms.project_fund where project_id=$1 and fund_id=$2"
+	var n int32
+	err := c.dp.QueryRow(context.TODO(), q, projectID, fundID).Scan(&n)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return false, nil
+	case err != nil:
+		return false, global.PGErr(err)
+	default:
+		return true, nil
+	}
+}
+
+func (c *Catalog) projectLocationExists(projectID, locationID int64) (bool, error) {
+	var q = "select 1 from ccms.project_location where project_id=$1 and location_id=$2"
+	var n int32
+	err := c.dp.QueryRow(context.TODO(), q, projectID, locationID).Scan(&n)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return false, nil
+	case err != nil:
+		return false, global.PGErr(err)
+	default:
+		return true, nil
+	}
+}
+
+func (c *Catalog) projectTrackExists(projectID, trackID int64) (bool, error) {
+	var q = "select 1 from ccms.project_track where project_id=$1 and track_id=$2"
+	var n int32
+	err := c.dp.QueryRow(context.TODO(), q, projectID, trackID).Scan(&n)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return false, nil
+	case err != nil:
+		return false, global.PGErr(err)
+	default:
+		return true, nil
+	}
+}
+
+// AlterProjectSetProperty does not do synchronization and must not access the catalog cache
+func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) error {
+	tx, err := c.dp.Begin(context.TODO())
+	if err != nil {
+		return fmt.Errorf("opening transaction: %v", global.PGErr(err))
+	}
+	defer tx.Rollback(context.TODO())
+
+	sql := "update ccms.project set \"" + property + "\"=nullif($1, '') where name=$2"
+	if _, err := tx.Exec(context.TODO(), sql, value, projectName); err != nil {
+		return fmt.Errorf("updating project: %v", global.PGErr(err))
+	}
+
+	if err := tx.Commit(context.TODO()); err != nil {
+		return fmt.Errorf("committing changes: %v", global.PGErr(err))
+	}
+	return nil
+}
+
 func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
 	var title, action, mouLink, funds, locations, tracks string
 	q := `with fnd as (
     select p.id project_id,
-           coalesce(string_agg(f.name||':'||f.title, '|'), '') funds
+           coalesce(string_agg(f.name||':'||f.title, '|' order by f.name), '') funds
         from ccms.project p
             join ccms.project_fund pf on p.id=pf.project_id
             join ccms.fund f on pf.fund_id=f.id
@@ -126,7 +461,7 @@ func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
 ),
 loc as (
     select p.id project_id,
-           coalesce(string_agg(l.name||':'||l.title, '|'), '') locations
+           coalesce(string_agg(l.name||':'||l.title, '|' order by l.name), '') locations
         from ccms.project p
             join ccms.project_location pl on p.id=pl.project_id
             join ccms.location l on pl.location_id=l.id
@@ -134,7 +469,7 @@ loc as (
 ),
 trk as (
     select p.id project_id,
-           coalesce(string_agg(t.name||':'||t.title, '|'), '') tracks
+           coalesce(string_agg(t.name||':'||t.title, '|' order by t.name), '') tracks
         from ccms.project p
             join ccms.project_track pl on p.id=pl.project_id
             join ccms.track t on pl.track_id=t.id
