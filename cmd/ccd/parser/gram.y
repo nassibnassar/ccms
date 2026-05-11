@@ -67,9 +67,11 @@ import (
 %token FILTER
 %token FILTERS
 %token FROM
+%token ILIKE
 %token INFO
 %token INSERT
 %token INTO
+%token LIKE
 %token LIMIT
 %token NOT
 %token OFFSET
@@ -391,6 +393,14 @@ equality_expr:
 	| equality_expr '=' relational_expr
 		{
 			$$ = &ast.EqualExpr{Expr1: $1, Expr2: $3}
+		}
+	| equality_expr LIKE relational_expr
+		{
+			$$ = &ast.LikeExpr{Expr1: $1, Expr2: $3}
+		}
+	| equality_expr ILIKE relational_expr
+		{
+			$$ = &ast.ILikeExpr{Expr1: $1, Expr2: $3}
 		}
 	| equality_expr NOT_EQUAL relational_expr
 		{

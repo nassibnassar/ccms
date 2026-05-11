@@ -139,6 +139,22 @@ func evalExpr(b *strings.Builder, expr Node) error {
 		if err := evalExprOptAttr(b, e.Expr2); err != nil {
 			return err
 		}
+	case *LikeExpr:
+		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+			return err
+		}
+		b.WriteString(" like ")
+		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+			return err
+		}
+	case *ILikeExpr:
+		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+			return err
+		}
+		b.WriteString(" ilike ")
+		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+			return err
+		}
 	case *NotEqualExpr:
 		if err := evalExprOptAttr(b, e.Expr1); err != nil {
 			return err

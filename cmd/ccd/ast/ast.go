@@ -153,6 +153,20 @@ type EqualExpr struct {
 
 func (*EqualExpr) node() {}
 
+type LikeExpr struct {
+	Expr1 Node
+	Expr2 Node
+}
+
+func (*LikeExpr) node() {}
+
+type ILikeExpr struct {
+	Expr1 Node
+	Expr2 Node
+}
+
+func (*ILikeExpr) node() {}
+
 type NotEqualExpr struct {
 	Expr1 Node
 	Expr2 Node
