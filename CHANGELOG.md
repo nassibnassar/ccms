@@ -1,3 +1,7 @@
+# v0.0.24
+
+* Added `alter project` command.
+
 # v0.0.23
 
 * Added `create project` command.
