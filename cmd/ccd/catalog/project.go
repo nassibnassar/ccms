@@ -434,17 +434,22 @@ func (c *Catalog) projectTrackExists(projectID, trackID int64) (bool, error) {
 func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) error {
 	tx, err := c.dp.Begin(context.TODO())
 	if err != nil {
-		return fmt.Errorf("opening transaction: %v", global.PGErr(err))
+		return errors.New("opening transaction: " + global.PGErr(err).Error())
 	}
 	defer tx.Rollback(context.TODO())
 
+	switch property {
+	case "funds", "locations", "tracks":
+		return errors.New("property \"" + property + "\" is composite")
+	}
+
 	sql := "update ccms.project set \"" + property + "\"=nullif($1, '') where name=$2"
 	if _, err := tx.Exec(context.TODO(), sql, value, projectName); err != nil {
-		return fmt.Errorf("updating project: %v", global.PGErr(err))
+		return errors.New("updating project: " + global.PGErr(err).Error())
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
-		return fmt.Errorf("committing changes: %v", global.PGErr(err))
+		return errors.New("committing changes: " + global.PGErr(err).Error())
 	}
 	return nil
 }
