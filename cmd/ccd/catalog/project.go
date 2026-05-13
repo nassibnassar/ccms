@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/indexdata/ccms/internal/global"
+	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -103,7 +103,7 @@ func (c *Catalog) CreateProject(projectName string) error {
 	}
 	sql = "insert into ccms.project (name) values ($1)"
 	if _, err := tx.Exec(context.TODO(), sql, projectName); err != nil {
-		return fmt.Errorf("registering project %q: %v", projectName, global.PGErr(err))
+		return errors.New("registering project \"" + projectName + "\": " + pgerr.String(err))
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
@@ -198,7 +198,7 @@ func (c *Catalog) alterProjectAddFund(project, fund string, projectID int64) err
 	// add project fund
 	q := "insert into ccms.project_fund (project_id, fund_id) values ($1, $2)"
 	if _, err := c.dp.Exec(context.TODO(), q, projectID, fundID); err != nil {
-		return global.PGErr(err)
+		return pgerr.Error(err)
 	}
 	return nil
 }
@@ -223,7 +223,7 @@ func (c *Catalog) alterProjectDropFund(project, fund string, projectID int64) er
 	// drop project fund
 	q := "delete from ccms.project_fund where project_id=$1 and fund_id=$2"
 	if _, err := c.dp.Exec(context.TODO(), q, projectID, fundID); err != nil {
-		return global.PGErr(err)
+		return pgerr.Error(err)
 	}
 	return nil
 }
@@ -248,7 +248,7 @@ func (c *Catalog) alterProjectAddLocation(project, location string, projectID in
 	// add project location
 	q := "insert into ccms.project_location (project_id, location_id) values ($1, $2)"
 	if _, err := c.dp.Exec(context.TODO(), q, projectID, locationID); err != nil {
-		return global.PGErr(err)
+		return pgerr.Error(err)
 	}
 	return nil
 }
@@ -273,7 +273,7 @@ func (c *Catalog) alterProjectDropLocation(project, location string, projectID i
 	// drop project location
 	q := "delete from ccms.project_location where project_id=$1 and location_id=$2"
 	if _, err := c.dp.Exec(context.TODO(), q, projectID, locationID); err != nil {
-		return global.PGErr(err)
+		return pgerr.Error(err)
 	}
 	return nil
 }
@@ -298,7 +298,7 @@ func (c *Catalog) alterProjectAddTrack(project, track string, projectID int64) e
 	// add project track
 	q := "insert into ccms.project_track (project_id, track_id) values ($1, $2)"
 	if _, err := c.dp.Exec(context.TODO(), q, projectID, trackID); err != nil {
-		return global.PGErr(err)
+		return pgerr.Error(err)
 	}
 	return nil
 }
@@ -323,7 +323,7 @@ func (c *Catalog) alterProjectDropTrack(project, track string, projectID int64) 
 	// drop project track
 	q := "delete from ccms.project_track where project_id=$1 and track_id=$2"
 	if _, err := c.dp.Exec(context.TODO(), q, projectID, trackID); err != nil {
-		return global.PGErr(err)
+		return pgerr.Error(err)
 	}
 	return nil
 }
@@ -337,7 +337,7 @@ func (c *Catalog) selectProjectID(project string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return -1, nil
 	case err != nil:
-		return 0, global.PGErr(err)
+		return 0, pgerr.Error(err)
 	default:
 		return id, nil
 	}
@@ -352,7 +352,7 @@ func (c *Catalog) selectFundID(fund string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return -1, nil
 	case err != nil:
-		return 0, global.PGErr(err)
+		return 0, pgerr.Error(err)
 	default:
 		return id, nil
 	}
@@ -367,7 +367,7 @@ func (c *Catalog) selectLocationID(location string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return -1, nil
 	case err != nil:
-		return 0, global.PGErr(err)
+		return 0, pgerr.Error(err)
 	default:
 		return id, nil
 	}
@@ -382,7 +382,7 @@ func (c *Catalog) selectTrackID(track string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return -1, nil
 	case err != nil:
-		return 0, global.PGErr(err)
+		return 0, pgerr.Error(err)
 	default:
 		return id, nil
 	}
@@ -396,7 +396,7 @@ func (c *Catalog) projectFundExists(projectID, fundID int64) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, global.PGErr(err)
+		return false, pgerr.Error(err)
 	default:
 		return true, nil
 	}
@@ -410,7 +410,7 @@ func (c *Catalog) projectLocationExists(projectID, locationID int64) (bool, erro
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, global.PGErr(err)
+		return false, pgerr.Error(err)
 	default:
 		return true, nil
 	}
@@ -424,7 +424,7 @@ func (c *Catalog) projectTrackExists(projectID, trackID int64) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, global.PGErr(err)
+		return false, pgerr.Error(err)
 	default:
 		return true, nil
 	}
@@ -434,7 +434,7 @@ func (c *Catalog) projectTrackExists(projectID, trackID int64) (bool, error) {
 func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) error {
 	tx, err := c.dp.Begin(context.TODO())
 	if err != nil {
-		return errors.New("opening transaction: " + global.PGErr(err).Error())
+		return errors.New("opening transaction: " + pgerr.String(err))
 	}
 	defer tx.Rollback(context.TODO())
 
@@ -445,11 +445,11 @@ func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) e
 
 	sql := "update ccms.project set \"" + property + "\"=nullif($1, '') where name=$2"
 	if _, err := tx.Exec(context.TODO(), sql, value, projectName); err != nil {
-		return errors.New("updating project: " + global.PGErr(err).Error())
+		return errors.New("updating project: " + pgerr.String(err))
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
-		return errors.New("committing changes: " + global.PGErr(err).Error())
+		return errors.New("committing changes: " + pgerr.String(err))
 	}
 	return nil
 }

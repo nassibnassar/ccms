@@ -3,11 +3,12 @@ package catalog
 import (
 	"cmp"
 	"context"
+	"errors"
 	"fmt"
 	"maps"
 	"slices"
 
-	"github.com/indexdata/ccms/internal/global"
+	"github.com/indexdata/ccms/internal/pgerr"
 )
 
 func (c *Catalog) initRoles() error {
@@ -58,7 +59,7 @@ func (c *Catalog) CreateRole(roleName string) error {
 
 	sql := "insert into ccms.role (rolename) values ($1)"
 	if _, err := tx.Exec(context.TODO(), sql, roleName); err != nil {
-		return fmt.Errorf("registering role %q: %v", roleName, global.PGErr(err))
+		return errors.New("registering role \"" + roleName + "\": " + pgerr.String(err))
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {

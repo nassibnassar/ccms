@@ -2,11 +2,10 @@ package server
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/internal/global"
+	"github.com/indexdata/ccms/internal/pgerr"
 )
 
 func deleteStmt(s *svr, rqid int64, cmd *ast.DeleteStmt) *ccms.Result {
@@ -24,7 +23,7 @@ func deleteStmt(s *svr, rqid int64, cmd *ast.DeleteStmt) *ccms.Result {
 	}
 	//log.Info("[%d] %s", rqid, sql)
 	if _, err := s.dp.Exec(context.TODO(), sql); err != nil {
-		return cmderr(fmt.Sprintf("deleting from %q: %v", cmd.From, global.PGErr(err)))
+		return cmderr("deleting from \"" + cmd.From + "\": " + pgerr.String(err))
 	}
 
 	return ccms.NewResult("delete")

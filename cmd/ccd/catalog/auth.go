@@ -7,7 +7,7 @@ import (
 	"slices"
 
 	"github.com/indexdata/ccms/internal/crypto"
-	"github.com/indexdata/ccms/internal/global"
+	"github.com/indexdata/ccms/internal/pgerr"
 )
 
 type User struct {
@@ -71,7 +71,7 @@ func (c *Catalog) CreateUser(userName, password string, superuser, login bool) e
 	hash := crypto.HashPassword(password, salt, c.secretKey)
 	sql := "insert into ccms.auth (name, superuser, login, password, salt) values ($1, $2, $3, $4, $5)"
 	if _, err := tx.Exec(context.TODO(), sql, userName, superuser, login, hash, crypto.EncodeToHexString(salt)); err != nil {
-		return fmt.Errorf("registering user %q: %v", userName, global.PGErr(err))
+		return fmt.Errorf("registering user %q: %v", userName, pgerr.Error(err))
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {

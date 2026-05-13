@@ -3,11 +3,12 @@ package catalog
 import (
 	"cmp"
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
 
-	"github.com/indexdata/ccms/internal/global"
+	"github.com/indexdata/ccms/internal/pgerr"
 )
 
 func (c *Catalog) initSets() error {
@@ -110,7 +111,7 @@ func (c *Catalog) CreateSet(setName string) error {
 	}
 	sql = "insert into ccms.sets (setname) values ($1)"
 	if _, err := tx.Exec(context.TODO(), sql, setName); err != nil {
-		return fmt.Errorf("registering set %q: %v", setName, global.PGErr(err))
+		return errors.New("registering set \"" + setName + "\": " + pgerr.String(err))
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
@@ -137,7 +138,7 @@ func (c *Catalog) DropSet(setName string) error {
 	}
 	sql = "delete from ccms.sets where setname=$1"
 	if _, err := tx.Exec(context.TODO(), sql, setName); err != nil {
-		return fmt.Errorf("deregistering set %q: %v", setName, global.PGErr(err))
+		return errors.New("deregistering set \"" + setName + "\": " + pgerr.String(err))
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
