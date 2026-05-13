@@ -375,7 +375,7 @@ func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 }
 
 func setDatabaseParameters(ctx context.Context, dc *pgx.Conn) error {
-	q := "SET search_path = ''"
+	q := "SET search_path = 'public'"
 	if _, err := dc.Exec(ctx, q); err != nil {
 		return err
 	}

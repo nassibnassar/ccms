@@ -10,6 +10,7 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/config"
 	"github.com/indexdata/ccms/internal/crypto"
 	"github.com/indexdata/ccms/internal/eout"
+	"github.com/indexdata/ccms/internal/global"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -95,11 +96,11 @@ func createTableInit(tx pgx.Tx) error {
 	q := "create table ccms.init (" +
 		"dbversion integer not null)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.init: %v", err)
+		return fmt.Errorf("creating table ccms.init: %v", global.PGErr(err))
 	}
 	q = "insert into ccms.init (dbversion) values (0)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.init: %v", err)
+		return fmt.Errorf("writing to table ccms.init: %v", global.PGErr(err))
 	}
 	return nil
 }
@@ -112,7 +113,7 @@ func createTableMD(tx pgx.Tx) error {
 		"date_stamp date not null," +
 		"data text not null)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.md: %v", err)
+		return fmt.Errorf("creating table ccms.md: %v", global.PGErr(err))
 	}
 	return nil
 }
@@ -126,23 +127,27 @@ func createTableAttr(tx pgx.Tx) error {
 		"availability text)"
 		//"place_of_publication text)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.attr: %v", err)
+		return fmt.Errorf("creating table ccms.attr: %v", global.PGErr(err))
 	}
-	q = "create index on ccms.attr (author)"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating index on ccms.attr (author): %v", err)
+	if err := createAttrIndex(tx, "author"); err != nil {
+		return err
 	}
-	q = "create index on ccms.attr (title)"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating index on ccms.attr (title): %v", err)
+	if err := createAttrIndex(tx, "title"); err != nil {
+		return err
 	}
-	q = "create index on ccms.attr (full_vendor_name)"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating index on ccms.attr (full_vendor_name): %v", err)
+	if err := createAttrIndex(tx, "full_vendor_name"); err != nil {
+		return err
 	}
-	q = "create index on ccms.attr (availability)"
+	if err := createAttrIndex(tx, "availability"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func createAttrIndex(tx pgx.Tx, column string) error {
+	q := "create index on ccms.attr using gin (" + column + " gin_trgm_ops)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating index on ccms.attr (availability): %v", err)
+		return fmt.Errorf("creating index on attribute %q: %v", column, global.PGErr(err))
 	}
 	return nil
 }
@@ -151,7 +156,7 @@ func createTableReserve(tx pgx.Tx) error {
 	q := "create table ccms.reserve (" +
 		"id bigint primary key)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.reserve: %v", err)
+		return fmt.Errorf("creating table ccms.reserve: %v", global.PGErr(err))
 	}
 	return nil
 }
@@ -165,7 +170,7 @@ func createTableACL(tx pgx.Tx) error {
 		"rolename text not null," +
 		"unique (objectname, objecttype, privilege, rolename))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.acl: %v", err)
+		return fmt.Errorf("creating table ccms.acl: %v", global.PGErr(err))
 	}
 	return nil
 }
@@ -179,7 +184,7 @@ func createTableAuth(tx pgx.Tx) error {
 		"password text not null," +
 		"salt text not null)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.auth: %v", err)
+		return fmt.Errorf("creating table ccms.auth: %v", global.PGErr(err))
 	}
 	return nil
 }
@@ -192,34 +197,34 @@ func createTableProject(tx pgx.Tx) error {
 		"action text," + // references ccms.action (name)
 		"mou_link text)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.project: %v", err)
+		return fmt.Errorf("creating table ccms.project: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.project (name) values ('test')"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project: %v", err)
+		return fmt.Errorf("writing to table ccms.project: %v", global.PGErr(err))
 	}
 	q = "create schema test"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating schema test: %v", err)
+		return fmt.Errorf("creating schema test: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.project (name,title,action,mou_link) values ('palci_slavic','Slavic studies','purchase','https://www.miketaylor.org.uk/dino/pubs/')"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project: %v", err)
+		return fmt.Errorf("writing to table ccms.project: %v", global.PGErr(err))
 	}
 	q = "create schema palci_slavic"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating schema palci_slavic: %v", err)
+		return fmt.Errorf("creating schema palci_slavic: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.project (name,title,action) values ('east_asia','East Asian studies','purchase')"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project: %v", err)
+		return fmt.Errorf("writing to table ccms.project: %v", global.PGErr(err))
 	}
 	q = "create schema east_asia"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating schema east_asia: %v", err)
+		return fmt.Errorf("creating schema east_asia: %v", global.PGErr(err))
 	}
 
 	return nil
@@ -229,7 +234,7 @@ func createTableSets(tx pgx.Tx) error {
 	q := "create table ccms.sets (" +
 		"setname text primary key)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.sets: %v", err)
+		return fmt.Errorf("creating table ccms.sets: %v", global.PGErr(err))
 	}
 	return nil
 }
@@ -240,12 +245,12 @@ func createTableFund(tx pgx.Tx) error {
 		"name text not null unique," +
 		"title text)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.fund: %v", err)
+		return fmt.Errorf("creating table ccms.fund: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.fund (name, title) values ('palci_cultural', 'PALCI cultural preservation'), ('coalition_slavic_lit', 'Coalition for Slavic literature')"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.fund: %v", err)
+		return fmt.Errorf("writing to table ccms.fund: %v", global.PGErr(err))
 	}
 
 	return nil
@@ -257,12 +262,12 @@ func createTableProjectFund(tx pgx.Tx) error {
 		"fund_id integer not null references ccms.fund (id)," +
 		"primary key (project_id, fund_id))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.project_fund: %v", err)
+		return fmt.Errorf("creating table ccms.project_fund: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.project_fund (project_id, fund_id) values (2, 1), (2, 2)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project_fund: %v", err)
+		return fmt.Errorf("writing to table ccms.project_fund: %v", global.PGErr(err))
 	}
 
 	return nil
@@ -274,12 +279,12 @@ func createTableLocation(tx pgx.Tx) error {
 		"name text not null unique," +
 		"title text)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.location: %v", err)
+		return fmt.Errorf("creating table ccms.location: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.location (name, title) values ('lehigh', 'Lehigh'), ('nyu', 'NYU'), ('clockss', 'CLOCKSS')"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.location: %v", err)
+		return fmt.Errorf("writing to table ccms.location: %v", global.PGErr(err))
 	}
 
 	return nil
@@ -291,12 +296,12 @@ func createTableProjectLocation(tx pgx.Tx) error {
 		"location_id integer not null references ccms.location (id)," +
 		"primary key (project_id, location_id))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.project_location: %v", err)
+		return fmt.Errorf("creating table ccms.project_location: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.project_location (project_id, location_id) values (2, 1), (2, 2), (2, 3)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project_location: %v", err)
+		return fmt.Errorf("writing to table ccms.project_location: %v", global.PGErr(err))
 	}
 
 	return nil
@@ -308,12 +313,12 @@ func createTableTrack(tx pgx.Tx) error {
 		"name text not null unique," +
 		"title text)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.track: %v", err)
+		return fmt.Errorf("creating table ccms.track: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.track (name, title) values ('offsite', 'Offsite'), ('reserve', 'Reserve'), ('stacks', 'Stacks')"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.track: %v", err)
+		return fmt.Errorf("writing to table ccms.track: %v", global.PGErr(err))
 	}
 
 	return nil
@@ -325,12 +330,12 @@ func createTableProjectTrack(tx pgx.Tx) error {
 		"track_id integer not null references ccms.track (id)," +
 		"primary key (project_id, track_id))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.project_track: %v", err)
+		return fmt.Errorf("creating table ccms.project_track: %v", global.PGErr(err))
 	}
 
 	q = "insert into ccms.project_track (project_id, track_id) values (2, 1), (2, 2), (2, 3)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project_track: %v", err)
+		return fmt.Errorf("writing to table ccms.project_track: %v", global.PGErr(err))
 	}
 
 	return nil
@@ -341,7 +346,7 @@ func createTableRole(tx pgx.Tx) error {
 		"id integer primary key generated by default as identity," +
 		"name text not null unique)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.role: %v", err)
+		return fmt.Errorf("creating table ccms.role: %v", global.PGErr(err))
 	}
 	return nil
 }
@@ -352,7 +357,7 @@ func createTableRoleUser(tx pgx.Tx) error {
 		"user_id integer not null references ccms.auth (id)," +
 		"primary key (role_id, user_id))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.role_user: %v", err)
+		return fmt.Errorf("creating table ccms.role_user: %v", global.PGErr(err))
 	}
 	return nil
 }
@@ -374,27 +379,31 @@ func initSchemaExists(dp *pgxpool.Pool) (bool, error) {
 func createSystemSchema(program string, dp *pgxpool.Pool, security *config.Security) error {
 	tx, err := dp.Begin(context.TODO())
 	if err != nil {
-		return err
+		return global.PGErr(err)
 	}
 	defer tx.Rollback(context.TODO())
 
-	var q = "create schema ccms"
-	_, err = tx.Exec(context.TODO(), q)
-	if err != nil {
-		return fmt.Errorf("creating schema: ccms: %v", err)
+	q := "create extension if not exists pg_trgm"
+	if _, err = tx.Exec(context.TODO(), q); err != nil {
+		return fmt.Errorf("creating pg_trgm extension: %v", global.PGErr(err))
+	}
+
+	q = "create schema ccms"
+	if _, err = tx.Exec(context.TODO(), q); err != nil {
+		return fmt.Errorf("creating ccms schema: %v", global.PGErr(err))
 	}
 
 	for _, t := range systemTables {
 		if err = t.create(tx); err != nil {
-			return fmt.Errorf("creating table ccms.%s: %v", t.table, err)
+			return fmt.Errorf("creating table %s: %v", t.table, err)
 		}
 	}
 	if err = writeAdminUser(tx, security); err != nil {
-		return fmt.Errorf("adding admin user: %v", err)
+		return fmt.Errorf("adding admin user: %v", global.PGErr(err))
 	}
 
 	if err = tx.Commit(context.TODO()); err != nil {
-		return fmt.Errorf("initializing system database: committing changes: %v", err)
+		return fmt.Errorf("initializing system database: committing changes: %v", global.PGErr(err))
 	}
 	return nil
 }

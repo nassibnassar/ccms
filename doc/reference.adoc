@@ -30,13 +30,13 @@ operands.
 
 The supported operators, in order of precedence, are:
 
-[%header,width=75%,cols="4,3,5"]
+[%header,width=75%,cols="5,2,5"]
 |===
 |Operator
 |Associativity
 |Description
 
-|`=` `<>` `<` `>` `\<=` `>=`
+|`=` `<>` `<` `>` `\<=` `>=` `like` `ilike`
 |
 |comparison operators
 
