@@ -1,0 +1,33 @@
+==== drop project
+
+Remove a project
+
+[source,subs="verbatim,quotes"]
+----
+drop project `*_project_name_*`
+----
+
+[discrete]
+===== Description
+
+The `drop project` command removes a project from the system.  All
+associated properties are also removed.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_project_name_*`
+|The name of the project.
+|===
+
+[discrete]
+===== Examples
+
+Remove a project `myproj`:
+
+----
+drop project myproj;
+----
+

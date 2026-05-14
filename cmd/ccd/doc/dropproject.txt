@@ -1,0 +1,21 @@
+drop project
+
+Remove a project
+
+drop project project_name
+
+Description
+
+The drop project command removes a project from the system. All associated
+properties are also removed.
+
+Parameters
+
+project_name The name of the project.
+
+Examples
+
+Remove a project myproj:
+
+drop project myproj;
+

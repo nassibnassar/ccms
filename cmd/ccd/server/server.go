@@ -235,6 +235,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			result = createUserStmt(s, rqid, cmd)
 		case *ast.DeleteStmt:
 			result = deleteStmt(s, rqid, cmd)
+		case *ast.DropProjectStmt:
+			result = dropProjectStmt(s, rqid, cmd)
 		case *ast.DropSetStmt:
 			result = dropSetStmt(s, rqid, cmd)
 		case *ast.InfoStmt:

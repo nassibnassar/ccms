@@ -40,6 +40,13 @@ func Delete() string {
 	return strings.TrimSpace(deleteTxt)
 }
 
+//go:embed dropproject.txt
+var dropProjectTxt string
+
+func DropProject() string {
+	return strings.TrimSpace(dropProjectTxt)
+}
+
 //go:embed dropset.txt
 var dropSetTxt string
 

@@ -24,6 +24,7 @@ import (
 %type <node> create_set_stmt
 %type <node> create_user_stmt
 %type <node> delete_stmt
+%type <node> drop_project_stmt
 %type <node> drop_set_stmt
 %type <node> info_stmt
 %type <node> ping_stmt
@@ -155,6 +156,10 @@ basic_stmt:
 		{
 			$$ = $1
 		}
+	| drop_project_stmt
+		{
+			$$ = $1
+		}
 	| drop_set_stmt
 		{
 			$$ = $1
@@ -224,6 +229,12 @@ delete_stmt:
 	DELETE FROM name where_clause ';'
 		{
 			$$ = &ast.DeleteStmt{From: $3, Where: $4}
+		}
+
+drop_project_stmt:
+	DROP PROJECT name ';'
+		{
+			$$ = &ast.DropProjectStmt{ProjectName: $3}
 		}
 
 drop_set_stmt:

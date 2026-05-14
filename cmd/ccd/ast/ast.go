@@ -45,6 +45,12 @@ type DeleteStmt struct {
 
 func (*DeleteStmt) node() {}
 
+type DropProjectStmt struct {
+	ProjectName string
+}
+
+func (*DropProjectStmt) node() {}
+
 type DropSetStmt struct {
 	SetName string
 }

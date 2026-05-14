@@ -68,6 +68,7 @@ func SetTable(setName string) string {
 func (c *Catalog) AllSets() []string {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	sets := make([]string, len(c.sets)+1)
 	i := 0
 	sets[i] = "reserve"
@@ -75,6 +76,25 @@ func (c *Catalog) AllSets() []string {
 	for k := range c.sets {
 		sets[i] = k
 		i++
+	}
+	sortSetNames(sets)
+	return sets
+}
+
+func (c *Catalog) SetsInProject(project string) []string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.setsInProject(project)
+}
+
+func (c *Catalog) setsInProject(project string) []string {
+	prefix := project + "."
+	sets := make([]string, 0)
+	for k := range c.sets {
+		if strings.HasPrefix(k, prefix) {
+			sets = append(sets, k)
+		}
 	}
 	sortSetNames(sets)
 	return sets

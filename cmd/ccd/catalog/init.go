@@ -258,8 +258,8 @@ func createTableFund(tx pgx.Tx) error {
 
 func createTableProjectFund(tx pgx.Tx) error {
 	q := "create table ccms.project_fund (" +
-		"project_id integer not null references ccms.project (id)," +
-		"fund_id integer not null references ccms.fund (id)," +
+		"project_id integer not null references ccms.project (id) on delete cascade," +
+		"fund_id integer not null references ccms.fund (id) on delete cascade," +
 		"primary key (project_id, fund_id))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project_fund: %v", pgerr.Error(err))
@@ -292,8 +292,8 @@ func createTableLocation(tx pgx.Tx) error {
 
 func createTableProjectLocation(tx pgx.Tx) error {
 	q := "create table ccms.project_location (" +
-		"project_id integer not null references ccms.project (id)," +
-		"location_id integer not null references ccms.location (id)," +
+		"project_id integer not null references ccms.project (id) on delete cascade," +
+		"location_id integer not null references ccms.location (id) on delete cascade," +
 		"primary key (project_id, location_id))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project_location: %v", pgerr.Error(err))
@@ -326,8 +326,8 @@ func createTableTrack(tx pgx.Tx) error {
 
 func createTableProjectTrack(tx pgx.Tx) error {
 	q := "create table ccms.project_track (" +
-		"project_id integer not null references ccms.project (id)," +
-		"track_id integer not null references ccms.track (id)," +
+		"project_id integer not null references ccms.project (id) on delete cascade," +
+		"track_id integer not null references ccms.track (id) on delete cascade," +
 		"primary key (project_id, track_id))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project_track: %v", pgerr.Error(err))

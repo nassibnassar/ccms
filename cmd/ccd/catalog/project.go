@@ -87,6 +87,38 @@ func sortProjectNames(projects []Project) {
 	})
 }
 
+func (c *Catalog) DropProject(projectName string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	sets := c.setsInProject(projectName)
+	if len(sets) != 0 {
+		return errors.New("project \"" + projectName + "\" contains one or more sets")
+	}
+
+	tx, err := c.dp.Begin(context.TODO())
+	if err != nil {
+		return fmt.Errorf("dropping project %q: opening transaction: %v", projectName, err)
+	}
+	defer tx.Rollback(context.TODO())
+
+	sql := "drop schema " + projectName
+	if _, err := tx.Exec(context.TODO(), sql); err != nil {
+		return fmt.Errorf("dropping project %q: %v", projectName, err)
+	}
+	sql = "delete from ccms.project where name=$1"
+	if _, err := tx.Exec(context.TODO(), sql, projectName); err != nil {
+		return errors.New("deregistering project \"" + projectName + "\": " + pgerr.String(err))
+	}
+
+	if err := tx.Commit(context.TODO()); err != nil {
+		return fmt.Errorf("dropping project %q: committing changes: %v", projectName, err)
+	}
+
+	delete(c.projects, projectName)
+	return nil
+}
+
 func (c *Catalog) CreateProject(projectName string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
