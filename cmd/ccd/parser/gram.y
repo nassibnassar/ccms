@@ -54,6 +54,7 @@ import (
 %token NOT_EQUAL
 
 %token ADD
+%token ALL
 %token ALTER
 %token AND
 %token ASC
@@ -195,6 +196,10 @@ alter_project_stmt:
 	| ALTER PROJECT name ALTER PROPERTY name DROP SLITERAL ';'
 		{
 			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Drop, Value: $8}
+		}
+	| ALTER PROJECT name ALTER PROPERTY name DROP ALL ';'
+		{
+			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Drop, Value: "*"}
 		}
 
 create_project_stmt:

@@ -9,7 +9,7 @@ where action is one of:
 
     alter property property_name set 'value'
     alter property property_name add 'subvalue_name'
-    alter property property_name drop 'subvalue_name'
+    alter property property_name drop { 'subvalue_name' | all }
 
 Description
 

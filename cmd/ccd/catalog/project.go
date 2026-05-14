@@ -204,6 +204,13 @@ func (c *Catalog) alterProjectAddFund(project, fund string, projectID int64) err
 }
 
 func (c *Catalog) alterProjectDropFund(project, fund string, projectID int64) error {
+	if fund == "*" {
+		q := "delete from ccms.project_fund where project_id=$1"
+		if _, err := c.dp.Exec(context.TODO(), q, projectID); err != nil {
+			return pgerr.Error(err)
+		}
+		return nil
+	}
 	// look up fund id
 	fundID, err := c.selectFundID(fund)
 	if err != nil {
@@ -254,6 +261,13 @@ func (c *Catalog) alterProjectAddLocation(project, location string, projectID in
 }
 
 func (c *Catalog) alterProjectDropLocation(project, location string, projectID int64) error {
+	if location == "*" {
+		q := "delete from ccms.project_location where project_id=$1"
+		if _, err := c.dp.Exec(context.TODO(), q, projectID); err != nil {
+			return pgerr.Error(err)
+		}
+		return nil
+	}
 	// look up location id
 	locationID, err := c.selectLocationID(location)
 	if err != nil {
@@ -304,6 +318,13 @@ func (c *Catalog) alterProjectAddTrack(project, track string, projectID int64) e
 }
 
 func (c *Catalog) alterProjectDropTrack(project, track string, projectID int64) error {
+	if track == "*" {
+		q := "delete from ccms.project_track where project_id=$1"
+		if _, err := c.dp.Exec(context.TODO(), q, projectID); err != nil {
+			return pgerr.Error(err)
+		}
+		return nil
+	}
 	// look up track id
 	trackID, err := c.selectTrackID(track)
 	if err != nil {

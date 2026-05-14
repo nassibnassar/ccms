@@ -11,7 +11,7 @@ where `*_action_*` is one of:
 
     alter property `*_property_name_*` set `*'_value_'*`
     alter property `*_property_name_*` add `*'_subvalue_name_'*`
-    alter property `*_property_name_*` drop `*'_subvalue_name_'*`
+    alter property `*_property_name_*` drop { `*'_subvalue_name_'*` | all }
 ----
 
 [discrete]
