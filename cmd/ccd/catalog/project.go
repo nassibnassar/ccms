@@ -193,7 +193,7 @@ func (c *Catalog) alterProjectAddFund(project, fund string, projectID int64) err
 		return err
 	}
 	if projectFundExists {
-		return errors.New("project \"" + project + "\" already has fund \"" + fund + "\"")
+		return nil
 	}
 	// add project fund
 	q := "insert into ccms.project_fund (project_id, fund_id) values ($1, $2)"
@@ -250,7 +250,7 @@ func (c *Catalog) alterProjectAddLocation(project, location string, projectID in
 		return err
 	}
 	if projectLocationExists {
-		return errors.New("project \"" + project + "\" already has location \"" + location + "\"")
+		return nil
 	}
 	// add project location
 	q := "insert into ccms.project_location (project_id, location_id) values ($1, $2)"
@@ -307,7 +307,7 @@ func (c *Catalog) alterProjectAddTrack(project, track string, projectID int64) e
 		return err
 	}
 	if projectTrackExists {
-		return errors.New("project \"" + project + "\" already has track \"" + track + "\"")
+		return nil
 	}
 	// add project track
 	q := "insert into ccms.project_track (project_id, track_id) values ($1, $2)"
