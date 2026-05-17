@@ -166,6 +166,14 @@ func (c *Catalog) AlterProjectAddToProperty(project, property, value string) err
 		if err := c.alterProjectAddLocation(project, value, projectID); err != nil {
 			return err
 		}
+	case "origins":
+		if err := c.alterProjectAddOrigin(project, value, projectID); err != nil {
+			return err
+		}
+	case "destinations":
+		if err := c.alterProjectAddDestination(project, value, projectID); err != nil {
+			return err
+		}
 	case "tracks":
 		if err := c.alterProjectAddTrack(project, value, projectID); err != nil {
 			return err
@@ -196,6 +204,14 @@ func (c *Catalog) AlterProjectDropFromProperty(project, property, value string) 
 		}
 	case "locations":
 		if err := c.alterProjectDropLocation(project, value, projectID); err != nil {
+			return err
+		}
+	case "origins":
+		if err := c.alterProjectDropOrigin(project, value, projectID); err != nil {
+			return err
+		}
+	case "destinations":
+		if err := c.alterProjectDropDestination(project, value, projectID); err != nil {
 			return err
 		}
 	case "tracks":
@@ -324,6 +340,120 @@ func (c *Catalog) alterProjectDropLocation(project, location string, projectID i
 	return nil
 }
 
+func (c *Catalog) alterProjectAddOrigin(project, origin string, projectID int64) error {
+	// look up origin id
+	originID, err := c.selectOriginID(origin)
+	if err != nil {
+		return err
+	}
+	if originID == -1 {
+		return errors.New("origin \"" + origin + "\" does not exist")
+	}
+	// check if project origin exists
+	projectOriginExists, err := c.projectOriginExists(projectID, originID)
+	if err != nil {
+		return err
+	}
+	if projectOriginExists {
+		return nil
+	}
+	// add project origin
+	q := "insert into ccms.project_origin (project_id, origin_id) values ($1, $2)"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, originID); err != nil {
+		return pgerr.Error(err)
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectDropOrigin(project, origin string, projectID int64) error {
+	if origin == "*" {
+		q := "delete from ccms.project_origin where project_id=$1"
+		if _, err := c.dp.Exec(context.TODO(), q, projectID); err != nil {
+			return pgerr.Error(err)
+		}
+		return nil
+	}
+	// look up origin id
+	originID, err := c.selectOriginID(origin)
+	if err != nil {
+		return err
+	}
+	if originID == -1 {
+		return errors.New("origin \"" + origin + "\" does not exist")
+	}
+	// check if project origin exists
+	projectOriginExists, err := c.projectOriginExists(projectID, originID)
+	if err != nil {
+		return err
+	}
+	if !projectOriginExists {
+		return errors.New("project \"" + project + "\" does not have origin \"" + origin + "\"")
+	}
+	// drop project origin
+	q := "delete from ccms.project_origin where project_id=$1 and origin_id=$2"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, originID); err != nil {
+		return pgerr.Error(err)
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectAddDestination(project, destination string, projectID int64) error {
+	// look up destination id
+	destinationID, err := c.selectDestinationID(destination)
+	if err != nil {
+		return err
+	}
+	if destinationID == -1 {
+		return errors.New("destination \"" + destination + "\" does not exist")
+	}
+	// check if project destination exists
+	projectDestinationExists, err := c.projectDestinationExists(projectID, destinationID)
+	if err != nil {
+		return err
+	}
+	if projectDestinationExists {
+		return nil
+	}
+	// add project destination
+	q := "insert into ccms.project_destination (project_id, destination_id) values ($1, $2)"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, destinationID); err != nil {
+		return pgerr.Error(err)
+	}
+	return nil
+}
+
+func (c *Catalog) alterProjectDropDestination(project, destination string, projectID int64) error {
+	if destination == "*" {
+		q := "delete from ccms.project_destination where project_id=$1"
+		if _, err := c.dp.Exec(context.TODO(), q, projectID); err != nil {
+			return pgerr.Error(err)
+		}
+		return nil
+	}
+	// look up destination id
+	destinationID, err := c.selectDestinationID(destination)
+	if err != nil {
+		return err
+	}
+	if destinationID == -1 {
+		return errors.New("destination \"" + destination + "\" does not exist")
+	}
+	// check if project destination exists
+	projectDestinationExists, err := c.projectDestinationExists(projectID, destinationID)
+	if err != nil {
+		return err
+	}
+	if !projectDestinationExists {
+		return errors.New("project \"" + project + "\" does not have destination \"" + destination + "\"")
+	}
+	// drop project destination
+	q := "delete from ccms.project_destination where project_id=$1 and destination_id=$2"
+	if _, err := c.dp.Exec(context.TODO(), q, projectID, destinationID); err != nil {
+		return pgerr.Error(err)
+	}
+	return nil
+}
+
 func (c *Catalog) alterProjectAddTrack(project, track string, projectID int64) error {
 	// look up track id
 	trackID, err := c.selectTrackID(track)
@@ -426,6 +556,36 @@ func (c *Catalog) selectLocationID(location string) (int64, error) {
 	}
 }
 
+// returns origin id, or -1 if origin does not exist
+func (c *Catalog) selectOriginID(origin string) (int64, error) {
+	var q = "select id from ccms.origin where name=$1"
+	var id int64
+	err := c.dp.QueryRow(context.TODO(), q, origin).Scan(&id)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return -1, nil
+	case err != nil:
+		return 0, pgerr.Error(err)
+	default:
+		return id, nil
+	}
+}
+
+// returns destination id, or -1 if destination does not exist
+func (c *Catalog) selectDestinationID(destination string) (int64, error) {
+	var q = "select id from ccms.destination where name=$1"
+	var id int64
+	err := c.dp.QueryRow(context.TODO(), q, destination).Scan(&id)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return -1, nil
+	case err != nil:
+		return 0, pgerr.Error(err)
+	default:
+		return id, nil
+	}
+}
+
 // returns track id, or -1 if track does not exist
 func (c *Catalog) selectTrackID(track string) (int64, error) {
 	var q = "select id from ccms.track where name=$1"
@@ -469,6 +629,34 @@ func (c *Catalog) projectLocationExists(projectID, locationID int64) (bool, erro
 	}
 }
 
+func (c *Catalog) projectOriginExists(projectID, originID int64) (bool, error) {
+	var q = "select 1 from ccms.project_origin where project_id=$1 and origin_id=$2"
+	var n int32
+	err := c.dp.QueryRow(context.TODO(), q, projectID, originID).Scan(&n)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return false, nil
+	case err != nil:
+		return false, pgerr.Error(err)
+	default:
+		return true, nil
+	}
+}
+
+func (c *Catalog) projectDestinationExists(projectID, destinationID int64) (bool, error) {
+	var q = "select 1 from ccms.project_destination where project_id=$1 and destination_id=$2"
+	var n int32
+	err := c.dp.QueryRow(context.TODO(), q, projectID, destinationID).Scan(&n)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return false, nil
+	case err != nil:
+		return false, pgerr.Error(err)
+	default:
+		return true, nil
+	}
+}
+
 func (c *Catalog) projectTrackExists(projectID, trackID int64) (bool, error) {
 	var q = "select 1 from ccms.project_track where project_id=$1 and track_id=$2"
 	var n int32
@@ -492,7 +680,7 @@ func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) e
 	defer tx.Rollback(context.TODO())
 
 	switch property {
-	case "funds", "locations", "tracks":
+	case "funds", "locations", "origins", "destinations", "tracks":
 		return errors.New("property \"" + property + "\" is composite")
 	}
 
@@ -508,7 +696,7 @@ func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) e
 }
 
 func (c *Catalog) ProjectProperties(projectName string) ([][2]string, error) {
-	var title, action, mouLink, funds, locations, tracks string
+	var title, action, mouLink, funds, locations, origins, destinations, tracks string
 	q := `with fnd as (
     select p.id project_id,
            coalesce(string_agg(f.name||':'||f.title, '|' order by f.name), '') funds
@@ -525,6 +713,22 @@ loc as (
             join ccms.location l on pl.location_id=l.id
         group by p.id
 ),
+org as (
+    select p.id project_id,
+           coalesce(string_agg(l.name||':'||l.title, '|' order by l.name), '') origins
+        from ccms.project p
+            join ccms.project_origin pl on p.id=pl.project_id
+            join ccms.origin l on pl.origin_id=l.id
+        group by p.id
+),
+dst as (
+    select p.id project_id,
+           coalesce(string_agg(l.name||':'||l.title, '|' order by l.name), '') destinations
+        from ccms.project p
+            join ccms.project_destination pl on p.id=pl.project_id
+            join ccms.destination l on pl.destination_id=l.id
+        group by p.id
+),
 trk as (
     select p.id project_id,
            coalesce(string_agg(t.name||':'||t.title, '|' order by t.name), '') tracks
@@ -538,13 +742,17 @@ select coalesce(p.title, '') title,
        coalesce(p.mou_link, '') mou_link,
        coalesce(fnd.funds, '') funds,
        coalesce(loc.locations, '') locations,
+       coalesce(org.origins, '') origins,
+       coalesce(dst.destinations, '') destinations,
        coalesce(trk.tracks, '') tracks
        from ccms.project p
            left join fnd on p.id=fnd.project_id
            left join loc on p.id=loc.project_id
+           left join org on p.id=org.project_id
+           left join dst on p.id=dst.project_id
            left join trk on p.id=trk.project_id
        where p.name=$1`
-	err := c.dp.QueryRow(context.TODO(), q, projectName).Scan(&title, &action, &mouLink, &funds, &locations, &tracks)
+	err := c.dp.QueryRow(context.TODO(), q, projectName).Scan(&title, &action, &mouLink, &funds, &locations, &origins, &destinations, &tracks)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return nil, fmt.Errorf("project %q does not exist", projectName)
@@ -558,6 +766,8 @@ select coalesce(p.title, '') title,
 		{"mou_link", mouLink},
 		{"funds", funds},
 		{"locations", locations},
+		{"origins", origins},
+		{"destinations", destinations},
 		{"tracks", tracks},
 	}
 	return prop, nil
