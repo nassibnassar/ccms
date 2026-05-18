@@ -213,7 +213,7 @@ func createTableProject(tx pgx.Tx) error {
 		return fmt.Errorf("creating schema test: %v", pgerr.Error(err))
 	}
 
-	q = "insert into ccms.project (name,title,action,mou_link) values ('palci_slavic','Slavic studies','purchase','https://www.miketaylor.org.uk/dino/pubs/')"
+	q = "insert into ccms.project (name,title,action,mou_link) values ('palci_slavic','Slavic studies','acquire','https://www.miketaylor.org.uk/dino/pubs/')"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("writing to table ccms.project: %v", pgerr.Error(err))
 	}
@@ -222,7 +222,7 @@ func createTableProject(tx pgx.Tx) error {
 		return fmt.Errorf("creating schema palci_slavic: %v", pgerr.Error(err))
 	}
 
-	q = "insert into ccms.project (name,title,action) values ('east_asia','East Asian studies','purchase')"
+	q = "insert into ccms.project (name,title,action) values ('east_asia','East Asian studies','acquire')"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("writing to table ccms.project: %v", pgerr.Error(err))
 	}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"unicode"
 
 	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/jackc/pgx/v5"
@@ -682,6 +683,19 @@ func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) e
 	switch property {
 	case "funds", "locations", "origins", "destinations", "tracks":
 		return errors.New("property \"" + property + "\" is composite")
+	case "title", "action", "mou_link":
+		// NOP
+	default:
+		return errors.New("property \"" + property + "\" does not exist")
+	}
+
+	if property == "action" {
+		switch value {
+		case "", "acquire", "retire", "digitize", "move", "other":
+			// NOP
+		default:
+			return errors.New("action \"" + value + "\" does not exist")
+		}
 	}
 
 	sql := "update ccms.project set \"" + property + "\"=nullif($1, '') where name=$2"
@@ -759,6 +773,9 @@ select coalesce(p.title, '') title,
 	case err != nil:
 		return nil, err
 	default:
+	}
+	if action != "" {
+		action = action + ":" + string(unicode.ToUpper(rune(action[0]))) + action[1:]
 	}
 	prop := [][2]string{
 		{"title", title},
