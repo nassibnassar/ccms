@@ -42,6 +42,44 @@ metadata.  The `set` action is used for single value properties, while
 |===
 
 [discrete]
+===== Properties
+
+[%header,width=75%,cols="2,4,3"]
+|===
+|Property
+|Value
+|Single value / composite
+
+|`title`
+|free text
+|single value
+
+|`action`
+|`acquire`, `retire`, `digitize`, `move`, `other`
+|single value
+
+|`mou_link`
+|free text
+|single value
+
+|`funds`
+|`coalition_slavic_lit`, `palci_cultural`
+|composite
+
+|`origins`
+|`clockss`,`lehigh`,`nyu`
+|composite
+
+|`destinations`
+|`clockss`,`lehigh`,`nyu`
+|composite
+
+|`tracks`
+|`offsite`,`reserve`,`stacks`
+|composite
+|===
+
+[discrete]
 ===== Examples
 
 Set the title of project `myproj` to `My Project`:

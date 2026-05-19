@@ -29,6 +29,23 @@ property_name   The name of the property in the project metadata.
 
 'subvalue_name' The name of a subvalue in a composite property.
 
+Properties
+
+  Property                   Value                  Single value / composite
+title        free text                              single value
+
+action       acquire, retire, digitize, move, other single value
+
+mou_link     free text                              single value
+
+funds        coalition_slavic_lit, palci_cultural   composite
+
+origins      clockss,lehigh,nyu                     composite
+
+destinations clockss,lehigh,nyu                     composite
+
+tracks       offsite,reserve,stacks                 composite
+
 Examples
 
 Set the title of project myproj to My Project:
