@@ -12,15 +12,15 @@ func alterProjectStmt(s *svr, rqid int64, cmd *ast.AlterProjectStmt) *ccms.Resul
 
 	switch cmd.Action {
 	case ast.Set:
-		if err := s.cat.AlterProjectSetProperty(cmd.ProjectName, cmd.Property, cmd.Value); err != nil {
+		if err := s.cat.AlterProjectSetProperty(cmd.ProjectName, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	case ast.Add:
-		if err := s.cat.AlterProjectAddToProperty(cmd.ProjectName, cmd.Property, cmd.Value); err != nil {
+		if err := s.cat.AlterProjectAddToProperty(cmd.ProjectName, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	case ast.Drop:
-		if err := s.cat.AlterProjectDropFromProperty(cmd.ProjectName, cmd.Property, cmd.Value); err != nil {
+		if err := s.cat.AlterProjectDropFromProperty(cmd.ProjectName, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	default:

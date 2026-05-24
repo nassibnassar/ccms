@@ -11,10 +11,11 @@ const (
 /* statements */
 
 type AlterProjectStmt struct {
-	ProjectName string
-	Property    string
-	Action      AlterAction
-	Value       string
+	ProjectName   string
+	Property      string
+	Action        AlterAction
+	Value         string
+	StringLiteral bool
 }
 
 func (*AlterProjectStmt) node() {}

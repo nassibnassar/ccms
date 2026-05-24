@@ -148,7 +148,7 @@ func (c *Catalog) CreateProject(projectName string) error {
 }
 
 // AlterProjectAddToProperty does not do synchronization and must not access the catalog cache
-func (c *Catalog) AlterProjectAddToProperty(project, property, value string) error {
+func (c *Catalog) AlterProjectAddToProperty(project, property, value string, stringLiteral bool) error {
 	// look up project id
 	projectID, err := c.selectProjectID(project)
 	if err != nil {
@@ -160,22 +160,37 @@ func (c *Catalog) AlterProjectAddToProperty(project, property, value string) err
 
 	switch property {
 	case "funds":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectAddFund(project, value, projectID); err != nil {
 			return err
 		}
 	case "locations":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectAddLocation(project, value, projectID); err != nil {
 			return err
 		}
 	case "origins":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectAddOrigin(project, value, projectID); err != nil {
 			return err
 		}
 	case "destinations":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectAddDestination(project, value, projectID); err != nil {
 			return err
 		}
 	case "tracks":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectAddTrack(project, value, projectID); err != nil {
 			return err
 		}
@@ -188,7 +203,7 @@ func (c *Catalog) AlterProjectAddToProperty(project, property, value string) err
 }
 
 // AlterProjectDropFromProperty does not do synchronization and must not access the catalog cache
-func (c *Catalog) AlterProjectDropFromProperty(project, property, value string) error {
+func (c *Catalog) AlterProjectDropFromProperty(project, property, value string, stringLiteral bool) error {
 	// look up project id
 	projectID, err := c.selectProjectID(project)
 	if err != nil {
@@ -200,22 +215,37 @@ func (c *Catalog) AlterProjectDropFromProperty(project, property, value string) 
 
 	switch property {
 	case "funds":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectDropFund(project, value, projectID); err != nil {
 			return err
 		}
 	case "locations":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectDropLocation(project, value, projectID); err != nil {
 			return err
 		}
 	case "origins":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectDropOrigin(project, value, projectID); err != nil {
 			return err
 		}
 	case "destinations":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectDropDestination(project, value, projectID); err != nil {
 			return err
 		}
 	case "tracks":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 		if err := c.alterProjectDropTrack(project, value, projectID); err != nil {
 			return err
 		}
@@ -673,7 +703,7 @@ func (c *Catalog) projectTrackExists(projectID, trackID int64) (bool, error) {
 }
 
 // AlterProjectSetProperty does not do synchronization and must not access the catalog cache
-func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) error {
+func (c *Catalog) AlterProjectSetProperty(projectName, property, value string, stringLiteral bool) error {
 	tx, err := c.dp.Begin(context.TODO())
 	if err != nil {
 		return errors.New("opening transaction: " + pgerr.String(err))
@@ -683,8 +713,14 @@ func (c *Catalog) AlterProjectSetProperty(projectName, property, value string) e
 	switch property {
 	case "funds", "locations", "origins", "destinations", "tracks":
 		return errors.New("property \"" + property + "\" is composite")
-	case "title", "action", "mou_link":
-		// NOP
+	case "title", "mou_link":
+		if !stringLiteral {
+			return invalidValueError(property, value)
+		}
+	case "action":
+		if stringLiteral {
+			return invalidValueError(property, value)
+		}
 	default:
 		return errors.New("property \"" + property + "\" does not exist")
 	}
@@ -788,4 +824,8 @@ select coalesce(p.title, '') title,
 		{"tracks", tracks},
 	}
 	return prop, nil
+}
+
+func invalidValueError(property, value string) error {
+	return errors.New("invalid value for property \"" + property + "\": \"" + value + "\"")
 }

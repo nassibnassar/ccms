@@ -190,15 +190,19 @@ basic_stmt:
 		}
 
 alter_project_stmt:
-	ALTER PROJECT name ALTER PROPERTY name SET SLITERAL ';'
+	ALTER PROJECT name ALTER PROPERTY name SET name ';'
 		{
-			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Set, Value: $8}
+			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
 		}
-	| ALTER PROJECT name ALTER PROPERTY name ADD SLITERAL ';'
+	| ALTER PROJECT name ALTER PROPERTY name SET SLITERAL ';'
+		{
+			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: true}
+		}
+	| ALTER PROJECT name ALTER PROPERTY name ADD name ';'
 		{
 			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Add, Value: $8}
 		}
-	| ALTER PROJECT name ALTER PROPERTY name DROP SLITERAL ';'
+	| ALTER PROJECT name ALTER PROPERTY name DROP name ';'
 		{
 			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Drop, Value: $8}
 		}

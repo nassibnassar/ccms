@@ -7,44 +7,45 @@ alter project project_name
 
 where action is one of:
 
-    alter property property_name set 'value'
-    alter property property_name add 'subvalue_name'
-    alter property property_name drop { 'subvalue_name' | all }
+    alter property property_name set { value | 'value' }
+    alter property property_name add subvalue
+    alter property property_name drop { subvalue | all }
 
 Description
 
 The alter project command changes the definition of a project.
 
 The alter property clause changes a property in the project’s metadata. The set
-action is used for single value properties, while add and drop are for
+action is used for single-value properties, while add and drop are for
 composite properties.
 
 Parameters
 
-project_name    The name of the project.
+project_name  The name of the project.
 
-property_name   The name of the property in the project metadata.
+property_name The name of the property in the project metadata.
 
-'value'         The new value of a property.
+value         The value of a single-value property.
+'value'
 
-'subvalue_name' The name of a subvalue in a composite property.
+subvalue      A subvalue in a composite property.
 
 Properties
 
-  Property                   Value                  Single value / composite
-title        free text                              single value
+  Property       Type                            Value
+title        single-value text
 
-action       acquire, retire, digitize, move, other single value
+action       single-value action name (acquire, retire, digitize, move, other)
 
-mou_link     free text                              single value
+mou_link     single-value text
 
-funds        coalition_slavic_lit, palci_cultural   composite
+funds        composite    fund name (coalition_slavic_lit, palci_cultural)
 
-origins      clockss,lehigh,nyu                     composite
+origins      composite    location name (clockss, lehigh, nyu)
 
-destinations clockss,lehigh,nyu                     composite
+destinations composite    location name
 
-tracks       offsite,reserve,stacks                 composite
+tracks       composite    track name (offsite, reserve, stacks)
 
 Examples
 
@@ -52,7 +53,7 @@ Set the title of project myproj to My Project:
 
 alter project myproj alter property title set 'My Project';
 
-Add a fund cultural to the project:
+Add a fund palci_cultural to the project:
 
-alter project myproj alter property funds add 'cultural';
+alter project myproj alter property funds add palci_cultural;
 

@@ -469,9 +469,9 @@ h1, h2, h3, h4, h5, h6, #toctitle,
 
 where <code><strong><em>action</em></strong></code> is one of:
 
-    alter property <code><strong><em>property_name</em></strong></code> set <code><strong>'<em>value</em>'</strong></code>
-    alter property <code><strong><em>property_name</em></strong></code> add <code><strong>'<em>subvalue_name</em>'</strong></code>
-    alter property <code><strong><em>property_name</em></strong></code> drop { <code><strong>'<em>subvalue_name</em>'</strong></code> | all }</code></pre>
+    alter property <code><strong><em>property_name</em></strong></code> set { <code><strong><em>value</em></strong></code> | <code><strong>'<em>value</em>'</strong></code> }
+    alter property <code><strong><em>property_name</em></strong></code> add <code><strong><em>subvalue</em></strong></code>
+    alter property <code><strong><em>property_name</em></strong></code> drop { <code><strong><em>subvalue</em></strong></code> | all }</code></pre>
 </div>
 </div>
 <h5 id="_description" class="discrete">Description</h5>
@@ -480,7 +480,7 @@ where <code><strong><em>action</em></strong></code> is one of:
 </div>
 <div class="paragraph">
 <p>The <code>alter property</code> clause changes a property in the project&#8217;s
-metadata.  The <code>set</code> action is used for single value properties, while
+metadata.  The <code>set</code> action is used for single-value properties, while
 <code>add</code> and <code>drop</code> are for composite properties.</p>
 </div>
 <h5 id="_parameters" class="discrete">Parameters</h5>
@@ -499,64 +499,65 @@ metadata.  The <code>set</code> action is used for single value properties, whil
 <td class="tableblock halign-left valign-top"><p class="tableblock">The name of the property in the project metadata.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>'<em>value</em>'</strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The new value of a property.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>value</em></strong></code><br>
+<code><strong>'<em>value</em>'</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The value of a single-value property.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>'<em>subvalue_name</em>'</strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The name of a subvalue in a composite property.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>subvalue</em></strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A subvalue in a composite property.</p></td>
 </tr>
 </tbody>
 </table>
 <h5 id="_properties" class="discrete">Properties</h5>
 <table class="tableblock frame-all grid-all" style="width: 75%;">
 <colgroup>
-<col style="width: 22.2222%;">
-<col style="width: 44.4444%;">
-<col style="width: 33.3334%;">
+<col style="width: 18.75%;">
+<col style="width: 18.75%;">
+<col style="width: 62.5%;">
 </colgroup>
 <thead>
 <tr>
 <th class="tableblock halign-left valign-top">Property</th>
+<th class="tableblock halign-left valign-top">Type</th>
 <th class="tableblock halign-left valign-top">Value</th>
-<th class="tableblock halign-left valign-top">Single value / composite</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>title</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">free text</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">single value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">single-value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">text</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>action</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>acquire</code>, <code>retire</code>, <code>digitize</code>, <code>move</code>, <code>other</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">single value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">single-value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">action name (<code>acquire</code>, <code>retire</code>, <code>digitize</code>, <code>move</code>, <code>other</code>)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>mou_link</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">free text</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">single value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">single-value</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">text</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>funds</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>coalition_slavic_lit</code>, <code>palci_cultural</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">composite</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">fund name (<code>coalition_slavic_lit</code>, <code>palci_cultural</code>)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>origins</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clockss</code>,<code>lehigh</code>,<code>nyu</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">composite</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">location name (<code>clockss</code>, <code>lehigh</code>, <code>nyu</code>)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>destinations</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clockss</code>,<code>lehigh</code>,<code>nyu</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">composite</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">location name</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>tracks</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>offsite</code>,<code>reserve</code>,<code>stacks</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">composite</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">track name (<code>offsite</code>, <code>reserve</code>, <code>stacks</code>)</p></td>
 </tr>
 </tbody>
 </table>
@@ -570,18 +571,18 @@ metadata.  The <code>set</code> action is used for single value properties, whil
 </div>
 </div>
 <div class="paragraph">
-<p>Add a fund <code>cultural</code> to the project:</p>
+<p>Add a fund <code>palci_cultural</code> to the project:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>alter project myproj alter property funds add 'cultural';</pre>
+<pre>alter project myproj alter property funds add palci_cultural;</pre>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-05-18 20:46:59 -0400
+Last updated 2026-05-24 12:07:38 -0400
 </div>
 </div>
 </body>
