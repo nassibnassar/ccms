@@ -1,3 +1,26 @@
+# v0.0.25
+
+* In `alter project`:
+
+  - Name values used as identifiers are no longer enclosed in
+    quotation marks.
+
+  - Values of the `action` property are now retricted to preset names
+    (listed in the documentation).
+
+  - The property `locations` has been superseded by new properties
+    `origins` and `destinations`, and will be removed in the future.
+
+  - Added the action `drop all`.
+
+  - An error is no longer returned when adding a subvalue to a
+    composite property that already contains the subvalue.
+
+* Added the `drop project` command.
+
+* In `select`, added support for `like` and `ilike` pattern matching
+  operators.
+
 # v0.0.24
 
 * Added `alter project` command.
