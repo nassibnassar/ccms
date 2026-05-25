@@ -220,7 +220,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		}
 	}
 	if !noLog {
-		log.Info("[%d] %s (%s) - %s", rqid, addr, user, req.Commands)
+		log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
 	}
 
 	for i := range cmds {
