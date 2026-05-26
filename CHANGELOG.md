@@ -7,7 +7,7 @@
   - Name values used as identifiers are no longer enclosed in
     quotation marks.
 
-  - Values of the `action` property are now retricted to preset names
+  - Values of the `action` property are now restricted to preset names
     (listed in the documentation).
 
   - The property `locations` has been superseded by new properties
