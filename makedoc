@@ -1,6 +1,7 @@
 #!/bin/sh
 asciidoctor -a docinfo=shared ./doc/*.adoc
 w3m ./doc/alterproject.html | head -n -1 > ./cmd/ccd/doc/alterproject.txt
+w3m ./doc/createfund.html | head -n -1 > ./cmd/ccd/doc/createfund.txt
 w3m ./doc/createproject.html | head -n -1 > ./cmd/ccd/doc/createproject.txt
 w3m ./doc/createset.html | head -n -1 > ./cmd/ccd/doc/createset.txt
 w3m ./doc/createuser.html | head -n -1 > ./cmd/ccd/doc/createuser.txt

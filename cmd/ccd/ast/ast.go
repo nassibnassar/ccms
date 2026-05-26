@@ -20,6 +20,12 @@ type AlterProjectStmt struct {
 
 func (*AlterProjectStmt) node() {}
 
+type CreateFundStmt struct {
+	FundName string
+}
+
+func (*CreateFundStmt) node() {}
+
 type CreateProjectStmt struct {
 	ProjectName string
 }

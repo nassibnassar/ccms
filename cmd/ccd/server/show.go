@@ -13,6 +13,12 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	switch cmd.Type {
 	case "filters":
 		result.AddField("filter_name", "text")
+	case "funds":
+		result.AddField("fund_name", "text")
+		result.AddField("fund_title", "text")
+		if err := addShowFundsData(s.cat, result); err != nil {
+			return cmderr(err.Error())
+		}
 	//case "roles":
 	//        result.AddField("role_name", "text")
 	//        result.AddField("user_names", "text")
@@ -40,6 +46,17 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 		return cmderr("unknown variable \"" + cmd.Type + "\"")
 	}
 	return result
+}
+
+func addShowFundsData(cat *catalog.Catalog, result *ccms.Result) error {
+	funds, err := cat.AllFunds()
+	if err != nil {
+		return err
+	}
+	for i := range funds {
+		result.AddData([]any{funds[i].Name, funds[i].Title})
+	}
+	return nil
 }
 
 func addShowRolesData(cat *catalog.Catalog, result *ccms.Result) {

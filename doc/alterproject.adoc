@@ -65,7 +65,7 @@ metadata.  The `set` action is used for single-value properties, while
 
 |`funds`
 |composite
-|fund name (`coalition_slavic_lit`, `palci_cultural`)
+|fund name
 
 |`origins`
 |composite

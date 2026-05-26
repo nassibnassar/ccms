@@ -1,3 +1,5 @@
+* Added the `create fund` and `show funds` commands.
+
 # v0.0.25
 
 * In `alter project`:

@@ -3,7 +3,6 @@ package server
 import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/log"
 )
 
 func createProjectStmt(s *svr, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Result {
@@ -16,8 +15,7 @@ func createProjectStmt(s *svr, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Res
 	}
 
 	if err := s.cat.CreateProject(cmd.ProjectName); err != nil {
-		log.Info("[%d] %v", rqid, err)
-		return cmderr("error writing project \"" + cmd.ProjectName + "\"")
+		return cmderr(err.Error())
 	}
 
 	return ccms.NewResult("create project")

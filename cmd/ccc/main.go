@@ -472,6 +472,7 @@ func helpCommand(line string) string {
 
 var completer = readline.NewPrefixCompleter(
 	readline.PcItem("alter project"),
+	readline.PcItem("create fund"),
 	readline.PcItem("create project"),
 	readline.PcItem("create set"),
 	readline.PcItem("delete from"),
@@ -483,6 +484,7 @@ var completer = readline.NewPrefixCompleter(
 		readline.PcItem("count(*)"),
 	),
 	readline.PcItem("show",
+		readline.PcItem("funds"),
 		readline.PcItem("project"),
 		readline.PcItem("projects"),
 		readline.PcItem("sets"),

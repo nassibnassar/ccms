@@ -69,6 +69,7 @@ func (c *Catalog) IsValidTargetProject(projectName string) bool {
 func (c *Catalog) AllProjects() []Project {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	projects := make([]Project, len(c.projects))
 	i := 0
 	for k, v := range c.projects {
@@ -547,21 +548,6 @@ func (c *Catalog) selectProjectID(project string) (int64, error) {
 	var q = "select id from ccms.project where name=$1"
 	var id int64
 	err := c.dp.QueryRow(context.TODO(), q, project).Scan(&id)
-	switch {
-	case errors.Is(err, pgx.ErrNoRows):
-		return -1, nil
-	case err != nil:
-		return 0, pgerr.Error(err)
-	default:
-		return id, nil
-	}
-}
-
-// returns fund id, or -1 if fund does not exist
-func (c *Catalog) selectFundID(fund string) (int64, error) {
-	var q = "select id from ccms.fund where name=$1"
-	var id int64
-	err := c.dp.QueryRow(context.TODO(), q, fund).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return -1, nil

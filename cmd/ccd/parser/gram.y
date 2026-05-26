@@ -20,6 +20,7 @@ import (
 %type <nodeList> stmt
 %type <nodeList> stmt_list
 %type <node> alter_project_stmt
+%type <node> create_fund_stmt
 %type <node> create_project_stmt
 %type <node> create_set_stmt
 %type <node> create_user_stmt
@@ -67,8 +68,8 @@ import (
 %token DROP
 %token ENCRYPTED
 %token FILTER
-%token FILTERS
 %token FROM
+%token FUND
 %token ILIKE
 %token INFO
 %token INSERT
@@ -81,19 +82,15 @@ import (
 %token ORDER
 %token PASSWORD
 %token PROJECT
-%token PROJECTS
 %token PROPERTY
 %token PING
 %token RETRIEVE
 %token SELECT
 %token SET
-%token SETS
 %token SHOW
 %token TAG
-%token TAGS
 %token TO
 %token USER
-%token USERS
 %token WHERE
 %token WITH
 
@@ -137,6 +134,10 @@ stmt:
 
 basic_stmt:
 	alter_project_stmt
+		{
+			$$ = $1
+		}
+	| create_fund_stmt
 		{
 			$$ = $1
 		}
@@ -211,6 +212,12 @@ alter_project_stmt:
 			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Drop, Value: "*"}
 		}
 
+create_fund_stmt:
+	CREATE FUND name ';'
+		{
+			$$ = &ast.CreateFundStmt{FundName: $3}
+		}
+
 create_project_stmt:
 	CREATE PROJECT name ';'
 		{
@@ -276,29 +283,13 @@ select_stmt:
 		}
 
 show_stmt:
-	SHOW PROJECTS ';'
+	SHOW name ';'
 		{
-			$$ = &ast.ShowStmt{Type: "projects"}
+			$$ = &ast.ShowStmt{Type: $2}
 		}
 	| SHOW PROJECT name ';'
 		{
 			$$ = &ast.ShowStmt{Type: "project", Name: $3}
-		}
-	| SHOW FILTERS ';'
-		{
-			$$ = &ast.ShowStmt{Type: "filters"}
-		}
-	| SHOW SETS ';'
-		{
-			$$ = &ast.ShowStmt{Type: "sets"}
-		}
-	| SHOW TAGS ';'
-		{
-			$$ = &ast.ShowStmt{Type: "tags"}
-		}
-	| SHOW USERS ';'
-		{
-			$$ = &ast.ShowStmt{Type: "users"}
 		}
 
 select_attr_list:

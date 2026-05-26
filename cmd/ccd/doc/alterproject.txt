@@ -39,7 +39,7 @@ action       single-value action name (acquire, retire, digitize, move, other)
 
 mou_link     single-value text
 
-funds        composite    fund name (coalition_slavic_lit, palci_cultural)
+funds        composite    fund name
 
 origins      composite    location name (clockss, lehigh, nyu)
 

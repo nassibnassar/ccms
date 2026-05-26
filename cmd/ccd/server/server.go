@@ -193,6 +193,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		return
 	}
 
+	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
+
 	var node ast.Node
 	var cmds []ast.Node
 
@@ -212,21 +214,23 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	var result *ccms.Result
 	cmds = node.(*ast.ParseTree).Commands
 
-	var noLog bool
-	if len(cmds) == 1 {
-		_, ok := cmds[0].(*ast.PingStmt)
-		if ok {
-			noLog = true
-		}
-	}
-	if !noLog {
-		log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
-	}
+	// var noLog bool
+	// if len(cmds) == 1 {
+	// 	_, ok := cmds[0].(*ast.PingStmt)
+	// 	if ok {
+	// 		noLog = true
+	// 	}
+	// }
+	// if !noLog {
+	// 	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
+	// }
 
 	for i := range cmds {
 		switch cmd := cmds[i].(type) {
 		case *ast.AlterProjectStmt:
 			result = alterProjectStmt(s, rqid, cmd)
+		case *ast.CreateFundStmt:
+			result = createFundStmt(s, rqid, cmd)
 		case *ast.CreateProjectStmt:
 			result = createProjectStmt(s, rqid, cmd)
 		case *ast.CreateSetStmt:

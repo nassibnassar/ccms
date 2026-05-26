@@ -1,0 +1,31 @@
+==== create fund
+
+Define a new fund
+
+[source,subs="verbatim,quotes"]
+----
+create fund `*_fund_name_*`
+----
+
+[discrete]
+===== Description
+
+The `create fund` command creates a new fund.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_fund_name_*`
+|The name of the new fund.
+|===
+
+[discrete]
+===== Examples
+
+Create a new fund `cultural_lit`:
+
+----
+create fund cultural_lit;
+----

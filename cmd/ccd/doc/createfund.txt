@@ -1,0 +1,20 @@
+create fund
+
+Define a new fund
+
+create fund fund_name
+
+Description
+
+The create fund command creates a new fund.
+
+Parameters
+
+fund_name The name of the new fund.
+
+Examples
+
+Create a new fund cultural_lit:
+
+create fund cultural_lit;
+

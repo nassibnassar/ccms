@@ -4,6 +4,8 @@ List the values of a system variable
 
 [source,subs="verbatim,quotes"]
 ----
+show funds
+
 show projects
 
 show project `*_project_name_*`
