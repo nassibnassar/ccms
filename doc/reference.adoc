@@ -32,6 +32,8 @@ The `where` clause in a query is followed by a search condition.  This
 condition is a Boolean expression consisting of operators and
 operands.
 
+===== Operators
+
 The supported operators, in order of precedence, are:
 
 [%header,width=75%,cols="5,2,5"]
@@ -59,6 +61,8 @@ The supported operators, in order of precedence, are:
 
 Parentheses may be used to override these precedence rules.
 
+===== Operands
+
 Supported operand types are:
 
 [%header,width=75%,cols="3,4,5"]
@@ -80,3 +84,33 @@ Supported operand types are:
 |numeric constant
 |===
 
+===== Attributes
+
+Supported attribute names are:
+
+[%header,width=75%,cols="4,3,5"]
+|===
+|Attribute
+|Type
+|Description
+
+|`id`
+|`bigint`
+|CCMS identifier
+
+|`author`
+|`text`
+|`100 $a`
+
+|`title`
+|`text`
+|`245 $a` and `245 $b`
+
+|`full_vendor_name`
+|`text`
+|`999 13 $a`
+
+|`availability`
+|`text`
+|`999 13 $z`
+|===
