@@ -59,6 +59,8 @@ func (s *SelectStmt) SQL() (string, error) {
 	return b.String(), nil
 }
 
+// TODO join table <project>.object and fund, and add fund name to projection
+// TODO does pgx coalesce nulls to zero value, obviating need for coalesce()?
 func (s *SelectStmt) sql(b *strings.Builder) error {
 	var projection string
 	switch s.AttrList.(*SelectAttrList).Attr {

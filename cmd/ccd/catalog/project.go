@@ -44,23 +44,23 @@ func (c *Catalog) initProjects() error {
 
 // given a project name or fully qualified set name (project.set), return true if the project exists
 func (c *Catalog) ProjectExists(projectOrFullSetName string) bool {
-	var p string // project name
-	sp := strings.Split(projectOrFullSetName, ".")
-	switch len(sp) {
-	case 1: // project
-		fallthrough
-	case 2: // full set name
-		p = sp[0]
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.projectExists(projectOrFullSetName)
+}
+
+func (c *Catalog) projectExists(projectOrFullSetName string) bool {
+	s := strings.Split(projectOrFullSetName, ".")
+	if len(s) < 1 || len(s) > 2 {
+		return false
 	}
-	_, ok := c.projects[p]
+	_, ok := c.projects[s[0]]
 	return ok
 }
 
-func (c *Catalog) IsValidTargetProject(projectName string) bool {
-	if projectName == "reserve" {
-		return false
-	}
-	if strings.ContainsRune(projectName, '.') {
+func (c *Catalog) IsValidTargetProject(project string) bool {
+	if strings.ContainsRune(project, '.') {
 		return false
 	}
 	return true
@@ -70,6 +70,10 @@ func (c *Catalog) AllProjects() []Project {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	return c.allProjects()
+}
+
+func (c *Catalog) allProjects() []Project {
 	projects := make([]Project, len(c.projects))
 	i := 0
 	for k, v := range c.projects {
@@ -89,62 +93,73 @@ func sortProjectNames(projects []Project) {
 	})
 }
 
-func (c *Catalog) DropProject(projectName string) error {
+func (c *Catalog) DropProject(project string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	sets := c.setsInProject(projectName)
+	sets := c.setsInProject(project)
 	if len(sets) != 0 {
-		return errors.New("project \"" + projectName + "\" contains one or more sets")
+		return errors.New("project \"" + project + "\" contains one or more sets")
 	}
 
 	tx, err := c.dp.Begin(context.TODO())
 	if err != nil {
-		return fmt.Errorf("dropping project %q: opening transaction: %v", projectName, err)
+		return fmt.Errorf("dropping project %q: opening transaction: %v", project, err)
 	}
 	defer tx.Rollback(context.TODO())
 
-	sql := "drop schema " + projectName
+	sql := "drop table " + project + ".object"
 	if _, err := tx.Exec(context.TODO(), sql); err != nil {
-		return fmt.Errorf("dropping project %q: %v", projectName, err)
+		return pgerr.Error(err)
+	}
+	sql = "drop schema " + project
+	if _, err := tx.Exec(context.TODO(), sql); err != nil {
+		return pgerr.Error(err)
 	}
 	sql = "delete from ccms.project where name=$1"
-	if _, err := tx.Exec(context.TODO(), sql, projectName); err != nil {
-		return errors.New("deregistering project \"" + projectName + "\": " + pgerr.String(err))
+	if _, err := tx.Exec(context.TODO(), sql, project); err != nil {
+		return pgerr.Error(err)
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
-		return fmt.Errorf("dropping project %q: committing changes: %v", projectName, err)
+		return pgerr.Error(err)
 	}
 
-	delete(c.projects, projectName)
+	delete(c.projects, project)
 	return nil
 }
 
-func (c *Catalog) CreateProject(projectName string) error {
+func (c *Catalog) CreateProject(project string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	tx, err := c.dp.Begin(context.TODO())
 	if err != nil {
-		return fmt.Errorf("creating project %q: opening transaction: %v", projectName, err)
+		return pgerr.Error(err)
 	}
 	defer tx.Rollback(context.TODO())
 
-	sql := "create schema " + projectName
+	sql := "create schema " + project
 	if _, err := tx.Exec(context.TODO(), sql); err != nil {
-		return fmt.Errorf("creating project %q: %v", projectName, err)
+		return pgerr.Error(err)
 	}
 	sql = "insert into ccms.project (name) values ($1)"
-	if _, err := tx.Exec(context.TODO(), sql, projectName); err != nil {
-		return errors.New("registering project \"" + projectName + "\": " + pgerr.String(err))
+	if _, err := tx.Exec(context.TODO(), sql, project); err != nil {
+		return pgerr.Error(err)
+	}
+
+	q := "create table " + project + ".object (" +
+		"id bigint primary key," +
+		"fund_id integer not null references ccms.fund (id))"
+	if _, err := tx.Exec(context.TODO(), q); err != nil {
+		return pgerr.Error(err)
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
-		return fmt.Errorf("creating project %q: committing changes: %v", projectName, err)
+		return pgerr.Error(err)
 	}
 
-	c.projects[projectName] = struct{}{}
+	c.projects[project] = struct{}{}
 	return nil
 }
 

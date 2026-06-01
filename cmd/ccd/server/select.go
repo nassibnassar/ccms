@@ -91,7 +91,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 	rows, err := s.dp.Query(context.TODO(), sql)
 	if err != nil {
 		fmt.Println(sql)
-		panic(fmt.Sprintf("selecting from reserve: %v", err))
+		panic(fmt.Sprintf("selecting: %v", err))
 	}
 	defer rows.Close()
 	result := ccms.NewResult("select")
@@ -106,7 +106,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 		var author, title, full_vendor_name, availability string
 		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability)
 		if err != nil {
-			panic(fmt.Sprintf("reading from reserve: %v", err))
+			panic(fmt.Sprintf("reading: %v", err))
 		}
 		result.AddData([]any{id, author, title, full_vendor_name, availability})
 		count++
@@ -115,7 +115,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 		}
 	}
 	if err = rows.Err(); err != nil {
-		panic(fmt.Sprintf("reading from reserve: %v", err))
+		panic(fmt.Sprintf("reading: %v", err))
 	}
 	return result, nil
 }

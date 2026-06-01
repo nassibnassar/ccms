@@ -10,6 +10,9 @@ const (
 
 /* statements */
 
+// TODO how to set spectre attributes?
+//      update east_asia.object set fund = 'palci_cultural' where id = 12;
+
 type AlterProjectStmt struct {
 	ProjectName   string
 	Property      string
