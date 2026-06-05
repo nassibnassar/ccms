@@ -52,7 +52,7 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 			cmd.Value = strconv.FormatInt(fundID, 10)
 		}
 	default:
-		return cmderr("unknown attribute \"" + cmd.Attr + "\"")
+		return cmderr("attribute \"" + cmd.Attr + "\" is not valid for update")
 	}
 
 	sql, err := cmd.SQL()
