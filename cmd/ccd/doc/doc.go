@@ -90,3 +90,10 @@ var showTxt string
 func Show() string {
 	return strings.TrimSpace(showTxt)
 }
+
+//go:embed update.txt
+var updateTxt string
+
+func Update() string {
+	return strings.TrimSpace(updateTxt)
+}

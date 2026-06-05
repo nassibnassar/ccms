@@ -114,6 +114,17 @@ type QueryClause struct {
 
 func (*QueryClause) node() {}
 
+type UpdateStmt struct {
+	SetName       string
+	Attr          string
+	Value         string
+	StringLiteral bool
+	IDAttr        string
+	IDValue       *Number
+}
+
+func (*UpdateStmt) node() {}
+
 type WhereClause struct {
 	Valid     bool
 	Condition Node

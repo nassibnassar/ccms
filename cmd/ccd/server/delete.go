@@ -23,7 +23,7 @@ func deleteStmt(s *svr, rqid int64, cmd *ast.DeleteStmt) *ccms.Result {
 	}
 	//log.Info("[%d] %s", rqid, sql)
 	if _, err := s.dp.Exec(context.TODO(), sql); err != nil {
-		return cmderr("deleting from \"" + cmd.From + "\": " + pgerr.String(err))
+		return cmderr(pgerr.String(err))
 	}
 
 	return ccms.NewResult("delete")

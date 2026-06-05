@@ -32,6 +32,7 @@ import (
 %type <node> insert_stmt
 %type <node> select_stmt
 %type <node> show_stmt
+%type <node> update_stmt
 
 %type <node> select_attr_list
 %type <node> query_clause
@@ -77,6 +78,7 @@ import (
 %token LIKE
 %token LIMIT
 %token NOT
+%token NULL
 %token OFFSET
 %token OR
 %token ORDER
@@ -90,6 +92,7 @@ import (
 %token SHOW
 %token TAG
 %token TO
+%token UPDATE
 %token USER
 %token WHERE
 %token WITH
@@ -178,6 +181,10 @@ basic_stmt:
 			$$ = $1
 		}
 	| show_stmt
+		{
+			$$ = $1
+		}
+	| update_stmt
 		{
 			$$ = $1
 		}
@@ -290,6 +297,20 @@ show_stmt:
 	| SHOW PROJECT name ';'
 		{
 			$$ = &ast.ShowStmt{Type: "project", Name: $3}
+		}
+
+update_stmt:
+	UPDATE name SET name '=' name WHERE name '=' NUMBER ';'
+		{
+			$$ = &ast.UpdateStmt{SetName: $2, Attr: $4, Value: $6, StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+		}
+	| UPDATE name SET FUND '=' name WHERE name '=' NUMBER ';'
+		{
+			$$ = &ast.UpdateStmt{SetName: $2, Attr: "fund", Value: $6, StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+		}
+	| UPDATE name SET FUND '=' NULL WHERE name '=' NUMBER ';'
+		{
+			$$ = &ast.UpdateStmt{SetName: $2, Attr: "fund", Value: "", StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
 		}
 
 select_attr_list:

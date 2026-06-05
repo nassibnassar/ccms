@@ -10,6 +10,7 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype/zeronull"
 )
 
 func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
@@ -91,7 +92,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 	rows, err := s.dp.Query(context.TODO(), sql)
 	if err != nil {
 		fmt.Println(sql)
-		panic(fmt.Sprintf("selecting from reserve: %v", err))
+		panic(fmt.Sprintf("selecting: %v", err))
 	}
 	defer rows.Close()
 	result := ccms.NewResult("select")
@@ -100,27 +101,35 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 	result.AddField("title", "text")
 	result.AddField("full_vendor_name", "text")
 	result.AddField("availability", "text")
+	result.AddField("fund", "text")
 	var count int
 	for rows.Next() {
 		var id int64
-		var author, title, full_vendor_name, availability string
-		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability)
+		// var author, title, full_vendor_name, availability, fund string
+		var author, title, full_vendor_name, availability, fund zeronull.Text
+		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability, &fund)
 		if err != nil {
-			panic(fmt.Sprintf("reading from reserve: %v", err))
+			panic(fmt.Sprintf("reading: %v", err))
 		}
-		result.AddData([]any{id, author, title, full_vendor_name, availability})
+		result.AddData([]any{id, author, title, full_vendor_name, availability, fund})
 		count++
 		if count > 10000 {
 			return nil, errors.New("result set too large")
 		}
 	}
 	if err = rows.Err(); err != nil {
-		panic(fmt.Sprintf("reading from reserve: %v", err))
+		panic(fmt.Sprintf("reading: %v", err))
 	}
 	return result, nil
 }
 
 func processQuery(s *svr, rqid int64, query *ast.QueryClause) error {
+
+	// TODO remove this "reserve" check after some time
+	if query.From == "reserve" {
+		return errors.New("set \"reserve\" no longer supported; use \"<project>.object\"")
+	}
+
 	if !s.cat.SetExists(query.From) {
 		return errors.New("set \"" + query.From + "\" does not exist")
 	}

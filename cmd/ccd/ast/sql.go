@@ -63,7 +63,8 @@ func (s *SelectStmt) sql(b *strings.Builder) error {
 	var projection string
 	switch s.AttrList.(*SelectAttrList).Attr {
 	case "*":
-		projection = "a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability"
+		// projection = "a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability, coalesce(fund.name, '') fund"
+		projection = "a.id, a.author, a.title, a.full_vendor_name, a.availability, fund.name||':'||fund.title fund"
 	case "count(*)":
 		projection = "count(*)"
 	}
@@ -78,9 +79,20 @@ func (s *SelectStmt) sql(b *strings.Builder) error {
 }
 
 func (q *QueryClause) sql(b *strings.Builder) error {
+	fromTable := catalog.SetTable(q.From)
+	schema, table := catalog.SplitSchemaTable(fromTable)
+
 	b.WriteString("from ")
-	b.WriteString(catalog.SetTable(q.From))
+	if table == "object" {
+		b.WriteString("ccms.reserve")
+	} else {
+		b.WriteString(fromTable)
+	}
 	b.WriteString(" t join ccms.attr a on t.id=a.id")
+
+	b.WriteString(" left join " + schema + ".object on t.id=object.id")
+	b.WriteString(" left join ccms.fund on object.fund_id=fund.id")
+
 	w := q.Where.(*WhereClause)
 	if w.Valid {
 		b.WriteString(" where (")
@@ -104,6 +116,34 @@ func (q *QueryClause) sql(b *strings.Builder) error {
 	if q.Offset.(*OffsetClause).Valid {
 		b.WriteString(" offset ")
 		b.WriteString(q.Offset.(*OffsetClause).Start)
+	}
+	return nil
+}
+
+func (u *UpdateStmt) SQL() (string, error) {
+	var b strings.Builder
+	if err := u.sql(&b); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
+
+func (u *UpdateStmt) sql(b *strings.Builder) error {
+	if u.Value == "" {
+		b.WriteString("update ")
+		b.WriteString(u.SetName)
+		b.WriteString(" set fund_id=null where id=")
+		b.WriteString(u.IDValue.Value)
+	} else {
+		b.WriteString("insert into ")
+		b.WriteString(u.SetName)
+		b.WriteString(" (id, fund_id) values (")
+		b.WriteString(u.IDValue.Value)
+		b.WriteString(", ")
+		b.WriteString(u.Value)
+		b.WriteString(")")
+		b.WriteString(" on conflict (id) do update set fund_id=")
+		b.WriteString(u.Value)
 	}
 	return nil
 }

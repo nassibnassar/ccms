@@ -253,6 +253,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			result = selectStmt(s, rqid, cmd)
 		case *ast.ShowStmt:
 			result = showStmt(s, cmd)
+		case *ast.UpdateStmt:
+			result = updateStmt(s, rqid, cmd)
 		case nil:
 			continue
 		default:

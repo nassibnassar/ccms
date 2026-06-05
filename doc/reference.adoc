@@ -24,6 +24,8 @@ include::select.adoc[]
 
 include::show.adoc[]
 
+include::update.adoc[]
+
 === Queries
 
 ==== Value expressions

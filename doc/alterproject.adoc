@@ -9,7 +9,7 @@ alter project `*_project_name_*`
 
 where `*_action_*` is one of:
 
-    alter property `*_property_name_*` set { `*_value_*` | `*'_value_'*` }
+    alter property `*_property_name_*` set `*_value_*`
     alter property `*_property_name_*` add `*_subvalue_*`
     alter property `*_property_name_*` drop { `*_subvalue_*` | all }
 ----
@@ -34,8 +34,7 @@ metadata.  The `set` action is used for single-value properties, while
 |`*_property_name_*`
 |The name of the property in the project metadata.
 
-|`*_value_*` +
-`*'_value_'*`
+|`*_value_*`
 |The value of a single-value property.
 
 |`*_subvalue_*`

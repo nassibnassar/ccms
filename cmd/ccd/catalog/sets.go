@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 
@@ -33,50 +34,63 @@ func (c *Catalog) initSets() error {
 	return nil
 }
 
-func (c *Catalog) SetExists(setName string) bool {
+func (c *Catalog) SetExists(set string) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if setName == "reserve" {
-		return true
+
+	s := strings.Split(set, ".")
+	if len(s) != 2 {
+		return false
 	}
-	_, ok := c.sets[setName]
+	if s[1] == "object" {
+		return c.projectExists(s[0])
+	}
+
+	_, ok := c.sets[set]
 	return ok
 }
 
-func (c *Catalog) IsValidTargetSet(setName string) bool {
-	if setName == "reserve" {
+// IsValidTargetSet does not do synchronization and must not access the catalog cache
+func (c *Catalog) IsValidTargetSet(set string) bool {
+	s := strings.Split(set, ".")
+	if len(s) != 2 {
 		return false
 	}
-	if !strings.ContainsRune(setName, '.') {
+	if s[0] == "" || s[1] == "" {
 		return false
 	}
-	if strings.HasPrefix(setName, ".") || strings.HasSuffix(setName, ".") {
+	if s[1] == "object" {
 		return false
 	}
-	return c.ProjectExists(setName)
+	return c.ProjectExists(set)
 }
 
 // return table containing set
-func SetTable(setName string) string {
-	if setName == "reserve" {
-		return "ccms.reserve"
+func SetTable(set string) string {
+	s := strings.Split(set, ".")
+	if s[1] == "object" {
+		return set
 	}
-	sp := strings.Split(setName, ".")
-	return sp[0] + ".s_" + sp[1]
+	return s[0] + ".s_" + s[1]
+}
+
+func SplitSchemaTable(schemaTable string) (string, string) {
+	s := strings.Split(schemaTable, ".")
+	switch len(s) {
+	case 1:
+		return s[0], ""
+	case 2:
+		return s[0], s[1]
+	default:
+		return "", ""
+	}
 }
 
 func (c *Catalog) AllSets() []string {
 	c.mu.Lock()
-	defer c.mu.Unlock()
+	sets := slices.Collect(maps.Keys(c.sets))
+	c.mu.Unlock()
 
-	sets := make([]string, len(c.sets)+1)
-	i := 0
-	sets[i] = "reserve"
-	i++
-	for k := range c.sets {
-		sets[i] = k
-		i++
-	}
 	sortSetNames(sets)
 	return sets
 }

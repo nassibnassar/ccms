@@ -33,6 +33,12 @@ func (c *Catalog) FundExists(fund string) (bool, error) {
 }
 
 // returns fund id, or -1 if fund does not exist
+// SelectFundID does not do synchronization and must not access the catalog cache
+func (c *Catalog) SelectFundID(fund string) (int64, error) {
+	return c.selectFundID(fund)
+}
+
+// returns fund id, or -1 if fund does not exist
 func (c *Catalog) selectFundID(fund string) (int64, error) {
 	var q = "select id from ccms.fund where name=$1"
 	var id int64

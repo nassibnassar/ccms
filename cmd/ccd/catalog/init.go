@@ -46,8 +46,7 @@ func Initialize(program string, dp *pgxpool.Pool, security *config.Security) (*C
 			return nil, err
 		}
 	} else {
-		// TODO check that database version is compatible;
-		// for now we assume it is compatible
+		// TODO check that database version is compatible; for now we assume it is compatible
 	}
 	c := &Catalog{secretKey: security.SecretKey, dp: dp}
 	if err := c.initAuth(); err != nil {
@@ -63,7 +62,23 @@ func Initialize(program string, dp *pgxpool.Pool, security *config.Security) (*C
 		return nil, err
 	}
 
+	if err := c.addSampleProject(); err != nil {
+		return nil, err
+	}
+
 	return c, nil
+}
+
+func (c *Catalog) addSampleProject() error {
+	if len(c.AllProjects()) == 0 {
+		if err := c.CreateProject("palci_slavic"); err != nil {
+			return err
+		}
+		if err := c.AlterProjectSetProperty("palci_slavic", "title", "Slavic studies", true); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type createTableFunc func(pgx.Tx) error
@@ -203,34 +218,6 @@ func createTableProject(tx pgx.Tx) error {
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project: %v", pgerr.Error(err))
 	}
-
-	q = "insert into ccms.project (name) values ('test')"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project: %v", pgerr.Error(err))
-	}
-	q = "create schema test"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating schema test: %v", pgerr.Error(err))
-	}
-
-	q = "insert into ccms.project (name,title,action,mou_link) values ('palci_slavic','Slavic studies','acquire','https://www.miketaylor.org.uk/dino/pubs/')"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project: %v", pgerr.Error(err))
-	}
-	q = "create schema palci_slavic"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating schema palci_slavic: %v", pgerr.Error(err))
-	}
-
-	q = "insert into ccms.project (name,title,action) values ('east_asia','East Asian studies','acquire')"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project: %v", pgerr.Error(err))
-	}
-	q = "create schema east_asia"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating schema east_asia: %v", pgerr.Error(err))
-	}
-
 	return nil
 }
 
@@ -268,12 +255,6 @@ func createTableProjectFund(tx pgx.Tx) error {
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project_fund: %v", pgerr.Error(err))
 	}
-
-	q = "insert into ccms.project_fund (project_id, fund_id) values (2, 1), (2, 2)"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project_fund: %v", pgerr.Error(err))
-	}
-
 	return nil
 }
 
@@ -302,12 +283,6 @@ func createTableProjectLocation(tx pgx.Tx) error {
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project_location: %v", pgerr.Error(err))
 	}
-
-	q = "insert into ccms.project_location (project_id, location_id) values (2, 1), (2, 2), (2, 3)"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project_location: %v", pgerr.Error(err))
-	}
-
 	return nil
 }
 
@@ -336,12 +311,6 @@ func createTableProjectOrigin(tx pgx.Tx) error {
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project_origin: %v", pgerr.Error(err))
 	}
-
-	q = "insert into ccms.project_origin (project_id, origin_id) values (2, 1), (2, 2)"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project_origin: %v", pgerr.Error(err))
-	}
-
 	return nil
 }
 
@@ -370,12 +339,6 @@ func createTableProjectDestination(tx pgx.Tx) error {
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project_destination: %v", pgerr.Error(err))
 	}
-
-	q = "insert into ccms.project_destination (project_id, destination_id) values (2, 3)"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project_destination: %v", pgerr.Error(err))
-	}
-
 	return nil
 }
 
@@ -404,12 +367,6 @@ func createTableProjectTrack(tx pgx.Tx) error {
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.project_track: %v", pgerr.Error(err))
 	}
-
-	q = "insert into ccms.project_track (project_id, track_id) values (2, 1), (2, 2), (2, 3)"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.project_track: %v", pgerr.Error(err))
-	}
-
 	return nil
 }
 

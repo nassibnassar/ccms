@@ -98,12 +98,14 @@ func Harvest(dp *pgxpool.Pool) {
 		identifier := strings.TrimPrefix(record.Header.Identifier, "oai:")
 		dateStamp := record.Header.DateStamp
 		author100a := m.Lookup("100", "", "", "a")
+		author := nilIfEmpty(&author100a)
 		title245 := m.Lookup("245", "", "", "a")
 		title245b := m.Lookup("245", "", "", "b")
 		if title245b != "" {
 			title245 = title245 + "\n" + title245b
 		}
 		//title245 := strings.Join([]string{title245a, title245b}, "\n")
+		title := nilIfEmpty(&title245)
 		fullVendorName := m.Lookup("999", "1", "3", "a")
 		availability := m.Lookup("999", "1", "3", "z")
 		//placePub := m.Lookup("260", "a")
@@ -114,17 +116,7 @@ func Harvest(dp *pgxpool.Pool) {
 		//        log.Info("harvested %d records", c)
 		//}
 
-		var author, title *string
-		//var author, title, placeOfPublication *string
-		if author100a != "" {
-			author = &author100a
-		}
-		if title245 != "" {
-			title = &title245
-		}
-		//if placePub != "" {
-		//        placeOfPublication = &placePub
-		//}
+		// placeOfPublication := nilIfEmpty(&placePub)
 
 		// temporarily skip records with no author to give us better example data
 		if author == nil {
@@ -177,4 +169,11 @@ func Harvest(dp *pgxpool.Pool) {
 	fmt.Printf("=======================================================================\n")
 	fmt.Printf("harvest exiting\n")
 	fmt.Printf("=======================================================================\n")
+}
+
+func nilIfEmpty(s *string) *string {
+	if *s == "" {
+		return nil
+	}
+	return s
 }

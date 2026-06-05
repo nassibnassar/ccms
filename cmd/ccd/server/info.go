@@ -24,7 +24,8 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 			//"        info    show supported commands\n" +
 			"        insert          insert objects into a set\n" +
 			"        select          retrieve objects from a set\n" +
-			"        show            list existing filters or sets\n"})
+			"        show            list existing filters or sets\n" +
+			"        update          update object attributes\n"})
 		return result
 	}
 
@@ -52,6 +53,8 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 		docstr = doc.Select()
 	case "show":
 		docstr = doc.Show()
+	case "update":
+		docstr = doc.Update()
 	default:
 		docstr = fmt.Sprintf("unknown command %q", cmd.Topic)
 	}

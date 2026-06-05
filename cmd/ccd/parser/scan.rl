@@ -73,6 +73,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'like'i => { tok = LIKE; fbreak; };
 			'limit'i => { tok = LIMIT; fbreak; };
 			'not'i => { tok = NOT; fbreak; };
+			'null'i => { tok = NULL; fbreak; };
 			'offset'i => { tok = OFFSET; fbreak; };
 			'or'i => { tok = OR; fbreak; };
 			'order'i => { tok = ORDER; fbreak; };
@@ -86,6 +87,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'to'i => { tok = TO; fbreak; };
 			'ping'i => { tok = PING; fbreak; };
 			'select'i => { tok = SELECT; fbreak; };
+			'update'i => { tok = UPDATE; fbreak; };
 			'user'i => { tok = USER; fbreak; };
 			'where'i => { tok = WHERE; fbreak; };
 			'with'i => { tok = WITH; fbreak; };

@@ -12,4 +12,4 @@ w3m ./doc/dropset.html | head -n -1 > ./cmd/ccd/doc/dropset.txt
 w3m ./doc/insert.html | head -n -1 > ./cmd/ccd/doc/insert.txt
 w3m ./doc/select.html | head -n -1 > ./cmd/ccd/doc/select.txt
 w3m ./doc/show.html | head -n -1 > ./cmd/ccd/doc/show.txt
-
+w3m ./doc/update.html | head -n -1 > ./cmd/ccd/doc/update.txt

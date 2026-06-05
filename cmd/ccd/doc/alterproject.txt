@@ -7,7 +7,7 @@ alter project project_name
 
 where action is one of:
 
-    alter property property_name set { value | 'value' }
+    alter property property_name set value
     alter property property_name add subvalue
     alter property property_name drop { subvalue | all }
 
@@ -26,7 +26,6 @@ project_name  The name of the project.
 property_name The name of the property in the project metadata.
 
 value         The value of a single-value property.
-'value'
 
 subvalue      A subvalue in a composite property.
 
