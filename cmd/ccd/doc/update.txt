@@ -25,7 +25,7 @@ The where clause specifies the object ID.
 
 Examples
 
-To update a single record:
+To set the fund in an object having ID = 12:
 
 update myproj.object set fund = cultural where id = 12;
 
