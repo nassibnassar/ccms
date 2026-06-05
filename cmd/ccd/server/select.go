@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/catalog"
+	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype/zeronull"
 )
@@ -91,8 +91,7 @@ func runQueryCount(s *svr, sql string) (*ccms.Result, error) {
 func runQuery(s *svr, sql string) (*ccms.Result, error) {
 	rows, err := s.dp.Query(context.TODO(), sql)
 	if err != nil {
-		fmt.Println(sql)
-		panic(fmt.Sprintf("selecting: %v", err))
+		return nil, pgerr.Error(err)
 	}
 	defer rows.Close()
 	result := ccms.NewResult("select")
@@ -109,7 +108,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 		var author, title, full_vendor_name, availability, fund zeronull.Text
 		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability, &fund)
 		if err != nil {
-			panic(fmt.Sprintf("reading: %v", err))
+			return nil, pgerr.Error(err)
 		}
 		result.AddData([]any{id, author, title, full_vendor_name, availability, fund})
 		count++
@@ -118,7 +117,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 		}
 	}
 	if err = rows.Err(); err != nil {
-		panic(fmt.Sprintf("reading: %v", err))
+		return nil, pgerr.Error(err)
 	}
 	return result, nil
 }
