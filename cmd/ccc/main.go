@@ -273,7 +273,8 @@ func runClient() error {
 				fmt.Printf("\n")
 			}
 			if result.Status() == "error" {
-				eout.Error(errorPrefix + " " + result.Message())
+				// eout.Error(errorPrefix + " " + result.Message())
+				fmt.Println(errorPrefix + " " + result.Message())
 				continue
 			}
 			header := true
