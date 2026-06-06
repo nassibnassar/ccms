@@ -187,22 +187,17 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		log.Info("[%d] %s - error: %v", rqid, addr, err)
 		resp := ccms.NewResponse()
 		resp.AddResult(cmderr(err.Error()))
-		if err1 := sendResponse(w, resp); err1 != nil {
-			log.Info("[%d] internal error: %v", rqid, err1)
-		}
+		sendResponse(w, rqid, resp)
 		return
 	}
 
 	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
 
-	var node ast.Node
-	var cmds []ast.Node
-
 	//fmt.Printf("### %#v --- %v\n", node, err)
+	var node ast.Node
 	node, err = parser.Parse(req.Commands)
 	if err != nil {
-		log.Info("[%d] error: %s", rqid, strings.Split(err.Error(), "\n")[0])
-		returnError(w, err.Error(), http.StatusOK /* http.StatusBadRequest */)
+		sendError(w, rqid, strings.Split(err.Error(), "\n")[0])
 		return
 	}
 	//if node == nil {
@@ -210,9 +205,6 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	//        return
 	//}
 	//log.Info("parsed: %#v", node)
-	resp := ccms.NewResponse()
-	var result *ccms.Result
-	cmds = node.(*ast.ParseTree).Commands
 
 	// var noLog bool
 	// if len(cmds) == 1 {
@@ -225,7 +217,17 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	// 	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
 	// }
 
+	// tx, err := s.dp.Begin(context.TODO())
+	// if err != nil {
+	// 	sendError(w, rqid, "start transaction: "+pgerr.String(err))
+	// 	return
+	// }
+	// defer tx.Rollback(context.TODO())
+
+	resp := ccms.NewResponse()
+	cmds := node.(*ast.ParseTree).Commands
 	for i := range cmds {
+		var result *ccms.Result
 		switch cmd := cmds[i].(type) {
 		case *ast.AlterProjectStmt:
 			result = alterProjectStmt(s, rqid, cmd)
@@ -271,18 +273,26 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			break
 		}
 	}
-	if err := sendResponse(w, resp); err != nil {
-		log.Info("[%d] internal error: %v", rqid, err)
-	}
+	// if err = tx.Commit(context.TODO()); err != nil {
+	// 	sendError(w, rqid, "commit: "+pgerr.String(err))
+	// 	return
+	// }
+	sendResponse(w, rqid, resp)
 }
 
-func sendResponse(w http.ResponseWriter, resp *ccms.Response) error {
+func sendError(w http.ResponseWriter, rqid int64, message string) {
+	log.Info("[%d] error: %s", rqid, message)
+	resp := ccms.NewResponse()
+	resp.AddResult(cmderr(message))
+	sendResponse(w, rqid, resp)
+}
+
+func sendResponse(w http.ResponseWriter, rqid int64, resp *ccms.Response) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := resp.Encode(w); err != nil {
-		return err
+		log.Info("[%d] internal error: encoding response: %v", rqid, err)
 	}
-	return nil
 }
 
 func cmderr(message string) *ccms.Result {
