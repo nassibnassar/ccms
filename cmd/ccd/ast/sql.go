@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
+	"github.com/indexdata/ccms/cmd/ccd/cat"
 )
 
 // conversion to SQL
@@ -20,7 +20,7 @@ func (d *DeleteStmt) SQL() (string, error) {
 
 func (d *DeleteStmt) sql(b *strings.Builder) error {
 	b.WriteString("delete from ")
-	b.WriteString(catalog.SetTable(d.From))
+	b.WriteString(cat.SetTable(d.From))
 	w := d.Where.(*WhereClause)
 	if w.Valid {
 		b.WriteString(" t using ccms.attr a where t.id=a.id and (")
@@ -42,7 +42,7 @@ func (i *InsertStmt) SQL() (string, error) {
 
 func (i *InsertStmt) sql(b *strings.Builder) error {
 	b.WriteString("insert into ")
-	b.WriteString(catalog.SetTable(i.Into))
+	b.WriteString(cat.SetTable(i.Into))
 	b.WriteString(" select a.id ")
 	if err := i.Query.(*QueryClause).sql(b); err != nil {
 		return err
@@ -79,8 +79,8 @@ func (s *SelectStmt) sql(b *strings.Builder) error {
 }
 
 func (q *QueryClause) sql(b *strings.Builder) error {
-	fromTable := catalog.SetTable(q.From)
-	schema, table := catalog.SplitSchemaTable(fromTable)
+	fromTable := cat.SetTable(q.From)
+	schema, table := cat.SplitSchemaTable(fromTable)
 
 	b.WriteString("from ")
 	if table == "object" {
@@ -286,7 +286,7 @@ func evalExprList(b *strings.Builder, exprList []Node) error {
 func evalExprOptAttr(b *strings.Builder, expr Node) error {
 	switch e := expr.(type) {
 	case *Name:
-		if !catalog.IsAttr(e.Value) {
+		if !cat.IsAttr(e.Value) {
 			return errors.New("attribute \"" + e.Value + "\" does not exist")
 		}
 		b.WriteString("a.")

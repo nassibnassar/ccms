@@ -1,26 +1,28 @@
 package server
 
 import (
-	"context"
 	"errors"
 	"strconv"
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
-	"github.com/indexdata/ccms/cmd/ccd/log"
+	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 
-	schema, table := catalog.SplitSchemaTable(cmd.SetName)
+	schema, table := cat.SplitSchemaTable(cmd.SetName)
 	if table != "object" {
 		return cmderr("set \"" + cmd.SetName + "\" is not valid for update")
 	}
-	if !s.cat.ProjectExists(schema) {
+	projectExists, err := cat.ProjectExists(s.d, schema)
+	if err != nil {
+		return cmderrint("checking if project exists", err)
+	}
+	if !projectExists {
 		return cmderr("project \"" + schema + "\" does not exist")
 	}
 
@@ -29,9 +31,9 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	}
 
 	idInt, _ := strconv.ParseInt(cmd.IDValue.Value, 10, 64)
-	idExists, err := objectIDExists(s.dp, idInt)
+	idExists, err := objectIDExists(s.d, idInt)
 	if err != nil {
-		return cmderr(err.Error())
+		return cmderrint("checking if object ID exists", err)
 	}
 	if !idExists {
 		return cmderr("object id = " + cmd.IDValue.Value + " does not exist")
@@ -42,9 +44,9 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 		cmd.Attr = "fund_id"
 		if cmd.Value != "" {
 			var fundID int64
-			fundID, err = s.cat.SelectFundID(cmd.Value)
+			fundID, err = cat.SelectFundID(s.d, cmd.Value)
 			if err != nil {
-				return cmderr(err.Error())
+				return cmderrint("looking up fund", err)
 			}
 			if fundID == -1 {
 				return cmderr("fund \"" + cmd.Value + "\" does not exist")
@@ -59,18 +61,17 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	log.Info("[%d] %s", rqid, sql)
-	if _, err := s.dp.Exec(context.TODO(), sql); err != nil {
-		return cmderr(pgerr.String(err))
+	if _, err := s.d.Q.Exec(s.d.C, sql); err != nil {
+		return cmderrint("executing update", err)
 	}
 
 	return ccms.NewResult("update")
 }
 
-func objectIDExists(dp *pgxpool.Pool, id int64) (bool, error) {
+func objectIDExists(d *dbx.DB, id int64) (bool, error) {
 	var q = "select 1 from ccms.reserve where id=$1"
 	var n int32
-	err := dp.QueryRow(context.TODO(), q, id).Scan(&n)
+	err := d.Q.QueryRow(d.C, q, id).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil

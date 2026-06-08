@@ -9,7 +9,7 @@ This section will contain system hardware requirements.
 ==== Software requirements
 
 * Operating system: Linux
-* Database system: https://www.postgresql.org/[PostgreSQL] 18 or later
+* Database system: https://www.postgresql.org/[PostgreSQL] 19 or later
 * To build from source:
 ** https://go.dev/[Go] 1.21 or later
 ** https://www.gnu.org/software/bash/[bash]

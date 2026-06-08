@@ -16,7 +16,7 @@ import (
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
+	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/cmd/ccd/config"
 	"github.com/indexdata/ccms/cmd/ccd/harvest"
 	"github.com/indexdata/ccms/cmd/ccd/log"
@@ -24,19 +24,27 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/osutil"
 	"github.com/indexdata/ccms/cmd/ccd/parser"
 	"github.com/indexdata/ccms/cmd/ccd/process"
+	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/global"
+	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/indexdata/ccms/internal/protocol"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type svr struct {
-	cat  *catalog.Catalog
-	dp   *pgxpool.Pool
+	d *dbx.DB
+	// cat *cat.Catalog
+	dp *pgxpool.Pool
+	// ctx context.Context
+	// tx   pgx.Tx
+	// dq   dbx.Queryable
 	conf *config.Config
 	opt  *option.Server
 }
+
+const internalError = "internal error: "
 
 func Start(opt *option.Server) error {
 	var err error
@@ -87,12 +95,12 @@ func databaseServer(opt *option.Server) error {
 	defer dp.Close()
 
 	// ensure database is initialized and compatible
-	cat, err := catalog.Initialize(opt.Program, dp, conf.Security)
+	err = cat.Initialize(opt.Program, dp, conf.Security)
 	if err != nil {
 		return err
 	}
 
-	s := &svr{cat: cat, dp: dp, conf: conf, opt: opt}
+	s := &svr{dp: dp, conf: conf, opt: opt}
 
 	if err = startServer(s); err != nil {
 		return fmt.Errorf("server stopped: %s", err)
@@ -144,7 +152,7 @@ func serve(s *svr) {
 	if s.opt.NoHarvest {
 		log.Warning("disabled harvesting")
 	}
-	catalog.Init()
+	cat.Init()
 	var err error
 	if s.opt.Listen == "" || s.opt.NoTLS {
 		err = httpsvr.ListenAndServe()
@@ -179,6 +187,7 @@ func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int64) {
+	s.d = &dbx.DB{C: context.TODO(), Q: s.dp}
 	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
 
 	var req protocol.Request
@@ -217,13 +226,16 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	// 	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
 	// }
 
-	// tx, err := s.dp.Begin(context.TODO())
-	// if err != nil {
-	// 	sendError(w, rqid, "start transaction: "+pgerr.String(err))
-	// 	return
-	// }
-	// defer tx.Rollback(context.TODO())
+	tx, err := s.dp.Begin(context.TODO())
+	if err != nil {
+		sendError(w, rqid, "start transaction: "+pgerr.String(err))
+		return
+	}
+	defer tx.Rollback(context.TODO())
+	s.d = &dbx.DB{C: context.TODO(), Q: tx}
+	// s.dq = tx
 
+	errorState := false
 	resp := ccms.NewResponse()
 	cmds := node.(*ast.ParseTree).Commands
 	for i := range cmds {
@@ -269,14 +281,25 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		}
 		resp.AddResult(result)
 		if result.Status() == "error" {
+			errorState = true
+			resp.SetError(i)
 			log.Info("[%d] error: %s", rqid, strings.Split(result.Message(), "\n")[0])
 			break
 		}
 	}
-	// if err = tx.Commit(context.TODO()); err != nil {
-	// 	sendError(w, rqid, "commit: "+pgerr.String(err))
-	// 	return
-	// }
+
+	if errorState {
+		if err = tx.Rollback(context.TODO()); err != nil {
+			sendError(w, rqid, "rollback: "+pgerr.String(err))
+			return
+		}
+	} else {
+		if err = tx.Commit(context.TODO()); err != nil {
+			sendError(w, rqid, "commit: "+pgerr.String(err))
+			return
+		}
+	}
+
 	sendResponse(w, rqid, resp)
 }
 
@@ -293,6 +316,10 @@ func sendResponse(w http.ResponseWriter, rqid int64, resp *ccms.Response) {
 	if err := resp.Encode(w); err != nil {
 		log.Info("[%d] internal error: encoding response: %v", rqid, err)
 	}
+}
+
+func cmderrint(message string, err error) *ccms.Result {
+	return cmderr(internalError + message + ": " + err.Error())
 }
 
 func cmderr(message string) *ccms.Result {
@@ -329,7 +356,11 @@ func (s *svr) HandleBasicAuth(w http.ResponseWriter, r *http.Request) (string, e
 	if !ok {
 		return "", fmt.Errorf("authentication failed")
 	}
-	if !s.cat.Authenticate(user, password) {
+	auth, err := cat.Authenticate(s.conf.Security.SecretKey, s.d, user, password)
+	if err != nil {
+		return "", err
+	}
+	if !auth {
 		return "", fmt.Errorf("authentication failed for user %q", user)
 	}
 	return user, nil
@@ -392,24 +423,31 @@ func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	return dp, nil
 }
 
-func setDatabaseParameters(ctx context.Context, dc *pgx.Conn) error {
-	q := "SET search_path = 'public'"
-	if _, err := dc.Exec(ctx, q); err != nil {
-		return err
+// func(ctx context.Context, conn *pgx.Conn) error {
+func setDatabaseParameters(ctx context.Context, conn *pgx.Conn) error {
+	q := "set search_path = 'public'"
+	if _, err := conn.Exec(ctx, q); err != nil {
+		return pgerr.Error(err)
 	}
-	q = "SET idle_in_transaction_session_timeout=0"
-	if _, err := dc.Exec(ctx, q); err != nil {
-		return err
+	q = "set idle_in_transaction_session_timeout=0"
+	if _, err := conn.Exec(ctx, q); err != nil {
+		return pgerr.Error(err)
 	}
-	q = "SET idle_session_timeout=0"
-	_, _ = dc.Exec(ctx, q) // Temporarily allow for PostgreSQL versions < 14
-	q = "SET statement_timeout=0"
-	if _, err := dc.Exec(ctx, q); err != nil {
-		return err
+	q = "set idle_session_timeout=0"
+	if _, err := conn.Exec(ctx, q); err != nil {
+		return pgerr.Error(err)
 	}
-	q = "SET timezone='UTC'"
-	if _, err := dc.Exec(ctx, q); err != nil {
-		return err
+	q = "set statement_timeout=0"
+	if _, err := conn.Exec(ctx, q); err != nil {
+		return pgerr.Error(err)
+	}
+	q = "set timezone='UTC'"
+	if _, err := conn.Exec(ctx, q); err != nil {
+		return pgerr.Error(err)
+	}
+	q = "set default_transaction_isolation=serializable"
+	if _, err := conn.Exec(ctx, q); err != nil {
+		return pgerr.Error(err)
 	}
 	return nil
 }

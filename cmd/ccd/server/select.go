@@ -1,15 +1,13 @@
 package server
 
 import (
-	"context"
 	"errors"
 	"strconv"
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
+	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/internal/pgerr"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype/zeronull"
 )
 
@@ -28,13 +26,21 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		return cmderr("selecting attributes is not yet supported")
 	}
 
-	if err := processQuery(s, rqid, cmd.Query.(*ast.QueryClause)); err != nil {
-		return cmderr(err.Error())
+	from := cmd.Query.(*ast.QueryClause).From
+	if from == "reserve" { // TODO remove this "reserve" check after some time
+		return cmderr("set \"reserve\" is no longer supported; use \"<project>.object\"")
+	}
+	setExists, err := cat.SetExists(s.d, from)
+	if err != nil {
+		return cmderrint("checking if set exists", err)
+	}
+	if !setExists {
+		return cmderr("set \"" + from + "\" does not exist")
 	}
 
 	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
 	if o.Valid {
-		if !catalog.IsAttr(o.Attr) {
+		if !cat.IsAttr(o.Attr) {
 			return cmderr("attribute \"" + o.Attr + "\" does not exist")
 		}
 	}
@@ -52,7 +58,6 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	//log.Info("[%d] %s", rqid, sql)
 
 	switch a.Attr {
 	case "*":
@@ -68,19 +73,14 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		}
 		return result
 	default:
-		return cmderr("internal error: invalid projection in select")
+		return cmderr(internalError + "invalid projection in select")
 	}
 }
 
 func runQueryCount(s *svr, sql string) (*ccms.Result, error) {
 	var count int64
-	err := s.dp.QueryRow(context.TODO(), sql).Scan(&count)
-	switch {
-	case errors.Is(err, pgx.ErrNoRows):
-		return nil, errors.New("internal error: no rows in select count(*)")
-	case err != nil:
-		return nil, err
-	default:
+	if err := s.d.Q.QueryRow(s.d.C, sql).Scan(&count); err != nil {
+		return nil, errors.New(internalError + pgerr.Error(err).Error())
 	}
 	result := ccms.NewResult("select")
 	result.AddField("count", "bigint")
@@ -89,9 +89,9 @@ func runQueryCount(s *svr, sql string) (*ccms.Result, error) {
 }
 
 func runQuery(s *svr, sql string) (*ccms.Result, error) {
-	rows, err := s.dp.Query(context.TODO(), sql)
+	rows, err := s.d.Q.Query(s.d.C, sql)
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, errors.New(internalError + pgerr.Error(err).Error())
 	}
 	defer rows.Close()
 	result := ccms.NewResult("select")
@@ -108,7 +108,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 		var author, title, full_vendor_name, availability, fund zeronull.Text
 		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability, &fund)
 		if err != nil {
-			return nil, pgerr.Error(err)
+			return nil, errors.New(internalError + pgerr.Error(err).Error())
 		}
 		result.AddData([]any{id, author, title, full_vendor_name, availability, fund})
 		count++
@@ -117,21 +117,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 		}
 	}
 	if err = rows.Err(); err != nil {
-		return nil, pgerr.Error(err)
+		return nil, errors.New(internalError + pgerr.Error(err).Error())
 	}
 	return result, nil
-}
-
-func processQuery(s *svr, rqid int64, query *ast.QueryClause) error {
-
-	// TODO remove this "reserve" check after some time
-	if query.From == "reserve" {
-		return errors.New("set \"reserve\" no longer supported; use \"<project>.object\"")
-	}
-
-	if !s.cat.SetExists(query.From) {
-		return errors.New("set \"" + query.From + "\" does not exist")
-	}
-
-	return nil
 }

@@ -5,7 +5,8 @@ import (
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
-	"github.com/indexdata/ccms/cmd/ccd/catalog"
+	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/dbx"
 )
 
 func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
@@ -16,8 +17,8 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	case "funds":
 		result.AddField("fund_name", "text")
 		result.AddField("fund_title", "text")
-		if err := addShowFundsData(s.cat, result); err != nil {
-			return cmderr(err.Error())
+		if err := addShowFundsData(s.d, result); err != nil {
+			return cmderrint("retrieving funds", err)
 		}
 	//case "roles":
 	//        result.AddField("role_name", "text")
@@ -25,31 +26,38 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	//        addShowRolesData(s.cat, result)
 	case "projects":
 		result.AddField("project_name", "text")
-		addShowProjectsData(s.cat, result)
+		err := addShowProjectsData(s.d, result)
+		if err != nil {
+			return cmderrint("retrieving projects", err)
+		}
 	case "project":
 		result.AddField("property", "text")
 		result.AddField("value", "text")
-		if err := addShowProjectData(s.cat, result, cmd.Name); err != nil {
-			return cmderr(err.Error())
+		if err := addShowProjectData(s.d, result, cmd.Name); err != nil {
+			return cmderrint("retrieving project data", err)
 		}
 	case "sets":
 		result.AddField("set_name", "text")
-		addShowSetsData(s.cat, result)
+		if err := addShowSetsData(s.d, result); err != nil {
+			return cmderrint("retrieving sets", err)
+		}
 	case "tags":
 		result.AddField("tag_name", "text")
 	case "users":
 		result.AddField("user_name", "text")
 		result.AddField("superuser", "boolean")
 		result.AddField("login", "boolean")
-		addShowUsersData(s.cat, result)
+		if err := addShowUsersData(s.d, result); err != nil {
+			return cmderrint("retrieving users", err)
+		}
 	default:
 		return cmderr("unknown variable \"" + cmd.Type + "\"")
 	}
 	return result
 }
 
-func addShowFundsData(cat *catalog.Catalog, result *ccms.Result) error {
-	funds, err := cat.AllFunds()
+func addShowFundsData(d *dbx.DB, result *ccms.Result) error {
+	funds, err := cat.AllFunds(d)
 	if err != nil {
 		return err
 	}
@@ -59,23 +67,31 @@ func addShowFundsData(cat *catalog.Catalog, result *ccms.Result) error {
 	return nil
 }
 
-func addShowRolesData(cat *catalog.Catalog, result *ccms.Result) {
-	roles := cat.AllRoles()
+func addShowRolesData(d *dbx.DB, result *ccms.Result) error {
+	roles, err := cat.AllRoles(d)
+	if err != nil {
+		return err
+	}
 	for i := range roles {
 		users := strings.Join(roles[i].UserNames, ", ")
 		result.AddData([]any{roles[i].RoleName, users})
 	}
+	return nil
 }
 
-func addShowProjectsData(cat *catalog.Catalog, result *ccms.Result) {
-	projects := cat.AllProjects()
-	for i := range projects {
-		result.AddData([]any{projects[i].ProjectName})
+func addShowProjectsData(d *dbx.DB, result *ccms.Result) error {
+	projects, err := cat.AllProjects(d)
+	if err != nil {
+		return err
 	}
+	for i := range projects {
+		result.AddData([]any{projects[i]})
+	}
+	return nil
 }
 
-func addShowProjectData(cat *catalog.Catalog, result *ccms.Result, projectName string) error {
-	prop, err := cat.ProjectProperties(projectName)
+func addShowProjectData(d *dbx.DB, result *ccms.Result, projectName string) error {
+	prop, err := cat.ProjectProperties(d, projectName)
 	if err != nil {
 		return err
 	}
@@ -85,16 +101,24 @@ func addShowProjectData(cat *catalog.Catalog, result *ccms.Result, projectName s
 	return nil
 }
 
-func addShowSetsData(cat *catalog.Catalog, result *ccms.Result) {
-	sets := cat.AllSets()
+func addShowSetsData(d *dbx.DB, result *ccms.Result) error {
+	sets, err := cat.AllSets(d)
+	if err != nil {
+		return err
+	}
 	for i := range sets {
 		result.AddData([]any{sets[i]})
 	}
+	return nil
 }
 
-func addShowUsersData(cat *catalog.Catalog, result *ccms.Result) {
-	users := cat.AllUsers()
+func addShowUsersData(d *dbx.DB, result *ccms.Result) error {
+	users, err := cat.AllUsers(d)
+	if err != nil {
+		return err
+	}
 	for i := range users {
 		result.AddData([]any{users[i].UserName, users[i].Superuser, users[i].Login})
 	}
+	return nil
 }

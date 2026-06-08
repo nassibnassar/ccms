@@ -1,29 +1,19 @@
-package catalog
+package cat
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/indexdata/ccms/cmd/ccd/config"
 	"github.com/indexdata/ccms/internal/crypto"
+	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-type Catalog struct {
-	mu        sync.Mutex
-	secretKey []byte
-	roles     map[string]roleUsers
-	users     map[string]auth
-	projects  map[string]struct{}
-	sets      map[string]struct{}
-	dp        *pgxpool.Pool
-}
 
 type roleUsers struct {
 	users map[string]struct{}
@@ -36,45 +26,37 @@ type auth struct {
 	salt      []byte
 }
 
-func Initialize(program string, dp *pgxpool.Pool, security *config.Security) (*Catalog, error) {
+func Initialize(program string, dp *pgxpool.Pool, security *config.Security) error {
 	exists, err := initSchemaExists(dp)
 	if err != nil {
-		return nil, fmt.Errorf("checking if database initialized: %w", err)
+		return fmt.Errorf("checking if database initialized: %w", err)
 	}
 	if !exists {
 		if err = createSystemSchema(program, dp, security); err != nil {
-			return nil, err
+			return err
 		}
 	} else {
 		// TODO check that database version is compatible; for now we assume it is compatible
 	}
-	c := &Catalog{secretKey: security.SecretKey, dp: dp}
-	if err := c.initAuth(); err != nil {
-		return nil, err
-	}
-	if err := c.initProjects(); err != nil {
-		return nil, err
-	}
-	if err := c.initRoles(); err != nil {
-		return nil, err
-	}
-	if err := c.initSets(); err != nil {
-		return nil, err
+
+	d := &dbx.DB{C: context.TODO(), Q: dp}
+	if err := addSampleProject(d); err != nil {
+		return err
 	}
 
-	if err := c.addSampleProject(); err != nil {
-		return nil, err
-	}
-
-	return c, nil
+	return nil
 }
 
-func (c *Catalog) addSampleProject() error {
-	if len(c.AllProjects()) == 0 {
-		if err := c.CreateProject("palci_slavic"); err != nil {
+func addSampleProject(d *dbx.DB) error {
+	projects, err := AllProjects(d)
+	if err != nil {
+		return err
+	}
+	if len(projects) == 0 {
+		if err := CreateProject(d, "palci_slavic"); err != nil {
 			return err
 		}
-		if err := c.AlterProjectSetProperty("palci_slavic", "title", "Slavic studies", true); err != nil {
+		if err := AlterProjectSetProperty(d, "palci_slavic", "title", "Slavic studies", true); err != nil {
 			return err
 		}
 	}

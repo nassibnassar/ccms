@@ -1,11 +1,9 @@
 package server
 
 import (
-	"context"
-	"fmt"
-
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
+	"github.com/indexdata/ccms/cmd/ccd/cat"
 )
 
 func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
@@ -18,25 +16,40 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 		return cmderr("\"offset\" is not supported with insert")
 	}
 
-	if !s.cat.IsValidTargetSet(cmd.Into) {
+	validTargetSet, err := cat.IsValidTargetSet(s.d, cmd.Into)
+	if err != nil {
+		return cmderrint("checking if target set valid", err)
+	}
+	if !validTargetSet {
 		return cmderr("invalid target set \"" + cmd.Into + "\"")
 	}
 
-	if !s.cat.SetExists(cmd.Into) {
+	intoSetExists, err := cat.SetExists(s.d, cmd.Into)
+	if err != nil {
+		return cmderrint("checking if set exists", err)
+	}
+	if !intoSetExists {
 		return cmderr("set \"" + cmd.Into + "\" does not exist")
 	}
 
-	if err := processQuery(s, rqid, cmd.Query.(*ast.QueryClause)); err != nil {
-		return cmderr(err.Error())
+	from := cmd.Query.(*ast.QueryClause).From
+	if from == "reserve" { // TODO remove this "reserve" check after some time
+		return cmderr("set \"reserve\" is no longer supported; use \"<project>.object\"")
+	}
+	fromSetExists, err := cat.SetExists(s.d, from)
+	if err != nil {
+		return cmderrint("checking if set exists", err)
+	}
+	if !fromSetExists {
+		return cmderr("set \"" + from + "\" does not exist")
 	}
 
 	sql, err := cmd.SQL()
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	//log.Info("[%d] %s", rqid, sql)
-	if _, err := s.dp.Exec(context.TODO(), sql); err != nil {
-		return cmderr(fmt.Sprintf("inserting data into %q: %v", cmd.Into, err))
+	if _, err := s.d.Q.Exec(s.d.C, sql); err != nil {
+		return cmderrint("inserting data into \""+cmd.Into+"\"", err)
 	}
 
 	return ccms.NewResult("insert")

@@ -41,12 +41,22 @@ func NewResponse() *Response {
 	}
 }
 
+// set error index
+func (r *Response) SetError(e int) {
+	r.resp.Error = e
+}
+
 // encode the reponse as JSON
 func (r *Response) Encode(w http.ResponseWriter) error {
 	if err := json.NewEncoder(w).Encode(*(r.resp)); err != nil {
 		return err
 	}
 	return nil
+}
+
+// return index of result having an error, or 0 if there was no error
+func (r *Response) Error() int {
+	return r.resp.Error
 }
 
 // return an iterator over results contained in the response
@@ -77,6 +87,7 @@ func (r *Response) AddResult(result *Result) {
 }
 
 type jsonResponse struct {
+	Error   int           `json:"error"`   // result index with error, or 0 if no error
 	Results []*jsonResult `json:"results"` // result for each command
 }
 
