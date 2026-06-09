@@ -10,7 +10,7 @@ show projects
 
 show project `*_project_name_*`
 
-show sets
+show sets [ in project `*_project_name_*` ]
 
 show users
 ----

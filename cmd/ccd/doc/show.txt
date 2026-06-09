@@ -8,7 +8,7 @@ show projects
 
 show project project_name
 
-show sets
+show sets [ in project project_name ]
 
 show users
 
