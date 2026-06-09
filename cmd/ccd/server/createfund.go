@@ -7,15 +7,15 @@ import (
 )
 
 func createFundStmt(s *svr, rqid int64, cmd *ast.CreateFundStmt) *ccms.Result {
-	exists, err := cat.FundExists(s.d, cmd.FundName)
+	exists, err := cat.FundExists(s.d, cmd.Fund)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 	if exists {
-		return cmderr("fund \"" + cmd.FundName + "\" already exists")
+		return cmderr("fund \"" + cmd.Fund + "\" already exists")
 	}
 
-	if err := cat.CreateFund(s.d, cmd.FundName); err != nil {
+	if err := cat.CreateFund(s.d, cmd.Fund); err != nil {
 		return cmderrint("creating fund", err)
 	}
 

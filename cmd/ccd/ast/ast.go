@@ -11,7 +11,7 @@ const (
 /* statements */
 
 type AlterProjectStmt struct {
-	ProjectName   string
+	Project       string
 	Property      string
 	Action        AlterAction
 	Value         string
@@ -21,25 +21,25 @@ type AlterProjectStmt struct {
 func (*AlterProjectStmt) node() {}
 
 type CreateFundStmt struct {
-	FundName string
+	Fund string
 }
 
 func (*CreateFundStmt) node() {}
 
 type CreateProjectStmt struct {
-	ProjectName string
+	Project string
 }
 
 func (*CreateProjectStmt) node() {}
 
 type CreateSetStmt struct {
-	SetName string
+	Set string
 }
 
 func (*CreateSetStmt) node() {}
 
 type CreateUserStmt struct {
-	UserName          string
+	User              string
 	EncryptedPassword string
 }
 
@@ -59,7 +59,7 @@ type DropProjectStmt struct {
 func (*DropProjectStmt) node() {}
 
 type DropSetStmt struct {
-	SetName string
+	Set string
 }
 
 func (*DropSetStmt) node() {}
@@ -116,7 +116,7 @@ type QueryClause struct {
 func (*QueryClause) node() {}
 
 type UpdateStmt struct {
-	SetName       string
+	Set           string
 	Attr          string
 	Value         string
 	StringLiteral bool

@@ -5,10 +5,13 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/internal/set"
 )
 
 func deleteStmt(s *svr, rqid int64, cmd *ast.DeleteStmt) *ccms.Result {
-	validTargetSet, err := cat.IsValidTargetSet(s.d, cmd.From)
+	fromSet := set.Parse(cmd.From)
+
+	validTargetSet, err := cat.IsValidTargetSet(s.d, fromSet)
 	if err != nil {
 		return cmderrint("checking if target set valid", err)
 	}
@@ -16,7 +19,7 @@ func deleteStmt(s *svr, rqid int64, cmd *ast.DeleteStmt) *ccms.Result {
 		return cmderr("invalid target set \"" + cmd.From + "\"")
 	}
 
-	setExists, err := cat.SetExists(s.d, cmd.From)
+	setExists, err := cat.SetExists(s.d, fromSet)
 	if err != nil {
 		return cmderrint("checking if set exists", err)
 	}

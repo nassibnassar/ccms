@@ -4,6 +4,7 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/set"
 )
 
 func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
@@ -16,7 +17,8 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 		return cmderr("\"offset\" is not supported with insert")
 	}
 
-	validTargetSet, err := cat.IsValidTargetSet(s.d, cmd.Into)
+	intoSet := set.Parse(cmd.Into)
+	validTargetSet, err := cat.IsValidTargetSet(s.d, intoSet)
 	if err != nil {
 		return cmderrint("checking if target set valid", err)
 	}
@@ -24,7 +26,7 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 		return cmderr("invalid target set \"" + cmd.Into + "\"")
 	}
 
-	intoSetExists, err := cat.SetExists(s.d, cmd.Into)
+	intoSetExists, err := cat.SetExists(s.d, intoSet)
 	if err != nil {
 		return cmderrint("checking if set exists", err)
 	}
@@ -36,7 +38,8 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 	if from == "reserve" { // TODO remove this "reserve" check after some time
 		return cmderr("set \"reserve\" is no longer supported; use \"<project>.object\"")
 	}
-	fromSetExists, err := cat.SetExists(s.d, from)
+	fromSet := set.Parse(from)
+	fromSetExists, err := cat.SetExists(s.d, fromSet)
 	if err != nil {
 		return cmderrint("checking if set exists", err)
 	}

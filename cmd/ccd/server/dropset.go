@@ -4,26 +4,29 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/set"
 )
 
 func dropSetStmt(s *svr, rqid int64, cmd *ast.DropSetStmt) *ccms.Result {
-	validTargetSet, err := cat.IsValidTargetSet(s.d, cmd.SetName)
+	set := set.Parse(cmd.Set)
+
+	validTargetSet, err := cat.IsValidTargetSet(s.d, set)
 	if err != nil {
 		return cmderrint("checking if target set valid", err)
 	}
 	if !validTargetSet {
-		return cmderr("invalid target set \"" + cmd.SetName + "\"")
+		return cmderr("invalid target set \"" + cmd.Set + "\"")
 	}
 
-	setExists, err := cat.SetExists(s.d, cmd.SetName)
+	setExists, err := cat.SetExists(s.d, set)
 	if err != nil {
 		return cmderrint("checking if set exists", err)
 	}
 	if !setExists {
-		return cmderr("set \"" + cmd.SetName + "\" does not exist")
+		return cmderr("set \"" + cmd.Set + "\" does not exist")
 	}
 
-	if err := cat.DropSet(s.d, cmd.SetName); err != nil {
+	if err := cat.DropSet(s.d, set); err != nil {
 		return cmderrint("dropping set", err)
 	}
 

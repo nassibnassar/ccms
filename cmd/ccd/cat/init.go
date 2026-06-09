@@ -205,7 +205,9 @@ func createTableProject(tx pgx.Tx) error {
 
 func createTableSets(tx pgx.Tx) error {
 	q := "create table ccms.sets (" +
-		"setname text primary key)"
+		"project text not null," +
+		"set text not null," +
+		"primary key (project, set))"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
 		return fmt.Errorf("creating table ccms.sets: %v", pgerr.Error(err))
 	}

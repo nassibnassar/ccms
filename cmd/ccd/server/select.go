@@ -8,6 +8,7 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/internal/set"
 	"github.com/jackc/pgx/v5/pgtype/zeronull"
 )
 
@@ -30,7 +31,8 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 	if from == "reserve" { // TODO remove this "reserve" check after some time
 		return cmderr("set \"reserve\" is no longer supported; use \"<project>.object\"")
 	}
-	setExists, err := cat.SetExists(s.d, from)
+	fromSet := set.Parse(from)
+	setExists, err := cat.SetExists(s.d, fromSet)
 	if err != nil {
 		return cmderrint("checking if set exists", err)
 	}

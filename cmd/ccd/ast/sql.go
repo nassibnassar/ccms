@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/dbx"
+	"github.com/indexdata/ccms/internal/set"
 )
 
 // conversion to SQL
@@ -19,8 +21,10 @@ func (d *DeleteStmt) SQL() (string, error) {
 }
 
 func (d *DeleteStmt) sql(b *strings.Builder) error {
+	fromSet := set.Parse(d.From)
+
 	b.WriteString("delete from ")
-	b.WriteString(cat.SetTable(d.From))
+	b.WriteString(cat.SetTable(fromSet))
 	w := d.Where.(*WhereClause)
 	if w.Valid {
 		b.WriteString(" t using ccms.attr a where t.id=a.id and (")
@@ -41,8 +45,10 @@ func (i *InsertStmt) SQL() (string, error) {
 }
 
 func (i *InsertStmt) sql(b *strings.Builder) error {
+	intoSet := set.Parse(i.Into)
+
 	b.WriteString("insert into ")
-	b.WriteString(cat.SetTable(i.Into))
+	b.WriteString(cat.SetTable(intoSet))
 	b.WriteString(" select a.id ")
 	if err := i.Query.(*QueryClause).sql(b); err != nil {
 		return err
@@ -79,18 +85,20 @@ func (s *SelectStmt) sql(b *strings.Builder) error {
 }
 
 func (q *QueryClause) sql(b *strings.Builder) error {
-	fromTable := cat.SetTable(q.From)
-	schema, table := cat.SplitSchemaTable(fromTable)
+	fromSet := set.Parse(q.From)
+
+	fromTable := cat.SetTable(fromSet)
+	table := dbx.ParseTable(fromTable)
 
 	b.WriteString("from ")
-	if table == "object" {
+	if table.Table == "object" {
 		b.WriteString("ccms.reserve")
 	} else {
 		b.WriteString(fromTable)
 	}
 	b.WriteString(" t join ccms.attr a on t.id=a.id")
 
-	b.WriteString(" left join " + schema + ".object on t.id=object.id")
+	b.WriteString(" left join " + table.Schema + ".object on t.id=object.id")
 	b.WriteString(" left join ccms.fund on object.fund_id=fund.id")
 
 	w := q.Where.(*WhereClause)
@@ -131,12 +139,12 @@ func (u *UpdateStmt) SQL() (string, error) {
 func (u *UpdateStmt) sql(b *strings.Builder) error {
 	if u.Value == "" {
 		b.WriteString("update ")
-		b.WriteString(u.SetName)
+		b.WriteString(u.Set)
 		b.WriteString(" set fund_id=null where id=")
 		b.WriteString(u.IDValue.Value)
 	} else {
 		b.WriteString("insert into ")
-		b.WriteString(u.SetName)
+		b.WriteString(u.Set)
 		b.WriteString(" (id, fund_id) values (")
 		b.WriteString(u.IDValue.Value)
 		b.WriteString(", ")

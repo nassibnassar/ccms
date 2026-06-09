@@ -7,25 +7,25 @@ import (
 )
 
 func alterProjectStmt(s *svr, rqid int64, cmd *ast.AlterProjectStmt) *ccms.Result {
-	projectExists, err := cat.ProjectExists(s.d, cmd.ProjectName)
+	projectExists, err := cat.ProjectExists(s.d, cmd.Project)
 	if err != nil {
 		return cmderrint("checking if project exists", err)
 	}
 	if !projectExists {
-		return cmderr("project \"" + cmd.ProjectName + "\" does not exist")
+		return cmderr("project \"" + cmd.Project + "\" does not exist")
 	}
 
 	switch cmd.Action {
 	case ast.Set:
-		if err := cat.AlterProjectSetProperty(s.d, cmd.ProjectName, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
+		if err := cat.AlterProjectSetProperty(s.d, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	case ast.Add:
-		if err := cat.AlterProjectAddToProperty(s.d, cmd.ProjectName, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
+		if err := cat.AlterProjectAddToProperty(s.d, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	case ast.Drop:
-		if err := cat.AlterProjectDropFromProperty(s.d, cmd.ProjectName, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
+		if err := cat.AlterProjectDropFromProperty(s.d, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	default:

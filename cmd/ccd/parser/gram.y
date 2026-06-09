@@ -201,47 +201,47 @@ basic_stmt:
 alter_project_stmt:
 	ALTER PROJECT name ALTER PROPERTY name SET name ';'
 		{
-			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
+			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
 		}
 	| ALTER PROJECT name ALTER PROPERTY name SET SLITERAL ';'
 		{
-			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: true}
+			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: true}
 		}
 	| ALTER PROJECT name ALTER PROPERTY name ADD name ';'
 		{
-			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Add, Value: $8}
+			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Add, Value: $8}
 		}
 	| ALTER PROJECT name ALTER PROPERTY name DROP name ';'
 		{
-			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Drop, Value: $8}
+			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Drop, Value: $8}
 		}
 	| ALTER PROJECT name ALTER PROPERTY name DROP ALL ';'
 		{
-			$$ = &ast.AlterProjectStmt{ProjectName: $3, Property: $6, Action: ast.Drop, Value: "*"}
+			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Drop, Value: "*"}
 		}
 
 create_fund_stmt:
 	CREATE FUND name ';'
 		{
-			$$ = &ast.CreateFundStmt{FundName: $3}
+			$$ = &ast.CreateFundStmt{Fund: $3}
 		}
 
 create_project_stmt:
 	CREATE PROJECT name ';'
 		{
-			$$ = &ast.CreateProjectStmt{ProjectName: $3}
+			$$ = &ast.CreateProjectStmt{Project: $3}
 		}
 
 create_set_stmt:
 	CREATE SET name ';'
 		{
-			$$ = &ast.CreateSetStmt{SetName: $3}
+			$$ = &ast.CreateSetStmt{Set: $3}
 		}
 
 create_user_stmt:
 	CREATE USER name WITH ENCRYPTED PASSWORD SLITERAL ';'
 		{
-			$$ = &ast.CreateUserStmt{UserName: $3, EncryptedPassword: $7}
+			$$ = &ast.CreateUserStmt{User: $3, EncryptedPassword: $7}
 		}
 
 delete_stmt:
@@ -259,7 +259,7 @@ drop_project_stmt:
 drop_set_stmt:
 	DROP SET name ';'
 		{
-			$$ = &ast.DropSetStmt{SetName: $3}
+			$$ = &ast.DropSetStmt{Set: $3}
 		}
 
 info_stmt:
@@ -307,15 +307,15 @@ show_stmt:
 update_stmt:
 	UPDATE name SET name '=' name WHERE name '=' NUMBER ';'
 		{
-			$$ = &ast.UpdateStmt{SetName: $2, Attr: $4, Value: $6, StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+			$$ = &ast.UpdateStmt{Set: $2, Attr: $4, Value: $6, StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
 		}
 	| UPDATE name SET FUND '=' name WHERE name '=' NUMBER ';'
 		{
-			$$ = &ast.UpdateStmt{SetName: $2, Attr: "fund", Value: $6, StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+			$$ = &ast.UpdateStmt{Set: $2, Attr: "fund", Value: $6, StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
 		}
 	| UPDATE name SET FUND '=' NULL WHERE name '=' NUMBER ';'
 		{
-			$$ = &ast.UpdateStmt{SetName: $2, Attr: "fund", Value: "", StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+			$$ = &ast.UpdateStmt{Set: $2, Attr: "fund", Value: "", StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
 		}
 
 select_attr_list:

@@ -20,14 +20,10 @@ import (
 // 	//MOULink      string
 // }
 
-func ProjectExists(d *dbx.DB, projectOrFullSetName string) (bool, error) {
-	s := strings.Split(projectOrFullSetName, ".")
-	if len(s) < 1 || len(s) > 2 {
-		return false, nil
-	}
-	q := "select 1 from ccms.project where name=$1"
+func ProjectExists(d *dbx.DB, project string) (bool, error) {
+	sql := "select 1 from ccms.project where name=$1"
 	var n int32
-	err := d.Q.QueryRow(d.C, q, s[0]).Scan(&n)
+	err := d.Q.QueryRow(d.C, sql, project).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil

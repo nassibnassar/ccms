@@ -725,47 +725,47 @@ yydefault:
 	case 21:
 		yyDollar = yyS[yypt-9 : yypt+1]
 		{
-			yyVAL.node = &ast.AlterProjectStmt{ProjectName: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Set, Value: yyDollar[8].str, StringLiteral: false}
+			yyVAL.node = &ast.AlterProjectStmt{Project: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Set, Value: yyDollar[8].str, StringLiteral: false}
 		}
 	case 22:
 		yyDollar = yyS[yypt-9 : yypt+1]
 		{
-			yyVAL.node = &ast.AlterProjectStmt{ProjectName: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Set, Value: yyDollar[8].str, StringLiteral: true}
+			yyVAL.node = &ast.AlterProjectStmt{Project: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Set, Value: yyDollar[8].str, StringLiteral: true}
 		}
 	case 23:
 		yyDollar = yyS[yypt-9 : yypt+1]
 		{
-			yyVAL.node = &ast.AlterProjectStmt{ProjectName: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Add, Value: yyDollar[8].str}
+			yyVAL.node = &ast.AlterProjectStmt{Project: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Add, Value: yyDollar[8].str}
 		}
 	case 24:
 		yyDollar = yyS[yypt-9 : yypt+1]
 		{
-			yyVAL.node = &ast.AlterProjectStmt{ProjectName: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Drop, Value: yyDollar[8].str}
+			yyVAL.node = &ast.AlterProjectStmt{Project: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Drop, Value: yyDollar[8].str}
 		}
 	case 25:
 		yyDollar = yyS[yypt-9 : yypt+1]
 		{
-			yyVAL.node = &ast.AlterProjectStmt{ProjectName: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Drop, Value: "*"}
+			yyVAL.node = &ast.AlterProjectStmt{Project: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Drop, Value: "*"}
 		}
 	case 26:
 		yyDollar = yyS[yypt-4 : yypt+1]
 		{
-			yyVAL.node = &ast.CreateFundStmt{FundName: yyDollar[3].str}
+			yyVAL.node = &ast.CreateFundStmt{Fund: yyDollar[3].str}
 		}
 	case 27:
 		yyDollar = yyS[yypt-4 : yypt+1]
 		{
-			yyVAL.node = &ast.CreateProjectStmt{ProjectName: yyDollar[3].str}
+			yyVAL.node = &ast.CreateProjectStmt{Project: yyDollar[3].str}
 		}
 	case 28:
 		yyDollar = yyS[yypt-4 : yypt+1]
 		{
-			yyVAL.node = &ast.CreateSetStmt{SetName: yyDollar[3].str}
+			yyVAL.node = &ast.CreateSetStmt{Set: yyDollar[3].str}
 		}
 	case 29:
 		yyDollar = yyS[yypt-8 : yypt+1]
 		{
-			yyVAL.node = &ast.CreateUserStmt{UserName: yyDollar[3].str, EncryptedPassword: yyDollar[7].str}
+			yyVAL.node = &ast.CreateUserStmt{User: yyDollar[3].str, EncryptedPassword: yyDollar[7].str}
 		}
 	case 30:
 		yyDollar = yyS[yypt-5 : yypt+1]
@@ -780,7 +780,7 @@ yydefault:
 	case 32:
 		yyDollar = yyS[yypt-4 : yypt+1]
 		{
-			yyVAL.node = &ast.DropSetStmt{SetName: yyDollar[3].str}
+			yyVAL.node = &ast.DropSetStmt{Set: yyDollar[3].str}
 		}
 	case 33:
 		yyDollar = yyS[yypt-2 : yypt+1]
@@ -825,17 +825,17 @@ yydefault:
 	case 41:
 		yyDollar = yyS[yypt-11 : yypt+1]
 		{
-			yyVAL.node = &ast.UpdateStmt{SetName: yyDollar[2].str, Attr: yyDollar[4].str, Value: yyDollar[6].str, StringLiteral: false, IDAttr: yyDollar[8].str, IDValue: &ast.Number{Value: yyDollar[10].str}}
+			yyVAL.node = &ast.UpdateStmt{Set: yyDollar[2].str, Attr: yyDollar[4].str, Value: yyDollar[6].str, StringLiteral: false, IDAttr: yyDollar[8].str, IDValue: &ast.Number{Value: yyDollar[10].str}}
 		}
 	case 42:
 		yyDollar = yyS[yypt-11 : yypt+1]
 		{
-			yyVAL.node = &ast.UpdateStmt{SetName: yyDollar[2].str, Attr: "fund", Value: yyDollar[6].str, StringLiteral: false, IDAttr: yyDollar[8].str, IDValue: &ast.Number{Value: yyDollar[10].str}}
+			yyVAL.node = &ast.UpdateStmt{Set: yyDollar[2].str, Attr: "fund", Value: yyDollar[6].str, StringLiteral: false, IDAttr: yyDollar[8].str, IDValue: &ast.Number{Value: yyDollar[10].str}}
 		}
 	case 43:
 		yyDollar = yyS[yypt-11 : yypt+1]
 		{
-			yyVAL.node = &ast.UpdateStmt{SetName: yyDollar[2].str, Attr: "fund", Value: "", StringLiteral: false, IDAttr: yyDollar[8].str, IDValue: &ast.Number{Value: yyDollar[10].str}}
+			yyVAL.node = &ast.UpdateStmt{Set: yyDollar[2].str, Attr: "fund", Value: "", StringLiteral: false, IDAttr: yyDollar[8].str, IDValue: &ast.Number{Value: yyDollar[10].str}}
 		}
 	case 44:
 		yyDollar = yyS[yypt-1 : yypt+1]

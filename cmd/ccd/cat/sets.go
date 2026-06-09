@@ -8,25 +8,22 @@ import (
 
 	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/internal/set"
 	"github.com/jackc/pgx/v5"
 )
 
-func SetExists(d *dbx.DB, set string) (bool, error) {
-	s := strings.Split(set, ".")
-	if len(s) != 2 {
-		return false, nil
-	}
-	if s[1] == "object" {
-		projectExists, err := ProjectExists(d, s[0])
+func SetExists(d *dbx.DB, set set.Set) (bool, error) {
+	if set.Set == "object" {
+		projectExists, err := ProjectExists(d, set.Project)
 		if err != nil {
 			return false, err
 		}
 		return projectExists, nil
 	}
 
-	var q = "select 1 from ccms.sets where setname=$1"
+	var q = "select 1 from ccms.sets where project=$1 and set=$2"
 	var n int32
-	err := d.Q.QueryRow(d.C, q, set).Scan(&n)
+	err := d.Q.QueryRow(d.C, q, set.Project, set.Set).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -37,18 +34,14 @@ func SetExists(d *dbx.DB, set string) (bool, error) {
 	}
 }
 
-func IsValidTargetSet(d *dbx.DB, set string) (bool, error) {
-	s := strings.Split(set, ".")
-	if len(s) != 2 {
+func IsValidTargetSet(d *dbx.DB, set set.Set) (bool, error) {
+	if set.Project == "" || set.Set == "" {
 		return false, nil
 	}
-	if s[0] == "" || s[1] == "" {
+	if set.Set == "object" {
 		return false, nil
 	}
-	if s[1] == "object" {
-		return false, nil
-	}
-	projectExists, err := ProjectExists(d, set)
+	projectExists, err := ProjectExists(d, set.Project)
 	if err != nil {
 		return false, err
 	}
@@ -56,28 +49,15 @@ func IsValidTargetSet(d *dbx.DB, set string) (bool, error) {
 }
 
 // return table containing set
-func SetTable(set string) string {
-	s := strings.Split(set, ".")
-	if s[1] == "object" {
-		return set
+func SetTable(set set.Set) string {
+	if set.Set == "object" {
+		return set.String()
 	}
-	return s[0] + ".s_" + s[1]
-}
-
-func SplitSchemaTable(schemaTable string) (string, string) {
-	s := strings.Split(schemaTable, ".")
-	switch len(s) {
-	case 1:
-		return s[0], ""
-	case 2:
-		return s[0], s[1]
-	default:
-		return "", ""
-	}
+	return set.Project + ".s_" + set.Set
 }
 
 func AllSets(d *dbx.DB) ([]string, error) {
-	sql := "select setname from ccms.sets"
+	sql := "select project||'.'||set from ccms.sets"
 	rows, _ := d.Q.Query(d.C, sql)
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
@@ -88,8 +68,8 @@ func AllSets(d *dbx.DB) ([]string, error) {
 }
 
 func SetsInProject(d *dbx.DB, project string) ([]string, error) {
-	sql := "select setname from ccms.sets where setname like $1"
-	rows, _ := d.Q.Query(d.C, sql, project+".%")
+	sql := "select project||'.'||set from ccms.sets where project=$1"
+	rows, _ := d.Q.Query(d.C, sql, project)
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
 		return nil, pgerr.Error(err)
@@ -112,26 +92,26 @@ func sortSetNames(sets []string) {
 	})
 }
 
-func CreateSet(d *dbx.DB, set string) error {
+func CreateSet(d *dbx.DB, set set.Set) error {
 	sql := "create table " + SetTable(set) + "(" +
 		"id bigint primary key)"
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
 		return pgerr.Error(err)
 	}
-	sql = "insert into ccms.sets (setname) values ($1)"
-	if _, err := d.Q.Exec(d.C, sql, set); err != nil {
+	sql = "insert into ccms.sets (project, set) values ($1, $2)"
+	if _, err := d.Q.Exec(d.C, sql, set.Project, set.Set); err != nil {
 		return pgerr.Error(err)
 	}
 	return nil
 }
 
-func DropSet(d *dbx.DB, setName string) error {
-	q := "drop table " + SetTable(setName)
+func DropSet(d *dbx.DB, set set.Set) error {
+	q := "drop table " + SetTable(set)
 	if _, err := d.Q.Exec(d.C, q); err != nil {
 		return pgerr.Error(err)
 	}
-	q = "delete from ccms.sets where setname=$1"
-	if _, err := d.Q.Exec(d.C, q, setName); err != nil {
+	q = "delete from ccms.sets where project=$1 and set=$2"
+	if _, err := d.Q.Exec(d.C, q, set.Project, set.Set); err != nil {
 		return pgerr.Error(err)
 	}
 	return nil
