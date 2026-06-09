@@ -14,16 +14,16 @@ import (
 
 func SetExists(d *dbx.DB, set set.Set) (bool, error) {
 	if set.Set == "object" {
-		projectExists, err := ProjectExists(d, set.Project)
+		projectID, err := ProjectID(d, set.Project)
 		if err != nil {
 			return false, err
 		}
-		return projectExists, nil
+		return projectID != 0, nil
 	}
 
-	var q = "select 1 from ccms.sets where project=$1 and set=$2"
+	sql := "select 1 from ccms.sets s join ccms.project p on s.project_id=p.id where p.name=$1 and s.name=$2"
 	var n int32
-	err := d.Q.QueryRow(d.C, q, set.Project, set.Set).Scan(&n)
+	err := d.Q.QueryRow(d.C, sql, set.Project, set.Set).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -41,11 +41,11 @@ func IsValidTargetSet(d *dbx.DB, set set.Set) (bool, error) {
 	if set.Set == "object" {
 		return false, nil
 	}
-	projectExists, err := ProjectExists(d, set.Project)
+	projectID, err := ProjectID(d, set.Project)
 	if err != nil {
 		return false, err
 	}
-	return projectExists, nil
+	return projectID != 0, nil
 }
 
 // return table containing set
@@ -57,7 +57,7 @@ func SetTable(set set.Set) string {
 }
 
 func AllSets(d *dbx.DB) ([]string, error) {
-	sql := "select project||'.'||set from ccms.sets"
+	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id"
 	rows, _ := d.Q.Query(d.C, sql)
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
@@ -68,7 +68,7 @@ func AllSets(d *dbx.DB) ([]string, error) {
 }
 
 func SetsInProject(d *dbx.DB, project string) ([]string, error) {
-	sql := "select project||'.'||set from ccms.sets where project=$1"
+	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id where p.name=$1"
 	rows, _ := d.Q.Query(d.C, sql, project)
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
@@ -98,8 +98,12 @@ func CreateSet(d *dbx.DB, set set.Set) error {
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
 		return pgerr.Error(err)
 	}
-	sql = "insert into ccms.sets (project, set) values ($1, $2)"
-	if _, err := d.Q.Exec(d.C, sql, set.Project, set.Set); err != nil {
+	projectID, err := ProjectID(d, set.Project)
+	if err != nil {
+		return err
+	}
+	sql = "insert into ccms.sets (project_id, name) values ($1, $2)"
+	if _, err := d.Q.Exec(d.C, sql, projectID, set.Set); err != nil {
 		return pgerr.Error(err)
 	}
 	return nil
@@ -110,8 +114,12 @@ func DropSet(d *dbx.DB, set set.Set) error {
 	if _, err := d.Q.Exec(d.C, q); err != nil {
 		return pgerr.Error(err)
 	}
-	q = "delete from ccms.sets where project=$1 and set=$2"
-	if _, err := d.Q.Exec(d.C, q, set.Project, set.Set); err != nil {
+	projectID, err := ProjectID(d, set.Project)
+	if err != nil {
+		return err
+	}
+	sql := "delete from ccms.sets where project_id=$1 and name=$2"
+	if _, err := d.Q.Exec(d.C, sql, projectID, set.Set); err != nil {
 		return pgerr.Error(err)
 	}
 	return nil

@@ -20,17 +20,18 @@ import (
 // 	//MOULink      string
 // }
 
-func ProjectExists(d *dbx.DB, project string) (bool, error) {
-	sql := "select 1 from ccms.project where name=$1"
-	var n int32
-	err := d.Q.QueryRow(d.C, sql, project).Scan(&n)
+// returns project ID, or 0 if project does not exist
+func ProjectID(d *dbx.DB, project string) (int64, error) {
+	sql := "select id from ccms.project where name=$1"
+	var id int64
+	err := d.Q.QueryRow(d.C, sql, project).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
-		return false, nil
+		return 0, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return 0, pgerr.Error(err)
 	default:
-		return true, nil
+		return id, nil
 	}
 }
 
@@ -101,11 +102,11 @@ func CreateProject(d *dbx.DB, project string) error {
 
 func AlterProjectAddToProperty(d *dbx.DB, project, property, value string, stringLiteral bool) error {
 	// look up project id
-	projectID, err := selectProjectID(d, project)
+	projectID, err := ProjectID(d, project)
 	if err != nil {
 		return err
 	}
-	if projectID == -1 {
+	if projectID == 0 {
 		return errors.New("project \"" + project + "\" does not exist")
 	}
 
@@ -155,11 +156,11 @@ func AlterProjectAddToProperty(d *dbx.DB, project, property, value string, strin
 
 func AlterProjectDropFromProperty(d *dbx.DB, project, property, value string, stringLiteral bool) error {
 	// look up project id
-	projectID, err := selectProjectID(d, project)
+	projectID, err := ProjectID(d, project)
 	if err != nil {
 		return err
 	}
-	if projectID == -1 {
+	if projectID == 0 {
 		return errors.New("project \"" + project + "\" does not exist")
 	}
 
@@ -209,11 +210,11 @@ func AlterProjectDropFromProperty(d *dbx.DB, project, property, value string, st
 
 func alterProjectAddFund(d *dbx.DB, project, fund string, projectID int64) error {
 	// look up fund id
-	fundID, err := SelectFundID(d, fund)
+	fundID, err := FundID(d, fund)
 	if err != nil {
 		return err
 	}
-	if fundID == -1 {
+	if fundID == 0 {
 		return errors.New("fund \"" + fund + "\" does not exist")
 	}
 	// check if project fund exists
@@ -241,11 +242,11 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 		return nil
 	}
 	// look up fund id
-	fundID, err := SelectFundID(d, fund)
+	fundID, err := FundID(d, fund)
 	if err != nil {
 		return err
 	}
-	if fundID == -1 {
+	if fundID == 0 {
 		return errors.New("fund \"" + fund + "\" does not exist")
 	}
 	// check if project fund exists
@@ -266,11 +267,11 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 
 func alterProjectAddLocation(d *dbx.DB, project, location string, projectID int64) error {
 	// look up location id
-	locationID, err := selectLocationID(d, location)
+	locationID, err := LocationID(d, location)
 	if err != nil {
 		return err
 	}
-	if locationID == -1 {
+	if locationID == 0 {
 		return errors.New("location \"" + location + "\" does not exist")
 	}
 	// check if project location exists
@@ -298,11 +299,11 @@ func alterProjectDropLocation(d *dbx.DB, project, location string, projectID int
 		return nil
 	}
 	// look up location id
-	locationID, err := selectLocationID(d, location)
+	locationID, err := LocationID(d, location)
 	if err != nil {
 		return err
 	}
-	if locationID == -1 {
+	if locationID == 0 {
 		return errors.New("location \"" + location + "\" does not exist")
 	}
 	// check if project location exists
@@ -323,11 +324,11 @@ func alterProjectDropLocation(d *dbx.DB, project, location string, projectID int
 
 func alterProjectAddOrigin(d *dbx.DB, project, origin string, projectID int64) error {
 	// look up origin id
-	originID, err := selectOriginID(d, origin)
+	originID, err := OriginID(d, origin)
 	if err != nil {
 		return err
 	}
-	if originID == -1 {
+	if originID == 0 {
 		return errors.New("origin \"" + origin + "\" does not exist")
 	}
 	// check if project origin exists
@@ -355,11 +356,11 @@ func alterProjectDropOrigin(d *dbx.DB, project, origin string, projectID int64) 
 		return nil
 	}
 	// look up origin id
-	originID, err := selectOriginID(d, origin)
+	originID, err := OriginID(d, origin)
 	if err != nil {
 		return err
 	}
-	if originID == -1 {
+	if originID == 0 {
 		return errors.New("origin \"" + origin + "\" does not exist")
 	}
 	// check if project origin exists
@@ -380,11 +381,11 @@ func alterProjectDropOrigin(d *dbx.DB, project, origin string, projectID int64) 
 
 func alterProjectAddDestination(d *dbx.DB, project, destination string, projectID int64) error {
 	// look up destination id
-	destinationID, err := selectDestinationID(d, destination)
+	destinationID, err := DestinationID(d, destination)
 	if err != nil {
 		return err
 	}
-	if destinationID == -1 {
+	if destinationID == 0 {
 		return errors.New("destination \"" + destination + "\" does not exist")
 	}
 	// check if project destination exists
@@ -412,11 +413,11 @@ func alterProjectDropDestination(d *dbx.DB, project, destination string, project
 		return nil
 	}
 	// look up destination id
-	destinationID, err := selectDestinationID(d, destination)
+	destinationID, err := DestinationID(d, destination)
 	if err != nil {
 		return err
 	}
-	if destinationID == -1 {
+	if destinationID == 0 {
 		return errors.New("destination \"" + destination + "\" does not exist")
 	}
 	// check if project destination exists
@@ -437,11 +438,11 @@ func alterProjectDropDestination(d *dbx.DB, project, destination string, project
 
 func alterProjectAddTrack(d *dbx.DB, project, track string, projectID int64) error {
 	// look up track id
-	trackID, err := selectTrackID(d, track)
+	trackID, err := TrackID(d, track)
 	if err != nil {
 		return err
 	}
-	if trackID == -1 {
+	if trackID == 0 {
 		return errors.New("track \"" + track + "\" does not exist")
 	}
 	// check if project track exists
@@ -469,11 +470,11 @@ func alterProjectDropTrack(d *dbx.DB, project, track string, projectID int64) er
 		return nil
 	}
 	// look up track id
-	trackID, err := selectTrackID(d, track)
+	trackID, err := TrackID(d, track)
 	if err != nil {
 		return err
 	}
-	if trackID == -1 {
+	if trackID == 0 {
 		return errors.New("track \"" + track + "\" does not exist")
 	}
 	// check if project track exists
@@ -492,29 +493,14 @@ func alterProjectDropTrack(d *dbx.DB, project, track string, projectID int64) er
 	return nil
 }
 
-// returns project id, or -1 if project does not exist
-func selectProjectID(d *dbx.DB, project string) (int64, error) {
-	var q = "select id from ccms.project where name=$1"
-	var id int64
-	err := d.Q.QueryRow(d.C, q, project).Scan(&id)
-	switch {
-	case errors.Is(err, pgx.ErrNoRows):
-		return -1, nil
-	case err != nil:
-		return 0, pgerr.Error(err)
-	default:
-		return id, nil
-	}
-}
-
-// returns location id, or -1 if location does not exist
-func selectLocationID(d *dbx.DB, location string) (int64, error) {
+// returns location ID, or 0 if location does not exist
+func LocationID(d *dbx.DB, location string) (int64, error) {
 	sql := "select id from ccms.location where name=$1"
 	var id int64
 	err := d.Q.QueryRow(d.C, sql, location).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
-		return -1, nil
+		return 0, nil
 	case err != nil:
 		return 0, pgerr.Error(err)
 	default:
@@ -522,14 +508,14 @@ func selectLocationID(d *dbx.DB, location string) (int64, error) {
 	}
 }
 
-// returns origin id, or -1 if origin does not exist
-func selectOriginID(d *dbx.DB, origin string) (int64, error) {
+// returns origin ID, or 0 if origin does not exist
+func OriginID(d *dbx.DB, origin string) (int64, error) {
 	var sql = "select id from ccms.origin where name=$1"
 	var id int64
 	err := d.Q.QueryRow(d.C, sql, origin).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
-		return -1, nil
+		return 0, nil
 	case err != nil:
 		return 0, pgerr.Error(err)
 	default:
@@ -537,14 +523,14 @@ func selectOriginID(d *dbx.DB, origin string) (int64, error) {
 	}
 }
 
-// returns destination id, or -1 if destination does not exist
-func selectDestinationID(d *dbx.DB, destination string) (int64, error) {
+// returns destination ID, or 0 if destination does not exist
+func DestinationID(d *dbx.DB, destination string) (int64, error) {
 	sql := "select id from ccms.destination where name=$1"
 	var id int64
 	err := d.Q.QueryRow(d.C, sql, destination).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
-		return -1, nil
+		return 0, nil
 	case err != nil:
 		return 0, pgerr.Error(err)
 	default:
@@ -552,14 +538,14 @@ func selectDestinationID(d *dbx.DB, destination string) (int64, error) {
 	}
 }
 
-// returns track id, or -1 if track does not exist
-func selectTrackID(d *dbx.DB, track string) (int64, error) {
+// returns track ID, or 0 if track does not exist
+func TrackID(d *dbx.DB, track string) (int64, error) {
 	sql := "select id from ccms.track where name=$1"
 	var id int64
 	err := d.Q.QueryRow(d.C, sql, track).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
-		return -1, nil
+		return 0, nil
 	case err != nil:
 		return 0, pgerr.Error(err)
 	default:
@@ -568,9 +554,9 @@ func selectTrackID(d *dbx.DB, track string) (int64, error) {
 }
 
 func projectFundExists(d *dbx.DB, projectID, fundID int64) (bool, error) {
-	var q = "select 1 from ccms.project_fund where project_id=$1 and fund_id=$2"
+	sql := "select 1 from ccms.project_fund where project_id=$1 and fund_id=$2"
 	var n int32
-	err := d.Q.QueryRow(d.C, q, projectID, fundID).Scan(&n)
+	err := d.Q.QueryRow(d.C, sql, projectID, fundID).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -582,9 +568,9 @@ func projectFundExists(d *dbx.DB, projectID, fundID int64) (bool, error) {
 }
 
 func projectLocationExists(d *dbx.DB, projectID, locationID int64) (bool, error) {
-	var q = "select 1 from ccms.project_location where project_id=$1 and location_id=$2"
+	sql := "select 1 from ccms.project_location where project_id=$1 and location_id=$2"
 	var n int32
-	err := d.Q.QueryRow(d.C, q, projectID, locationID).Scan(&n)
+	err := d.Q.QueryRow(d.C, sql, projectID, locationID).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -596,7 +582,7 @@ func projectLocationExists(d *dbx.DB, projectID, locationID int64) (bool, error)
 }
 
 func projectOriginExists(d *dbx.DB, projectID, originID int64) (bool, error) {
-	var sql = "select 1 from ccms.project_origin where project_id=$1 and origin_id=$2"
+	sql := "select 1 from ccms.project_origin where project_id=$1 and origin_id=$2"
 	var n int32
 	err := d.Q.QueryRow(d.C, sql, projectID, originID).Scan(&n)
 	switch {
@@ -610,7 +596,7 @@ func projectOriginExists(d *dbx.DB, projectID, originID int64) (bool, error) {
 }
 
 func projectDestinationExists(d *dbx.DB, projectID, destinationID int64) (bool, error) {
-	var sql = "select 1 from ccms.project_destination where project_id=$1 and destination_id=$2"
+	sql := "select 1 from ccms.project_destination where project_id=$1 and destination_id=$2"
 	var n int32
 	err := d.Q.QueryRow(d.C, sql, projectID, destinationID).Scan(&n)
 	switch {
@@ -671,7 +657,7 @@ func AlterProjectSetProperty(d *dbx.DB, projectName, property, value string, str
 
 func ProjectProperties(d *dbx.DB, projectName string) ([][2]string, error) {
 	var title, action, mouLink, funds, locations, origins, destinations, tracks string
-	q := `with fnd as (
+	sql := `with fnd as (
     select p.id project_id,
            coalesce(string_agg(f.name||':'||f.title, '|' order by f.name), '') funds
         from ccms.project p
@@ -726,7 +712,7 @@ select coalesce(p.title, '') title,
            left join dst on p.id=dst.project_id
            left join trk on p.id=trk.project_id
        where p.name=$1`
-	err := d.Q.QueryRow(d.C, q, projectName).Scan(&title, &action, &mouLink, &funds, &locations, &origins, &destinations, &tracks)
+	err := d.Q.QueryRow(d.C, sql, projectName).Scan(&title, &action, &mouLink, &funds, &locations, &origins, &destinations, &tracks)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return nil, fmt.Errorf("project %q does not exist", projectName)

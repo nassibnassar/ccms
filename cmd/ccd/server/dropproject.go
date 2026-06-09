@@ -11,11 +11,11 @@ func dropProjectStmt(s *svr, rqid int64, cmd *ast.DropProjectStmt) *ccms.Result 
 		return cmderr("invalid target project \"" + cmd.Project + "\"")
 	}
 
-	projectExists, err := cat.ProjectExists(s.d, cmd.Project)
+	projectID, err := cat.ProjectID(s.d, cmd.Project)
 	if err != nil {
 		return cmderrint("checking if project exists", err)
 	}
-	if !projectExists {
+	if projectID == 0 {
 		return cmderr("project \"" + cmd.Project + "\" does not exist")
 	}
 

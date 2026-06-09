@@ -38,11 +38,11 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 		}
 	case "sets":
 		if cmd.In != "" {
-			projectExists, err := cat.ProjectExists(s.d, cmd.In)
+			projectID, err := cat.ProjectID(s.d, cmd.In)
 			if err != nil {
 				return cmderrint("checking if project exists", err)
 			}
-			if !projectExists {
+			if projectID == 0 {
 				return cmderr("project \"" + cmd.In + "\" does not exist")
 			}
 		}

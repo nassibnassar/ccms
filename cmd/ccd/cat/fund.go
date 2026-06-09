@@ -20,23 +20,14 @@ func CreateFund(d *dbx.DB, fund string) error {
 	return nil
 }
 
-// FundExists does not do synchronization and must not access the catalog cache
-func FundExists(d *dbx.DB, fund string) (bool, error) {
-	id, err := SelectFundID(d, fund)
-	if err != nil {
-		return false, err
-	}
-	return id != -1, nil
-}
-
-// returns fund id, or -1 if fund does not exist
-func SelectFundID(d *dbx.DB, fund string) (int64, error) {
+// returns fund ID, or 0 if fund does not exist
+func FundID(d *dbx.DB, fund string) (int64, error) {
 	var q = "select id from ccms.fund where name=$1"
 	var id int64
 	err := d.Q.QueryRow(d.C, q, fund).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
-		return -1, nil
+		return 0, nil
 	case err != nil:
 		return 0, pgerr.Error(err)
 	default:

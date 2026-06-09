@@ -26,11 +26,11 @@ func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *ccms.Result {
 		return cmderr("invalid set name \"" + cmd.Set + "\"")
 	}
 
-	projectExists, err := cat.ProjectExists(s.d, set.Project)
+	projectID, err := cat.ProjectID(s.d, set.Project)
 	if err != nil {
 		return cmderrint("checking if project exists", err)
 	}
-	if !projectExists {
+	if projectID == 0 {
 		return cmderr("invalid project in  \"" + cmd.Set + "\"")
 	}
 

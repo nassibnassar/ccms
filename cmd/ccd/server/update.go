@@ -19,11 +19,11 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	if set.Set != "object" {
 		return cmderr("set \"" + cmd.Set + "\" is not valid for update")
 	}
-	projectExists, err := cat.ProjectExists(s.d, set.Project)
+	projectID, err := cat.ProjectID(s.d, set.Project)
 	if err != nil {
 		return cmderrint("checking if project exists", err)
 	}
-	if !projectExists {
+	if projectID == 0 {
 		return cmderr("project \"" + set.Project + "\" does not exist")
 	}
 
@@ -45,11 +45,11 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 		cmd.Attr = "fund_id"
 		if cmd.Value != "" {
 			var fundID int64
-			fundID, err = cat.SelectFundID(s.d, cmd.Value)
+			fundID, err = cat.FundID(s.d, cmd.Value)
 			if err != nil {
 				return cmderrint("looking up fund", err)
 			}
-			if fundID == -1 {
+			if fundID == 0 {
 				return cmderr("fund \"" + cmd.Value + "\" does not exist")
 			}
 			cmd.Value = strconv.FormatInt(fundID, 10)

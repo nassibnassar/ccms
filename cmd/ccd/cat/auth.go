@@ -48,6 +48,21 @@ func UserExists(d *dbx.DB, user string) (bool, error) {
 	}
 }
 
+// returns user ID, or 0 if user does not exist
+func UserID(d *dbx.DB, user string) (int64, error) {
+	var q = "select id from ccms.auth where name=$1"
+	var id int64
+	err := d.Q.QueryRow(d.C, q, user).Scan(&id)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return 0, nil
+	case err != nil:
+		return 0, pgerr.Error(err)
+	default:
+		return id, nil
+	}
+}
+
 func CreateUser(secretKey []byte, d *dbx.DB, userName, password string, superuser, login bool) error {
 	salt := crypto.RandomKey()
 	hash := crypto.HashPassword(password, salt, secretKey)
