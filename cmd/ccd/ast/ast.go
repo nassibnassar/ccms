@@ -53,7 +53,7 @@ type DeleteStmt struct {
 func (*DeleteStmt) node() {}
 
 type DropProjectStmt struct {
-	ProjectName string
+	Project string
 }
 
 func (*DropProjectStmt) node() {}
@@ -92,6 +92,7 @@ func (*SelectStmt) node() {}
 type ShowStmt struct {
 	Type string
 	Name string
+	In   string
 }
 
 func (*ShowStmt) node() {}

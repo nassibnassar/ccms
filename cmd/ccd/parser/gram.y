@@ -72,6 +72,7 @@ import (
 %token FROM
 %token FUND
 %token ILIKE
+%token IN
 %token INFO
 %token INSERT
 %token INTO
@@ -252,7 +253,7 @@ delete_stmt:
 drop_project_stmt:
 	DROP PROJECT name ';'
 		{
-			$$ = &ast.DropProjectStmt{ProjectName: $3}
+			$$ = &ast.DropProjectStmt{Project: $3}
 		}
 
 drop_set_stmt:
@@ -293,6 +294,10 @@ show_stmt:
 	SHOW name ';'
 		{
 			$$ = &ast.ShowStmt{Type: $2}
+		}
+	| SHOW name IN PROJECT name ';'
+		{
+			$$ = &ast.ShowStmt{Type: $2, In: $5}
 		}
 	| SHOW PROJECT name ';'
 		{

@@ -37,8 +37,17 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 			return cmderrint("retrieving project data", err)
 		}
 	case "sets":
+		if cmd.In != "" {
+			projectExists, err := cat.ProjectExists(s.d, cmd.In)
+			if err != nil {
+				return cmderrint("checking if project exists", err)
+			}
+			if !projectExists {
+				return cmderr("project \"" + cmd.In + "\" does not exist")
+			}
+		}
 		result.AddField("set_name", "text")
-		if err := addShowSetsData(s.d, result); err != nil {
+		if err := addShowSetsData(s.d, result, cmd.In); err != nil {
 			return cmderrint("retrieving sets", err)
 		}
 	case "tags":
@@ -101,8 +110,14 @@ func addShowProjectData(d *dbx.DB, result *ccms.Result, projectName string) erro
 	return nil
 }
 
-func addShowSetsData(d *dbx.DB, result *ccms.Result) error {
-	sets, err := cat.AllSets(d)
+func addShowSetsData(d *dbx.DB, result *ccms.Result, in string) error {
+	var sets []string
+	var err error
+	if in == "" {
+		sets, err = cat.AllSets(d)
+	} else {
+		sets, err = cat.SetsInProject(d, in)
+	}
 	if err != nil {
 		return err
 	}
