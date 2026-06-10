@@ -14,18 +14,20 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 		result.AddField("info", "text")
 		result.AddData([]any{"" +
 			"SQL commands:\n" +
-			"        alter project   change the definition of a project\n" +
-			"        create fund     define a new fund\n" +
-			"        create project  define a new project\n" +
-			"        create set      define a new set\n" +
-			"        create user     define a new user\n" +
-			"        delete          remove objects from set membership\n" +
-			"        drop set        remove a set\n" +
+			"        alter project    change the definition of a project\n" +
+			"        archive project  archive a project\n" +
+			"        create fund      define a new fund\n" +
+			"        create project   define a new project\n" +
+			"        create set       define a new set\n" +
+			"        create user      define a new user\n" +
+			"        delete           remove objects from set membership\n" +
+			"        drop project     drop an archived project\n" +
+			"        drop set         remove a set\n" +
 			//"        info    show supported commands\n" +
-			"        insert          insert objects into a set\n" +
-			"        select          retrieve objects from a set\n" +
-			"        show            list existing filters or sets\n" +
-			"        update          update object attributes\n"})
+			"        insert           insert objects into a set\n" +
+			"        select           retrieve objects from a set\n" +
+			"        show             list existing filters or sets\n" +
+			"        update           update object attributes\n"})
 		return result
 	}
 
@@ -33,6 +35,8 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 	switch cmd.Topic {
 	case "alter project":
 		docstr = doc.AlterProject()
+	case "archive project":
+		docstr = doc.ArchiveProject()
 	case "create fund":
 		docstr = doc.CreateFund()
 	case "create project":
@@ -43,6 +47,8 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 		docstr = doc.CreateUser()
 	case "delete":
 		docstr = doc.Delete()
+	case "drop project":
+		docstr = doc.DropProject()
 	case "drop set":
 		docstr = doc.DropSet()
 	//case "info":

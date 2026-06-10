@@ -9,10 +9,13 @@ import (
 func alterProjectStmt(s *svr, rqid int64, cmd *ast.AlterProjectStmt) *ccms.Result {
 	projectID, err := cat.ProjectID(s.d, cmd.Project)
 	if err != nil {
-		return cmderrint("checking if project exists", err)
+		return cmderr("checking if project exists: " + err.Error())
 	}
 	if projectID == 0 {
 		return cmderr("project \"" + cmd.Project + "\" does not exist")
+	}
+	if projectID == -1 {
+		return cmderr("project \"" + cmd.Project + "\" is archived")
 	}
 
 	switch cmd.Action {

@@ -12,7 +12,7 @@ func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *ccms.Result {
 
 	setExists, err := cat.SetExists(s.d, set)
 	if err != nil {
-		return cmderrint("checking if set exists", err)
+		return cmderr("checking if set exists: " + err.Error())
 	}
 	if setExists {
 		return cmderr("set \"" + cmd.Set + "\" already exists")
@@ -20,7 +20,7 @@ func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *ccms.Result {
 
 	validTargetSet, err := cat.IsValidTargetSet(s.d, set)
 	if err != nil {
-		return cmderrint("checking if target set valid", err)
+		return cmderr("checking if target set valid: " + err.Error())
 	}
 	if !validTargetSet {
 		return cmderr("invalid set name \"" + cmd.Set + "\"")
@@ -28,14 +28,17 @@ func createSetStmt(s *svr, rqid int64, cmd *ast.CreateSetStmt) *ccms.Result {
 
 	projectID, err := cat.ProjectID(s.d, set.Project)
 	if err != nil {
-		return cmderrint("checking if project exists", err)
+		return cmderr("checking if project exists: " + err.Error())
 	}
 	if projectID == 0 {
-		return cmderr("invalid project in  \"" + cmd.Set + "\"")
+		return cmderr("project \"" + set.Project + "\" does not exist")
+	}
+	if projectID == -1 {
+		return cmderr("project \"" + set.Project + "\" is archived")
 	}
 
 	if err := cat.CreateSet(s.d, set); err != nil {
-		return cmderrint("writing set", err)
+		return cmderr("writing set: " + err.Error())
 	}
 
 	return ccms.NewResult("create set")

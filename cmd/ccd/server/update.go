@@ -21,10 +21,14 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	}
 	projectID, err := cat.ProjectID(s.d, set.Project)
 	if err != nil {
-		return cmderrint("checking if project exists", err)
+		return cmderr("checking if project exists: " + err.Error())
 	}
+
 	if projectID == 0 {
 		return cmderr("project \"" + set.Project + "\" does not exist")
+	}
+	if projectID == -1 {
+		return cmderr("project \"" + set.Project + "\" is archived")
 	}
 
 	if cmd.IDAttr != "id" {
@@ -34,7 +38,7 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	idInt, _ := strconv.ParseInt(cmd.IDValue.Value, 10, 64)
 	idExists, err := objectIDExists(s.d, idInt)
 	if err != nil {
-		return cmderrint("checking if object ID exists", err)
+		return cmderr("checking if object ID exists: " + err.Error())
 	}
 	if !idExists {
 		return cmderr("object id = " + cmd.IDValue.Value + " does not exist")
@@ -47,7 +51,7 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 			var fundID int64
 			fundID, err = cat.FundID(s.d, cmd.Value)
 			if err != nil {
-				return cmderrint("looking up fund", err)
+				return cmderr("looking up fund: " + err.Error())
 			}
 			if fundID == 0 {
 				return cmderr("fund \"" + cmd.Value + "\" does not exist")
@@ -63,7 +67,7 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 		return cmderr(err.Error())
 	}
 	if _, err := s.d.Q.Exec(s.d.C, sql); err != nil {
-		return cmderrint("executing update", err)
+		return cmderr("executing update: " + err.Error())
 	}
 
 	return ccms.NewResult("update")

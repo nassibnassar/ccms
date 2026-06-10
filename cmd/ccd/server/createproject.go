@@ -9,7 +9,7 @@ import (
 func createProjectStmt(s *svr, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Result {
 	projectID, err := cat.ProjectID(s.d, cmd.Project)
 	if err != nil {
-		return cmderrint("checking if project exists", err)
+		return cmderr("checking if project exists: " + err.Error())
 	}
 	if projectID != 0 {
 		return cmderr("project \"" + cmd.Project + "\" already exists")

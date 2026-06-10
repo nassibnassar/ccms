@@ -6,7 +6,7 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 )
 
-func dropProjectStmt(s *svr, rqid int64, cmd *ast.DropProjectStmt) *ccms.Result {
+func archiveProjectStmt(s *svr, rqid int64, cmd *ast.ArchiveProjectStmt) *ccms.Result {
 	if !cat.IsValidTargetProject(cmd.Project) {
 		return cmderr("invalid target project \"" + cmd.Project + "\"")
 	}
@@ -18,13 +18,14 @@ func dropProjectStmt(s *svr, rqid int64, cmd *ast.DropProjectStmt) *ccms.Result 
 	if projectID == 0 {
 		return cmderr("project \"" + cmd.Project + "\" does not exist")
 	}
-	if projectID != -1 {
-		return cmderr("project \"" + cmd.Project + "\" is not archived")
+	if projectID == -1 {
+		return cmderr("project \"" + cmd.Project + "\" is already archived")
 	}
 
-	if err := cat.DropProject(s.d, cmd.Project); err != nil {
-		return cmderr("dropping project: " + err.Error())
+	newProjectName, err := cat.ArchiveProject(s.d, cmd.Project)
+	if err != nil {
+		return cmderr("archiving project: " + err.Error())
 	}
 
-	return ccms.NewResult("drop project")
+	return ccms.NewResult("archive project " + newProjectName)
 }

@@ -243,6 +243,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		switch cmd := cmds[i].(type) {
 		case *ast.AlterProjectStmt:
 			result = alterProjectStmt(s, rqid, cmd)
+		case *ast.ArchiveProjectStmt:
+			result = archiveProjectStmt(s, rqid, cmd)
 		case *ast.CreateFundStmt:
 			result = createFundStmt(s, rqid, cmd)
 		case *ast.CreateProjectStmt:
@@ -318,9 +320,9 @@ func sendResponse(w http.ResponseWriter, rqid int64, resp *ccms.Response) {
 	}
 }
 
-func cmderrint(message string, err error) *ccms.Result {
-	return cmderr(internalError + message + ": " + err.Error())
-}
+// func cmderrint(message string, err error) *ccms.Result {
+// 	return cmderr(internalError + message + ": " + err.Error())
+// }
 
 func cmderr(message string) *ccms.Result {
 	result := ccms.NewResult("error")

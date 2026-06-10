@@ -18,7 +18,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("fund_name", "text")
 		result.AddField("fund_title", "text")
 		if err := addShowFundsData(s.d, result); err != nil {
-			return cmderrint("retrieving funds", err)
+			return cmderr("retrieving funds: " + err.Error())
 		}
 	//case "roles":
 	//        result.AddField("role_name", "text")
@@ -26,21 +26,21 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	//        addShowRolesData(s.cat, result)
 	case "projects":
 		result.AddField("project_name", "text")
-		err := addShowProjectsData(s.d, result)
+		err := addShowProjectsData(s.d, result, cmd.Archived)
 		if err != nil {
-			return cmderrint("retrieving projects", err)
+			return cmderr("retrieving projects: " + err.Error())
 		}
 	case "project":
 		result.AddField("property", "text")
 		result.AddField("value", "text")
 		if err := addShowProjectData(s.d, result, cmd.Name); err != nil {
-			return cmderrint("retrieving project data", err)
+			return cmderr("retrieving project data: " + err.Error())
 		}
 	case "sets":
 		if cmd.In != "" {
 			projectID, err := cat.ProjectID(s.d, cmd.In)
 			if err != nil {
-				return cmderrint("checking if project exists", err)
+				return cmderr("checking if project exists: " + err.Error())
 			}
 			if projectID == 0 {
 				return cmderr("project \"" + cmd.In + "\" does not exist")
@@ -48,7 +48,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 		}
 		result.AddField("set_name", "text")
 		if err := addShowSetsData(s.d, result, cmd.In); err != nil {
-			return cmderrint("retrieving sets", err)
+			return cmderr("retrieving sets: " + err.Error())
 		}
 	case "tags":
 		result.AddField("tag_name", "text")
@@ -57,7 +57,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("superuser", "boolean")
 		result.AddField("login", "boolean")
 		if err := addShowUsersData(s.d, result); err != nil {
-			return cmderrint("retrieving users", err)
+			return cmderr("retrieving users: " + err.Error())
 		}
 	default:
 		return cmderr("unknown variable \"" + cmd.Type + "\"")
@@ -88,8 +88,8 @@ func addShowRolesData(d *dbx.DB, result *ccms.Result) error {
 	return nil
 }
 
-func addShowProjectsData(d *dbx.DB, result *ccms.Result) error {
-	projects, err := cat.AllProjects(d)
+func addShowProjectsData(d *dbx.DB, result *ccms.Result, archived bool) error {
+	projects, err := cat.AllProjects(d, archived)
 	if err != nil {
 		return err
 	}

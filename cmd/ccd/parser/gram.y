@@ -20,6 +20,7 @@ import (
 %type <nodeList> stmt
 %type <nodeList> stmt_list
 %type <node> alter_project_stmt
+%type <node> archive_project_stmt
 %type <node> create_fund_stmt
 %type <node> create_project_stmt
 %type <node> create_set_stmt
@@ -60,6 +61,8 @@ import (
 %token ALL
 %token ALTER
 %token AND
+%token ARCHIVE
+%token ARCHIVED
 %token ASC
 %token BY
 %token CREATE
@@ -85,6 +88,7 @@ import (
 %token ORDER
 %token PASSWORD
 %token PROJECT
+%token PROJECTS
 %token PROPERTY
 %token PING
 %token RETRIEVE
@@ -138,6 +142,10 @@ stmt:
 
 basic_stmt:
 	alter_project_stmt
+		{
+			$$ = $1
+		}
+	| archive_project_stmt
 		{
 			$$ = $1
 		}
@@ -196,6 +204,12 @@ basic_stmt:
 	| ';'
 		{
 			$$ = nil
+		}
+
+archive_project_stmt:
+	ARCHIVE PROJECT name ';'
+		{
+			$$ = &ast.ArchiveProjectStmt{Project: $3}
 		}
 
 alter_project_stmt:
@@ -302,6 +316,14 @@ show_stmt:
 	| SHOW PROJECT name ';'
 		{
 			$$ = &ast.ShowStmt{Type: "project", Name: $3}
+		}
+	| SHOW PROJECTS ';'
+		{
+			$$ = &ast.ShowStmt{Type: "projects"}
+		}
+	| SHOW PROJECTS ARCHIVED ';'
+		{
+			$$ = &ast.ShowStmt{Type: "projects", Archived: true}
 		}
 
 update_stmt:

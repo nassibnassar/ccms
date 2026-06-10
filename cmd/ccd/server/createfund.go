@@ -16,7 +16,7 @@ func createFundStmt(s *svr, rqid int64, cmd *ast.CreateFundStmt) *ccms.Result {
 	}
 
 	if err := cat.CreateFund(s.d, cmd.Fund); err != nil {
-		return cmderrint("creating fund", err)
+		return cmderr("creating fund: " + err.Error())
 	}
 
 	return ccms.NewResult("create fund")

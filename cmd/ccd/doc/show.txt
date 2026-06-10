@@ -4,7 +4,7 @@ List the values of a system variable
 
 show funds
 
-show projects
+show projects [ archived ]
 
 show project project_name
 

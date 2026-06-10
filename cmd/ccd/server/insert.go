@@ -20,15 +20,26 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 	intoSet := set.Parse(cmd.Into)
 	validTargetSet, err := cat.IsValidTargetSet(s.d, intoSet)
 	if err != nil {
-		return cmderrint("checking if target set valid", err)
+		return cmderr("checking if target set valid: " + err.Error())
 	}
 	if !validTargetSet {
 		return cmderr("invalid target set \"" + cmd.Into + "\"")
 	}
 
+	projectID, err := cat.ProjectID(s.d, intoSet.Project)
+	if err != nil {
+		return cmderr("checking if project exists: " + err.Error())
+	}
+	if projectID == 0 {
+		return cmderr("project \"" + intoSet.Project + "\" does not exist")
+	}
+	if projectID == -1 {
+		return cmderr("project \"" + intoSet.Project + "\" is archived")
+	}
+
 	intoSetExists, err := cat.SetExists(s.d, intoSet)
 	if err != nil {
-		return cmderrint("checking if set exists", err)
+		return cmderr("checking if set exists: " + err.Error())
 	}
 	if !intoSetExists {
 		return cmderr("set \"" + cmd.Into + "\" does not exist")
@@ -41,7 +52,7 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 	fromSet := set.Parse(from)
 	fromSetExists, err := cat.SetExists(s.d, fromSet)
 	if err != nil {
-		return cmderrint("checking if set exists", err)
+		return cmderr("checking if set exists: " + err.Error())
 	}
 	if !fromSetExists {
 		return cmderr("set \"" + from + "\" does not exist")
@@ -52,7 +63,7 @@ func insertStmt(s *svr, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 		return cmderr(err.Error())
 	}
 	if _, err := s.d.Q.Exec(s.d.C, sql); err != nil {
-		return cmderrint("inserting data into \""+cmd.Into+"\"", err)
+		return cmderr("inserting data into \"" + cmd.Into + "\": " + err.Error())
 	}
 
 	return ccms.NewResult("insert")

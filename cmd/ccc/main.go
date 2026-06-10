@@ -267,6 +267,14 @@ func runClient() error {
 		if err = pager.Setup(); err != nil {
 			return err
 		}
+		defer pager.Complete()
+		defer func() {
+			if r := recover(); r != nil {
+				pager.Complete()
+				panic(r)
+			}
+		}()
+
 		i := 0
 		for result := range resp.Results() {
 			if i > 0 {
@@ -293,6 +301,7 @@ func runClient() error {
 			case "select":
 				w := tabwriter.NewWriter(os.Stdout, 1, 1, 2, ' ', 0)
 				if header {
+					// print field names
 					fields := result.Fields()
 					for j := range fields {
 						if j != 0 {
@@ -301,16 +310,32 @@ func runClient() error {
 						fmt.Fprint(w, fields[j].Name())
 					}
 					fmt.Fprint(w, "\n")
-				}
-				for data := range result.Data() {
-					values := data.Values()
-					for j := range values {
+					// print dashes under the field names
+					for j := range fields {
 						if j != 0 {
 							fmt.Fprint(w, "\t")
 						}
-						fmt.Fprint(w, values[j])
+						printDashes(w, len(fields[j].Name()))
 					}
 					fmt.Fprint(w, "\n")
+				}
+				// print the data
+				j := 0
+				for data := range result.Data() {
+					values := data.Values()
+					for k := range values {
+						if k != 0 {
+							fmt.Fprint(w, "\t")
+						}
+						fmt.Fprint(w, values[k])
+					}
+					fmt.Fprint(w, "\n")
+					j++
+				}
+				if j == 1 {
+					fmt.Fprint(w, "(1 row)\n")
+				} else {
+					_, _ = fmt.Fprintf(w, "(%d rows)\n", j)
 				}
 				_ = w.Flush()
 				if line == "info;" {
@@ -333,6 +358,12 @@ func runClient() error {
 	}
 
 	return nil
+}
+
+const dashes = "-------------------------------------------------------------------------------"
+
+func printDashes(w *tabwriter.Writer, count int) {
+	fmt.Fprint(w, dashes[0:min(count, len(dashes))])
 }
 
 func createUser(client *ccms.Client, fields []string) (string, error) {
@@ -485,6 +516,7 @@ var completer = readline.NewPrefixCompleter(
 		readline.PcItem("show"),
 	),
 	readline.PcItem("alter project"),
+	readline.PcItem("archive project"),
 	readline.PcItem("create fund"),
 	readline.PcItem("create project"),
 	readline.PcItem("create set"),

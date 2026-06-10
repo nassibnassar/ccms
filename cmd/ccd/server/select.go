@@ -32,9 +32,16 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		return cmderr("set \"reserve\" is no longer supported; use \"<project>.object\"")
 	}
 	fromSet := set.Parse(from)
+	projectID, err := cat.ProjectID(s.d, fromSet.Project)
+	if err != nil {
+		return cmderr("checking if project exists: " + err.Error())
+	}
+	if projectID == 0 {
+		return cmderr("project \"" + fromSet.Project + "\" does not exist")
+	}
 	setExists, err := cat.SetExists(s.d, fromSet)
 	if err != nil {
-		return cmderrint("checking if set exists", err)
+		return cmderr("checking if set exists: " + err.Error())
 	}
 	if !setExists {
 		return cmderr("set \"" + from + "\" does not exist")

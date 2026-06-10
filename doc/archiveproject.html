@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.23">
-<title>alter project</title>
+<title>archive project</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -458,30 +458,18 @@ h1, h2, h3, h4, h5, h6, #toctitle,
 </div>
 <div id="content">
 <div class="sect3">
-<h4 id="_alter_project">alter project</h4>
+<h4 id="_archive_project">archive project</h4>
 <div class="paragraph">
-<p>Change the definition of a project</p>
+<p>Archive a project</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>alter project <code><strong><em>project_name</em></strong></code>
-    <code><strong><em>action</em></strong></code>
-
-where <code><strong><em>action</em></strong></code> is one of:
-
-    alter property <code><strong><em>property_name</em></strong></code> set <code><strong><em>value</em></strong></code>
-    alter property <code><strong><em>property_name</em></strong></code> add <code><strong><em>subvalue</em></strong></code>
-    alter property <code><strong><em>property_name</em></strong></code> drop { <code><strong><em>subvalue</em></strong></code> | all }</code></pre>
+<pre class="highlight"><code>archive project <code><strong><em>project_name</em></strong></code></code></pre>
 </div>
 </div>
 <h5 id="_description" class="discrete">Description</h5>
 <div class="paragraph">
-<p>The <code>alter project</code> command changes the definition of a project.</p>
-</div>
-<div class="paragraph">
-<p>The <code>alter property</code> clause changes a property in the project&#8217;s
-metadata.  The <code>set</code> action is used for single-value properties, while
-<code>add</code> and <code>drop</code> are for composite properties.</p>
+<p>The <code>archive project</code> command marks a project as no longer active.</p>
 </div>
 <h5 id="_parameters" class="discrete">Parameters</h5>
 <table class="tableblock frame-none grid-none stretch">
@@ -494,94 +482,22 @@ metadata.  The <code>set</code> action is used for single-value properties, whil
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>project_name</em></strong></code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">The name of the project.</p></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>property_name</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the property in the project metadata.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>value</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The value of a single-value property.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong><em>subvalue</em></strong></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">A subvalue in a composite property.</p></td>
-</tr>
-</tbody>
-</table>
-<h5 id="_properties" class="discrete">Properties</h5>
-<table class="tableblock frame-all grid-all" style="width: 75%;">
-<colgroup>
-<col style="width: 18.75%;">
-<col style="width: 18.75%;">
-<col style="width: 62.5%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Property</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">single-value</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">text</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>action</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">single-value</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">action name (<code>acquire</code>, <code>retire</code>, <code>digitize</code>, <code>move</code>, <code>other</code>)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mou_link</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">single-value</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">text</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>funds</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">composite</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">fund name</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>origins</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">composite</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">location name (<code>clockss</code>, <code>lehigh</code>, <code>nyu</code>)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>destinations</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">composite</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">location name</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tracks</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">composite</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">track name (<code>offsite</code>, <code>reserve</code>, <code>stacks</code>)</p></td>
-</tr>
 </tbody>
 </table>
 <h5 id="_examples" class="discrete">Examples</h5>
 <div class="paragraph">
-<p>Set the title of project <code>myproj</code> to <code>My Project</code>:</p>
+<p>Archive a project <code>myproj</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>alter project myproj alter property title set 'My Project';</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Add a fund <code>palci_cultural</code> to the project:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>alter project myproj alter property funds add palci_cultural;</pre>
+<pre>archive project myproj;</pre>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-06-04 23:48:12 -0400
+Last updated 2026-06-10 12:44:48 -0400
 </div>
 </div>
 </body>
