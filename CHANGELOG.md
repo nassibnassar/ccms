@@ -5,6 +5,8 @@
 
 * Added the `create fund` and `show funds` commands.
 
+* Added the `show sets in project` command.
+
 * The project property `locations` has been removed.
 
 # v0.0.25
