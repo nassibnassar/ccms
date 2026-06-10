@@ -1,9 +1,11 @@
-* Added the `create fund` and `show funds` commands.
-
 * The `reserve` set has been superseded by the `object` set in each
   project.
 
 * Added the `update` command for changing `object` attributes.
+
+* Added the `create fund` and `show funds` commands.
+
+* The project property `locations` has been removed.
 
 # v0.0.25
 

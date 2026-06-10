@@ -84,7 +84,7 @@ var systemTables = []systemTableDef{
 	{table: "fund", create: createTableFund},
 	{table: "project_fund", create: createTableProjectFund},
 	{table: "location", create: createTableLocation},
-	{table: "project_location", create: createTableProjectLocation},
+	// {table: "project_location", create: createTableProjectLocation},
 	{table: "origin", create: createTableOrigin},
 	{table: "project_origin", create: createTableProjectOrigin},
 	{table: "destination", create: createTableDestination},
@@ -260,16 +260,16 @@ func createTableLocation(tx pgx.Tx) error {
 	return nil
 }
 
-func createTableProjectLocation(tx pgx.Tx) error {
-	q := "create table ccms.project_location (" +
-		"project_id integer not null references ccms.project (id) on delete cascade," +
-		"location_id integer not null references ccms.location (id) on delete cascade," +
-		"primary key (project_id, location_id))"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("creating table ccms.project_location: %v", pgerr.Error(err))
-	}
-	return nil
-}
+// func createTableProjectLocation(tx pgx.Tx) error {
+// 	q := "create table ccms.project_location (" +
+// 		"project_id integer not null references ccms.project (id) on delete cascade," +
+// 		"location_id integer not null references ccms.location (id) on delete cascade," +
+// 		"primary key (project_id, location_id))"
+// 	if _, err := tx.Exec(context.TODO(), q); err != nil {
+// 		return fmt.Errorf("creating table ccms.project_location: %v", pgerr.Error(err))
+// 	}
+// 	return nil
+// }
 
 func createTableOrigin(tx pgx.Tx) error {
 	q := "create table ccms.origin (" +

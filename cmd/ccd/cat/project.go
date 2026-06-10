@@ -118,13 +118,13 @@ func AlterProjectAddToProperty(d *dbx.DB, project, property, value string, strin
 		if err := alterProjectAddFund(d, project, value, projectID); err != nil {
 			return err
 		}
-	case "locations":
-		if stringLiteral {
-			return invalidValueError(property, value)
-		}
-		if err := alterProjectAddLocation(d, project, value, projectID); err != nil {
-			return err
-		}
+	// case "locations":
+	// 	if stringLiteral {
+	// 		return invalidValueError(property, value)
+	// 	}
+	// 	if err := alterProjectAddLocation(d, project, value, projectID); err != nil {
+	// 		return err
+	// 	}
 	case "origins":
 		if stringLiteral {
 			return invalidValueError(property, value)
@@ -172,13 +172,13 @@ func AlterProjectDropFromProperty(d *dbx.DB, project, property, value string, st
 		if err := alterProjectDropFund(d, project, value, projectID); err != nil {
 			return err
 		}
-	case "locations":
-		if stringLiteral {
-			return invalidValueError(property, value)
-		}
-		if err := alterProjectDropLocation(d, project, value, projectID); err != nil {
-			return err
-		}
+	// case "locations":
+	// 	if stringLiteral {
+	// 		return invalidValueError(property, value)
+	// 	}
+	// 	if err := alterProjectDropLocation(d, project, value, projectID); err != nil {
+	// 		return err
+	// 	}
 	case "origins":
 		if stringLiteral {
 			return invalidValueError(property, value)
@@ -265,62 +265,62 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 	return nil
 }
 
-func alterProjectAddLocation(d *dbx.DB, project, location string, projectID int64) error {
-	// look up location id
-	locationID, err := LocationID(d, location)
-	if err != nil {
-		return err
-	}
-	if locationID == 0 {
-		return errors.New("location \"" + location + "\" does not exist")
-	}
-	// check if project location exists
-	projectLocationExists, err := projectLocationExists(d, projectID, locationID)
-	if err != nil {
-		return err
-	}
-	if projectLocationExists {
-		return nil
-	}
-	// add project location
-	sql := "insert into ccms.project_location (project_id, location_id) values ($1, $2)"
-	if _, err := d.Q.Exec(d.C, sql, projectID, locationID); err != nil {
-		return pgerr.Error(err)
-	}
-	return nil
-}
+// func alterProjectAddLocation(d *dbx.DB, project, location string, projectID int64) error {
+// 	// look up location id
+// 	locationID, err := LocationID(d, location)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if locationID == 0 {
+// 		return errors.New("location \"" + location + "\" does not exist")
+// 	}
+// 	// check if project location exists
+// 	projectLocationExists, err := projectLocationExists(d, projectID, locationID)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if projectLocationExists {
+// 		return nil
+// 	}
+// 	// add project location
+// 	sql := "insert into ccms.project_location (project_id, location_id) values ($1, $2)"
+// 	if _, err := d.Q.Exec(d.C, sql, projectID, locationID); err != nil {
+// 		return pgerr.Error(err)
+// 	}
+// 	return nil
+// }
 
-func alterProjectDropLocation(d *dbx.DB, project, location string, projectID int64) error {
-	if location == "*" {
-		sql := "delete from ccms.project_location where project_id=$1"
-		if _, err := d.Q.Exec(d.C, sql, projectID); err != nil {
-			return pgerr.Error(err)
-		}
-		return nil
-	}
-	// look up location id
-	locationID, err := LocationID(d, location)
-	if err != nil {
-		return err
-	}
-	if locationID == 0 {
-		return errors.New("location \"" + location + "\" does not exist")
-	}
-	// check if project location exists
-	projectLocationExists, err := projectLocationExists(d, projectID, locationID)
-	if err != nil {
-		return err
-	}
-	if !projectLocationExists {
-		return errors.New("project \"" + project + "\" does not have location \"" + location + "\"")
-	}
-	// drop project location
-	sql := "delete from ccms.project_location where project_id=$1 and location_id=$2"
-	if _, err := d.Q.Exec(d.C, sql, projectID, locationID); err != nil {
-		return pgerr.Error(err)
-	}
-	return nil
-}
+// func alterProjectDropLocation(d *dbx.DB, project, location string, projectID int64) error {
+// 	if location == "*" {
+// 		sql := "delete from ccms.project_location where project_id=$1"
+// 		if _, err := d.Q.Exec(d.C, sql, projectID); err != nil {
+// 			return pgerr.Error(err)
+// 		}
+// 		return nil
+// 	}
+// 	// look up location id
+// 	locationID, err := LocationID(d, location)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if locationID == 0 {
+// 		return errors.New("location \"" + location + "\" does not exist")
+// 	}
+// 	// check if project location exists
+// 	projectLocationExists, err := projectLocationExists(d, projectID, locationID)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if !projectLocationExists {
+// 		return errors.New("project \"" + project + "\" does not have location \"" + location + "\"")
+// 	}
+// 	// drop project location
+// 	sql := "delete from ccms.project_location where project_id=$1 and location_id=$2"
+// 	if _, err := d.Q.Exec(d.C, sql, projectID, locationID); err != nil {
+// 		return pgerr.Error(err)
+// 	}
+// 	return nil
+// }
 
 func alterProjectAddOrigin(d *dbx.DB, project, origin string, projectID int64) error {
 	// look up origin id
@@ -567,19 +567,19 @@ func projectFundExists(d *dbx.DB, projectID, fundID int64) (bool, error) {
 	}
 }
 
-func projectLocationExists(d *dbx.DB, projectID, locationID int64) (bool, error) {
-	sql := "select 1 from ccms.project_location where project_id=$1 and location_id=$2"
-	var n int32
-	err := d.Q.QueryRow(d.C, sql, projectID, locationID).Scan(&n)
-	switch {
-	case errors.Is(err, pgx.ErrNoRows):
-		return false, nil
-	case err != nil:
-		return false, pgerr.Error(err)
-	default:
-		return true, nil
-	}
-}
+// func projectLocationExists(d *dbx.DB, projectID, locationID int64) (bool, error) {
+// 	sql := "select 1 from ccms.project_location where project_id=$1 and location_id=$2"
+// 	var n int32
+// 	err := d.Q.QueryRow(d.C, sql, projectID, locationID).Scan(&n)
+// 	switch {
+// 	case errors.Is(err, pgx.ErrNoRows):
+// 		return false, nil
+// 	case err != nil:
+// 		return false, pgerr.Error(err)
+// 	default:
+// 		return true, nil
+// 	}
+// }
 
 func projectOriginExists(d *dbx.DB, projectID, originID int64) (bool, error) {
 	sql := "select 1 from ccms.project_origin where project_id=$1 and origin_id=$2"
@@ -625,7 +625,7 @@ func projectTrackExists(d *dbx.DB, projectID, trackID int64) (bool, error) {
 
 func AlterProjectSetProperty(d *dbx.DB, projectName, property, value string, stringLiteral bool) error {
 	switch property {
-	case "funds", "locations", "origins", "destinations", "tracks":
+	case "funds" /*"locations",*/, "origins", "destinations", "tracks":
 		return errors.New("property \"" + property + "\" is composite")
 	case "title", "mou_link":
 		if !stringLiteral {
@@ -656,21 +656,21 @@ func AlterProjectSetProperty(d *dbx.DB, projectName, property, value string, str
 }
 
 func ProjectProperties(d *dbx.DB, projectName string) ([][2]string, error) {
-	var title, action, mouLink, funds, locations, origins, destinations, tracks string
+	var title, action, mouLink, funds /*locations,*/, origins, destinations, tracks string
+	// loc as (
+	//     select p.id project_id,
+	//            coalesce(string_agg(l.name||':'||l.title, '|' order by l.name), '') locations
+	//         from ccms.project p
+	//             join ccms.project_location pl on p.id=pl.project_id
+	//             join ccms.location l on pl.location_id=l.id
+	//         group by p.id
+	// ),
 	sql := `with fnd as (
     select p.id project_id,
            coalesce(string_agg(f.name||':'||f.title, '|' order by f.name), '') funds
         from ccms.project p
             join ccms.project_fund pf on p.id=pf.project_id
             join ccms.fund f on pf.fund_id=f.id
-        group by p.id
-),
-loc as (
-    select p.id project_id,
-           coalesce(string_agg(l.name||':'||l.title, '|' order by l.name), '') locations
-        from ccms.project p
-            join ccms.project_location pl on p.id=pl.project_id
-            join ccms.location l on pl.location_id=l.id
         group by p.id
 ),
 org as (
@@ -701,23 +701,21 @@ select coalesce(p.title, '') title,
        coalesce(p.action, '') action,
        coalesce(p.mou_link, '') mou_link,
        coalesce(fnd.funds, '') funds,
-       coalesce(loc.locations, '') locations,
        coalesce(org.origins, '') origins,
        coalesce(dst.destinations, '') destinations,
        coalesce(trk.tracks, '') tracks
        from ccms.project p
            left join fnd on p.id=fnd.project_id
-           left join loc on p.id=loc.project_id
            left join org on p.id=org.project_id
            left join dst on p.id=dst.project_id
            left join trk on p.id=trk.project_id
        where p.name=$1`
-	err := d.Q.QueryRow(d.C, sql, projectName).Scan(&title, &action, &mouLink, &funds, &locations, &origins, &destinations, &tracks)
+	err := d.Q.QueryRow(d.C, sql, projectName).Scan(&title, &action, &mouLink, &funds /*&locations,*/, &origins, &destinations, &tracks)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return nil, fmt.Errorf("project %q does not exist", projectName)
 	case err != nil:
-		return nil, err
+		return nil, pgerr.Error(err)
 	default:
 	}
 	if action != "" {
@@ -728,7 +726,7 @@ select coalesce(p.title, '') title,
 		{"action", action},
 		{"mou_link", mouLink},
 		{"funds", funds},
-		{"locations", locations},
+		// {"locations", locations},
 		{"origins", origins},
 		{"destinations", destinations},
 		{"tracks", tracks},

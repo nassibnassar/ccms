@@ -15,9 +15,17 @@ import (
 )
 
 func Harvest(dp *pgxpool.Pool) {
+	for {
+		harvestLoop(dp)
+		time.Sleep(1 * time.Hour)
+		log.Info("restarting harvest")
+	}
+}
+
+func harvestLoop(dp *pgxpool.Pool) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Error("harvest aborted: %v", r)
+			logError(r)
 		}
 	}()
 	/*
@@ -91,8 +99,9 @@ func Harvest(dp *pgxpool.Pool) {
 		m, err := marcxml.Unmarshal(record.Metadata.Body)
 		//m, err := marcxml.Unmarshal(rs.GetRecord.Record.Metadata.Body)
 		if err != nil {
-			fmt.Printf("----\n%s\n----\n", string(record.Metadata.Body))
-			panic(err)
+			// fmt.Printf("----\n%s\n----\n", string(record.Metadata.Body))
+			logError("unmarshalling: " + err.Error())
+			return
 		}
 		metadata := strings.TrimSpace(string(record.Metadata.Body))
 		identifier := strings.TrimPrefix(record.Header.Identifier, "oai:")
@@ -125,7 +134,8 @@ func Harvest(dp *pgxpool.Pool) {
 
 		tx, err := dp.Begin(context.TODO())
 		if err != nil {
-			panic(err)
+			logError("starting transaction" + err.Error())
+			return
 		}
 		defer tx.Rollback(context.TODO())
 
@@ -137,7 +147,8 @@ func Harvest(dp *pgxpool.Pool) {
 		case errors.Is(err, pgx.ErrNoRows):
 			//log.Info("conflict: skipping record %s", identifier)
 		case err != nil:
-			panic(fmt.Sprintf("writing to table ccms.md: %v", err))
+			logError("writing to table md: " + err.Error())
+			return
 		default:
 		}
 
@@ -145,23 +156,24 @@ func Harvest(dp *pgxpool.Pool) {
 			q = "insert into ccms.attr (id, author, title, full_vendor_name, availability) " +
 				"values ($1, $2, $3, $4, $5) on conflict do nothing"
 			if _, err = tx.Exec(context.TODO(), q, id, author, title, fullVendorName, availability); err != nil {
-				panic(fmt.Sprintf("writing to table ccms.attr: %v", err))
+				logError("writing to table attr: " + err.Error())
+				return
 			}
 
 			q = "insert into ccms.reserve (id) " +
 				"values ($1) on conflict do nothing"
 			if _, err = tx.Exec(context.TODO(), q, id); err != nil {
-				panic(fmt.Sprintf("writing to table ccms.reserve: %v", err))
+				logError("writing to table reserve: " + err.Error())
+				return
 			}
 
 			//log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)
 		}
 
 		if err = tx.Commit(context.TODO()); err != nil {
-			panic(fmt.Sprintf("writing harvested data: committing changes: %v", err))
+			logError("committing transaction: " + err.Error())
+			return
 		}
-
-		//os.Exit(0)
 	})
 	// TODO add to ccd.conf:
 	// [oai]
@@ -176,4 +188,8 @@ func nilIfEmpty(s *string) *string {
 		return nil
 	}
 	return s
+}
+
+func logError(e any) {
+	log.Error("harvesting: error: %v", e)
 }

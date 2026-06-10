@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -328,9 +328,9 @@ func cmderr(message string) *ccms.Result {
 	return result
 }
 
-func returnError(w http.ResponseWriter, errString string, statusCode int) {
-	HTTPError(w, errString, statusCode)
-}
+// func returnError(w http.ResponseWriter, errString string, statusCode int) {
+// 	HTTPError(w, errString, statusCode)
+// }
 
 func (s *svr) ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct any) (string, error) {
 	user, err := s.HandleBasicAuth(w, r)
@@ -338,13 +338,13 @@ func (s *svr) ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct 
 		return "", err
 	}
 
-	var body []byte
-	if body, err = ioutil.ReadAll(r.Body); err != nil {
-		HandleError(w, err, http.StatusBadRequest)
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		// HandleError(w, err, http.StatusBadRequest)
 		return "", err
 	}
 	if err = json.Unmarshal(body, requestStruct); err != nil {
-		HandleError(w, err, http.StatusBadRequest)
+		// HandleError(w, err, http.StatusBadRequest)
 		return "", err
 	}
 	log.Trace("request %s %v\n", r.RemoteAddr, requestStruct)
@@ -384,24 +384,24 @@ func ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct interface
 }
 */
 
-func HandleError(w http.ResponseWriter, err error, statusCode int) {
-	log.Error("%s", err)
-	HTTPError(w, err.Error(), statusCode)
-}
+// func HandleError(w http.ResponseWriter, err error, statusCode int) {
+// 	log.Error("%s", err)
+// 	HTTPError(w, err.Error(), statusCode)
+// }
 
-func HTTPError(w http.ResponseWriter, errString string, code int) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(code)
-	m := ccms.NewResponse()
-	result := ccms.NewResult("error")
-	result.AddMessage(errString)
-	m.AddResult(result)
-	if err := m.Encode(w); err != nil {
-		// TODO error handling
-		panic(err)
-	}
-}
+// func HTTPError(w http.ResponseWriter, errString string, code int) {
+// 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+// 	w.Header().Set("X-Content-Type-Options", "nosniff")
+// 	w.WriteHeader(code)
+// 	m := ccms.NewResponse()
+// 	result := ccms.NewResult("error")
+// 	result.AddMessage(errString)
+// 	m.AddResult(result)
+// 	if err := m.Encode(w); err != nil {
+// 		// TODO error handling
+// 		panic(err)
+// 	}
+// }
 
 func requestString(r *http.Request) string {
 	var remoteHost, remotePort string
