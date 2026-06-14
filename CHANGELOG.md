@@ -1,20 +1,18 @@
-* Added the `archive project` command, to be used instead of `drop
-  project`.
-
-* The `drop project` command now only drops archived projects.
-
 * The `reserve` set has been superseded by the `object` set in each
   project.
 
 * Added the `update` command for changing `object` attributes.
 
-* Added the `create fund` and `show funds` commands.
-
-* Added the `show projects archived` command.
-
 * Added the `show sets in project` command.
 
 * The project property `locations` has been removed.
+
+* Added the `archive project` command, to be used instead of `drop
+  project`.
+
+* The `drop project` command now only drops archived projects.
+
+* Added the `show projects archived` command.
 
 # v0.0.25
 
