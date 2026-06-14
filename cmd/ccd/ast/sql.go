@@ -28,7 +28,7 @@ func (d *DeleteStmt) sql(b *strings.Builder) error {
 	w := d.Where.(*WhereClause)
 	if w.Valid {
 		b.WriteString(" t using ccms.attr a where t.id=a.id and (")
-		if err := evalExpr(b, w.Condition); err != nil {
+		if err := evalExpr(b, w.Condition, true); err != nil {
 			return err
 		}
 		b.WriteRune(')')
@@ -104,7 +104,7 @@ func (q *QueryClause) sql(b *strings.Builder) error {
 	w := q.Where.(*WhereClause)
 	if w.Valid {
 		b.WriteString(" where (")
-		if err := evalExpr(b, w.Condition); err != nil {
+		if err := evalExpr(b, w.Condition, true); err != nil {
 			return err
 		}
 		b.WriteRune(')')
@@ -156,27 +156,27 @@ func (u *UpdateStmt) sql(b *strings.Builder) error {
 	return nil
 }
 
-func evalExpr(b *strings.Builder, expr Node) error {
+func evalExpr(b *strings.Builder, expr Node, root bool) error {
 	switch e := expr.(type) {
 	case *OrExpr:
-		if err := evalExpr(b, e.Expr1); err != nil {
+		if err := evalExpr(b, e.Expr1, false); err != nil {
 			return err
 		}
 		b.WriteString(" or ")
-		if err := evalExpr(b, e.Expr2); err != nil {
+		if err := evalExpr(b, e.Expr2, false); err != nil {
 			return err
 		}
 	case *AndExpr:
-		if err := evalExpr(b, e.Expr1); err != nil {
+		if err := evalExpr(b, e.Expr1, false); err != nil {
 			return err
 		}
 		b.WriteString(" and ")
-		if err := evalExpr(b, e.Expr2); err != nil {
+		if err := evalExpr(b, e.Expr2, false); err != nil {
 			return err
 		}
 	case *NotExpr:
 		b.WriteString("not ")
-		if err := evalExpr(b, e.Expr); err != nil {
+		if err := evalExpr(b, e.Expr, false); err != nil {
 			return err
 		}
 	case *EqualExpr:
@@ -258,21 +258,30 @@ func evalExpr(b *strings.Builder, expr Node) error {
 		//}
 		//b.WriteRune(')')
 	case *Name:
+		if root {
+			return errors.New("invalid boolean expression")
+		}
 		b.WriteString(e.Value)
 	case *SLiteral:
+		if root {
+			return errors.New("invalid boolean expression")
+		}
 		b.WriteRune('\'')
 		b.WriteString(e.Value)
 		b.WriteRune('\'')
 	case *Number:
+		if root {
+			return errors.New("invalid boolean expression")
+		}
 		b.WriteString(e.Value)
 	case *ParenExpr:
 		b.WriteRune('(')
-		if err := evalExpr(b, e.Expr); err != nil {
+		if err := evalExpr(b, e.Expr, root); err != nil {
 			return err
 		}
 		b.WriteRune(')')
 	default:
-		return fmt.Errorf("internal error: unknown node %T", expr)
+		return fmt.Errorf("unknown node %T", expr)
 	}
 	return nil
 }
@@ -282,7 +291,7 @@ func evalExprList(b *strings.Builder, exprList []Node) error {
 		if i != 0 {
 			b.WriteRune(',')
 		}
-		if err := evalExpr(b, exprList[i]); err != nil {
+		if err := evalExpr(b, exprList[i], false); err != nil {
 			return err
 		}
 	}
@@ -299,7 +308,7 @@ func evalExprOptAttr(b *strings.Builder, expr Node) error {
 		}
 		b.WriteString("a.")
 	}
-	if err := evalExpr(b, expr); err != nil {
+	if err := evalExpr(b, expr, false); err != nil {
 		return err
 	}
 	return nil
