@@ -16,7 +16,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 			"SQL commands:\n" +
 			"        alter project    change the definition of a project\n" +
 			"        archive project  archive a project\n" +
-			// "        create fund      define a new fund\n" +
+			"        create fund      define a new fund\n" +
 			"        create project   define a new project\n" +
 			"        create set       define a new set\n" +
 			"        create user      define a new user\n" +
@@ -37,8 +37,8 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 		docstr = doc.AlterProject()
 	case "archive project":
 		docstr = doc.ArchiveProject()
-	// case "create fund":
-	// 	docstr = doc.CreateFund()
+	case "create fund":
+		docstr = doc.CreateFund()
 	case "create project":
 		docstr = doc.CreateProject()
 	case "create set":

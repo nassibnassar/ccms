@@ -6,6 +6,8 @@ include::alterproject.adoc[]
 
 include::archiveproject.adoc[]
 
+include::createfund.adoc[]
+
 include::createproject.adoc[]
 
 include::createset.adoc[]

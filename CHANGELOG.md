@@ -3,6 +3,8 @@
 
 * Added the `update` command for changing `object` attributes.
 
+* Added the `create fund` and `show funds` commands.
+
 * Added the `show sets in project` command.
 
 * The project property `locations` has been removed.
