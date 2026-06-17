@@ -16,8 +16,6 @@ include::createuser.adoc[]
 
 include::delete.adoc[]
 
-include::dropproject.adoc[]
-
 include::dropset.adoc[]
 
 include::insert.adoc[]

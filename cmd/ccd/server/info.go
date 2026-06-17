@@ -21,7 +21,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 			"        create set       define a new set\n" +
 			"        create user      define a new user\n" +
 			"        delete           remove objects from set membership\n" +
-			"        drop project     drop an archived project\n" +
+			// "        drop project     drop an archived project\n" +
 			"        drop set         remove a set\n" +
 			//"        info    show supported commands\n" +
 			"        insert           insert objects into a set\n" +
@@ -47,8 +47,8 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 		docstr = doc.CreateUser()
 	case "delete":
 		docstr = doc.Delete()
-	case "drop project":
-		docstr = doc.DropProject()
+	// case "drop project":
+	// 	docstr = doc.DropProject()
 	case "drop set":
 		docstr = doc.DropSet()
 	//case "info":

@@ -1,10 +1,8 @@
 package cat
 
 import (
-	"cmp"
 	"errors"
 	"fmt"
-	"slices"
 
 	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/pgerr"
@@ -35,7 +33,7 @@ func FundID(d *dbx.DB, fund string) (int64, error) {
 	}
 }
 
-func AllFunds(d *dbx.DB) ([]prop.Prop, error) {
+func Funds(d *dbx.DB) (prop.Property, error) {
 	q := "select name, title from ccms.fund"
 	rows, err := d.Q.Query(d.C, q)
 	if err != nil {
@@ -53,12 +51,5 @@ func AllFunds(d *dbx.DB) ([]prop.Prop, error) {
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("reading funds: %v", err)
 	}
-	sortFundNames(funds)
 	return funds, nil
-}
-
-func sortFundNames(funds []prop.Prop) {
-	slices.SortFunc(funds, func(x, y prop.Prop) int {
-		return cmp.Compare(x.Name, y.Name)
-	})
 }

@@ -18,6 +18,12 @@ type User struct {
 	Login     bool
 }
 
+func SortUsers(users []User) {
+	slices.SortFunc(users, func(x, y User) int {
+		return cmp.Compare(x.UserName, y.UserName)
+	})
+}
+
 func Authenticate(secretKey []byte, d *dbx.DB, user, password string) (bool, error) {
 	sql := "select login, password, salt from ccms.auth where name=$1"
 	var login bool
@@ -73,7 +79,7 @@ func CreateUser(secretKey []byte, d *dbx.DB, userName, password string, superuse
 	return nil
 }
 
-func AllUsers(d *dbx.DB) ([]User, error) {
+func Users(d *dbx.DB) ([]User, error) {
 	sql := "select name, superuser, login, password, salt from ccms.auth"
 	rows, err := d.Q.Query(d.C, sql)
 	if err != nil {
@@ -96,12 +102,5 @@ func AllUsers(d *dbx.DB) ([]User, error) {
 	if err := rows.Err(); err != nil {
 		return nil, pgerr.Error(err)
 	}
-	sortUserNames(users)
 	return users, nil
-}
-
-func sortUserNames(users []User) {
-	slices.SortFunc(users, func(x, y User) int {
-		return cmp.Compare(x.UserName, y.UserName)
-	})
 }

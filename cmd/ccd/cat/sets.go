@@ -56,14 +56,23 @@ func SetTable(set set.Set) string {
 	return set.Project + ".s_" + set.Set
 }
 
-func AllSets(d *dbx.DB) ([]string, error) {
-	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id"
+func Sets(d *dbx.DB) ([]string, error) {
+	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id where not p.archived"
 	rows, _ := d.Q.Query(d.C, sql)
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
 		return nil, pgerr.Error(err)
 	}
-	slices.Sort(sets)
+
+	// add object sets
+	projects, err := Projects(d, false)
+	if err != nil {
+		return nil, err
+	}
+	for i := range projects {
+		sets = append(sets, projects[i]+".object")
+	}
+
 	return sets, nil
 }
 
@@ -74,7 +83,7 @@ func SetsInProject(d *dbx.DB, project string) ([]string, error) {
 	if err != nil {
 		return nil, pgerr.Error(err)
 	}
-	slices.Sort(sets)
+	sets = append(sets, project+".object")
 	return sets, nil
 }
 

@@ -8,7 +8,6 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/config"
 	"github.com/indexdata/ccms/internal/crypto"
-	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/jackc/pgx/v5"
@@ -39,29 +38,29 @@ func Initialize(program string, dp *pgxpool.Pool, security *config.Security) err
 		// TODO check that database version is compatible; for now we assume it is compatible
 	}
 
-	d := &dbx.DB{C: context.TODO(), Q: dp}
-	if err := addSampleProject(d); err != nil {
-		return err
-	}
+	// d := &dbx.DB{C: context.TODO(), Q: dp}
+	// if err := addSampleProject(d); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
 
-func addSampleProject(d *dbx.DB) error {
-	projects, err := AllProjects(d, false)
-	if err != nil {
-		return err
-	}
-	if len(projects) == 0 {
-		if err := CreateProject(d, "palci_slavic"); err != nil {
-			return err
-		}
-		if err := AlterProjectSetProperty(d, "palci_slavic", "title", "Slavic studies", true); err != nil {
-			return err
-		}
-	}
-	return nil
-}
+// func addSampleProject(d *dbx.DB) error {
+// 	projects, err := Projects(d, false)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if len(projects) == 0 {
+// 		if err := CreateProject(d, "palci_slavic"); err != nil {
+// 			return err
+// 		}
+// 		if err := AlterProjectSetProperty(d, "palci_slavic", "title", "Slavic studies", true); err != nil {
+// 			return err
+// 		}
+// 	}
+// 	return nil
+// }
 
 type createTableFunc func(pgx.Tx) error
 

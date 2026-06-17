@@ -1,10 +1,8 @@
 package cat
 
 import (
-	"cmp"
 	"errors"
 	"fmt"
-	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -62,21 +60,14 @@ func IsValidTargetProject(project string) bool {
 	return true
 }
 
-func AllProjects(d *dbx.DB, archived bool) ([]string, error) {
+func Projects(d *dbx.DB, archived bool) ([]string, error) {
 	sql := "select name from ccms.project where archived=$1"
 	rows, _ := d.Q.Query(d.C, sql, archived)
 	projects, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
 		return nil, pgerr.Error(err)
 	}
-	sortProjectNames(projects)
 	return projects, nil
-}
-
-func sortProjectNames(projects []string) {
-	slices.SortFunc(projects, func(x, y string) int {
-		return cmp.Compare(x, y)
-	})
 }
 
 func DropProject(d *dbx.DB, project string) error {

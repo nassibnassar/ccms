@@ -22,7 +22,13 @@ type Role struct {
 	UserNames []string
 }
 
-func AllRoles(d *dbx.DB) ([]Role, error) {
+func SortRoles(roles []Role) {
+	slices.SortFunc(roles, func(x, y Role) int {
+		return cmp.Compare(x.RoleName, y.RoleName)
+	})
+}
+
+func Roles(d *dbx.DB) ([]Role, error) {
 	q := "select r.name, u.name from ccms.role r left join ccms.role_user ru on r.id=ru.role_id left join ccms.auth u on ru.user_id=u.id"
 	rows, err := d.Q.Query(d.C, q)
 	if err != nil {
@@ -57,8 +63,5 @@ func AllRoles(d *dbx.DB) ([]Role, error) {
 		}
 		i++
 	}
-	slices.SortFunc(roles1, func(x, y Role) int {
-		return cmp.Compare(x.RoleName, y.RoleName)
-	})
 	return roles1, nil
 }

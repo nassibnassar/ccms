@@ -1,6 +1,7 @@
 package server
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/indexdata/ccms"
@@ -66,10 +67,11 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 }
 
 func addShowFundsData(d *dbx.DB, result *ccms.Result) error {
-	funds, err := cat.AllFunds(d)
+	funds, err := cat.Funds(d)
 	if err != nil {
 		return err
 	}
+	funds.Sort()
 	for i := range funds {
 		result.AddData([]any{funds[i].Name, funds[i].Title})
 	}
@@ -77,10 +79,11 @@ func addShowFundsData(d *dbx.DB, result *ccms.Result) error {
 }
 
 func addShowRolesData(d *dbx.DB, result *ccms.Result) error {
-	roles, err := cat.AllRoles(d)
+	roles, err := cat.Roles(d)
 	if err != nil {
 		return err
 	}
+	cat.SortRoles(roles)
 	for i := range roles {
 		users := strings.Join(roles[i].UserNames, ", ")
 		result.AddData([]any{roles[i].RoleName, users})
@@ -89,10 +92,11 @@ func addShowRolesData(d *dbx.DB, result *ccms.Result) error {
 }
 
 func addShowProjectsData(d *dbx.DB, result *ccms.Result, archived bool) error {
-	projects, err := cat.AllProjects(d, archived)
+	projects, err := cat.Projects(d, archived)
 	if err != nil {
 		return err
 	}
+	slices.Sort(projects)
 	for i := range projects {
 		result.AddData([]any{projects[i]})
 	}
@@ -114,13 +118,14 @@ func addShowSetsData(d *dbx.DB, result *ccms.Result, in string) error {
 	var sets []string
 	var err error
 	if in == "" {
-		sets, err = cat.AllSets(d)
+		sets, err = cat.Sets(d)
 	} else {
 		sets, err = cat.SetsInProject(d, in)
 	}
 	if err != nil {
 		return err
 	}
+	slices.Sort(sets)
 	for i := range sets {
 		result.AddData([]any{sets[i]})
 	}
@@ -128,10 +133,11 @@ func addShowSetsData(d *dbx.DB, result *ccms.Result, in string) error {
 }
 
 func addShowUsersData(d *dbx.DB, result *ccms.Result) error {
-	users, err := cat.AllUsers(d)
+	users, err := cat.Users(d)
 	if err != nil {
 		return err
 	}
+	cat.SortUsers(users)
 	for i := range users {
 		result.AddData([]any{users[i].UserName, users[i].Superuser, users[i].Login})
 	}

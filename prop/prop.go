@@ -1,7 +1,11 @@
 // primitives for parsing composite properties
 package prop
 
-import "strings"
+import (
+	"cmp"
+	"slices"
+	"strings"
+)
 
 // a name-title pair
 type Prop struct {
@@ -30,7 +34,13 @@ func Parse(property string) []Prop {
 
 // possibly not needed
 // a list of name-title pairs
-// type Property []Prop
+type Property []Prop
+
+func (p *Property) Sort() {
+	slices.SortFunc(*p, func(x, y Prop) int {
+		return cmp.Compare(x.Name, y.Name)
+	})
+}
 
 // possibly not needed
 // assemble a list of name-title pairs into a composite property value
