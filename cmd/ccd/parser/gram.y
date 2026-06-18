@@ -99,6 +99,7 @@ import (
 %token TO
 %token UPDATE
 %token USER
+%token VERSION
 %token WHERE
 %token WITH
 
@@ -302,6 +303,10 @@ select_stmt:
 	SELECT select_attr_list query_clause ';'
 		{
 			$$ = &ast.SelectStmt{AttrList: $2, Query: $3}
+		}
+	| SELECT VERSION '(' ')' ';'
+		{
+			$$ = &ast.SelectVersionStmt{}
 		}
 
 show_stmt:

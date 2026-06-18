@@ -218,7 +218,7 @@ func runClient() error {
 			case "\\q":
 			case "\\createuser":
 			default:
-				eout.Error("unknown command: %s", fields[0])
+				eout.Error(errorPrefix + " unknown command \"" + fields[0] + "\"")
 				continue
 			}
 		}
@@ -258,7 +258,7 @@ func runClient() error {
 		startTime := time.Now()
 		resp, err := client.Send(line)
 		if err != nil {
-			eout.Error("%v", err)
+			eout.Error(errorPrefix + " " + err.Error())
 			continue
 		}
 		elapsedTime := time.Since(startTime).Seconds()

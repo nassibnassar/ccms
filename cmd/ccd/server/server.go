@@ -267,6 +267,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			result = ccms.NewResult("ping")
 		case *ast.SelectStmt:
 			result = selectStmt(s, rqid, cmd)
+		case *ast.SelectVersionStmt:
+			result = selectVersionStmt(s, rqid, cmd)
 		case *ast.ShowStmt:
 			result = showStmt(s, cmd)
 		case *ast.UpdateStmt:

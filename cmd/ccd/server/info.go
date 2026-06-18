@@ -1,8 +1,6 @@
 package server
 
 import (
-	"fmt"
-
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/doc"
@@ -62,7 +60,7 @@ func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
 	case "update":
 		docstr = doc.Update()
 	default:
-		docstr = fmt.Sprintf("unknown command %q", cmd.Topic)
+		return cmderr("unknown command \"" + cmd.Topic + "\"")
 	}
 
 	result := ccms.NewResult("info")

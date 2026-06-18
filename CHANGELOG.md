@@ -1,3 +1,7 @@
+# main
+
+* Added the `select version()` command.
+
 # v0.0.26
 
 * The `reserve` set has been superseded by the `object` set in each

@@ -93,6 +93,7 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'select'i => { tok = SELECT; fbreak; };
 			'update'i => { tok = UPDATE; fbreak; };
 			'user'i => { tok = USER; fbreak; };
+			'version'i => { tok = VERSION; fbreak; };
 			'where'i => { tok = WHERE; fbreak; };
 			'with'i => { tok = WITH; fbreak; };
 			identifier => { out.str = string(lex.data[lex.ts:lex.te]); tok = IDENT; fbreak; };

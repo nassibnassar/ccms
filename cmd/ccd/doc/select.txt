@@ -1,6 +1,6 @@
 select
 
-Retrieve objects from a set
+Retrieve data
 
 select { * | count(*) }
     from set_name
@@ -8,6 +8,8 @@ select { * | count(*) }
     [ order by attribute [ asc | desc ] ]
     [ limit count ]
     [ offset start ]
+
+select version()
 
 Description
 

@@ -95,6 +95,13 @@ type SelectStmt struct {
 
 func (*SelectStmt) node() {}
 
+type SelectVersionStmt struct {
+	AttrList Node
+	Query    Node
+}
+
+func (*SelectVersionStmt) node() {}
+
 type ShowStmt struct {
 	Type     string
 	Name     string
