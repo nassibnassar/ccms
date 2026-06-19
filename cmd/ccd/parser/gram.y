@@ -334,15 +334,19 @@ show_stmt:
 update_stmt:
 	UPDATE name SET name '=' name WHERE name '=' NUMBER ';'
 		{
-			$$ = &ast.UpdateStmt{Set: $2, Attr: $4, Value: $6, StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+			$$ = &ast.UpdateStmt{Set: $2, Attr: $4, Value: $6, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+		}
+	| UPDATE name SET name '=' NULL WHERE name '=' NUMBER ';'
+		{
+			$$ = &ast.UpdateStmt{Set: $2, Attr: $4, ValueNull: true, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
 		}
 	| UPDATE name SET FUND '=' name WHERE name '=' NUMBER ';'
 		{
-			$$ = &ast.UpdateStmt{Set: $2, Attr: "fund", Value: $6, StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+			$$ = &ast.UpdateStmt{Set: $2, Attr: "fund", Value: $6, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
 		}
 	| UPDATE name SET FUND '=' NULL WHERE name '=' NUMBER ';'
 		{
-			$$ = &ast.UpdateStmt{Set: $2, Attr: "fund", Value: "", StringLiteral: false, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
+			$$ = &ast.UpdateStmt{Set: $2, Attr: "fund", ValueNull: true, IDAttr: $8, IDValue: &ast.Number{Value: $10}}
 		}
 
 select_attr_list:

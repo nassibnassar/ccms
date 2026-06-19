@@ -45,9 +45,17 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	}
 
 	switch cmd.Attr {
+	case "decision":
+		if cmd.ValueNull {
+			return cmderr("invalid decision \"null\"")
+		}
+		if cmd.Value != "false" && cmd.Value != "true" {
+			return cmderr("invalid decision \"" + cmd.Value + "\"")
+		}
 	case "fund":
 		cmd.Attr = "fund_id"
-		if cmd.Value != "" {
+		if !cmd.ValueNull {
+			// look up fund id
 			var fundID int64
 			fundID, err = cat.FundID(s.d, cmd.Value)
 			if err != nil {
@@ -55,6 +63,15 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 			}
 			if fundID == 0 {
 				return cmderr("fund \"" + cmd.Value + "\" does not exist")
+			}
+			// ensure fund is valid for project
+			var inProject bool
+			inProject, err = cat.ProjectFundExists(s.d, projectID, fundID)
+			if err != nil {
+				return cmderr("looking up project fund: " + err.Error())
+			}
+			if !inProject {
+				return cmderr("fund \"" + cmd.Value + "\" is not selected for project")
 			}
 			cmd.Value = strconv.FormatInt(fundID, 10)
 		}

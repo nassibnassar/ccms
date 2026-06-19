@@ -123,6 +123,7 @@ func CreateProject(d *dbx.DB, project string) error {
 	}
 	sql = "create table " + project + ".object (" +
 		"id bigint primary key," +
+		"decision boolean not null default false," +
 		"fund_id integer references ccms.fund (id))"
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
 		return pgerr.Error(err)
@@ -248,7 +249,7 @@ func alterProjectAddFund(d *dbx.DB, project, fund string, projectID int64) error
 		return errors.New("fund \"" + fund + "\" does not exist")
 	}
 	// check if project fund exists
-	projectFundExists, err := projectFundExists(d, projectID, fundID)
+	projectFundExists, err := ProjectFundExists(d, projectID, fundID)
 	if err != nil {
 		return err
 	}
@@ -265,9 +266,17 @@ func alterProjectAddFund(d *dbx.DB, project, fund string, projectID int64) error
 
 func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) error {
 	if fund == "*" {
-		sql := "delete from ccms.project_fund where project_id=$1"
-		if _, err := d.Q.Exec(d.C, sql, projectID); err != nil {
-			return pgerr.Error(err)
+		sql := "select f.name from ccms.project p join ccms.project_fund pf on p.id=pf.project_id join ccms.fund f on pf.fund_id=f.id where p.name=$1"
+		rows, _ := d.Q.Query(d.C, sql, project)
+		funds, err := pgx.CollectRows(rows, pgx.RowTo[string])
+		if err != nil {
+			return err
+		}
+		for i := range funds {
+			err = alterProjectDropFund(d, project, funds[i], projectID)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -280,12 +289,20 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 		return errors.New("fund \"" + fund + "\" does not exist")
 	}
 	// check if project fund exists
-	projectFundExists, err := projectFundExists(d, projectID, fundID)
+	projectFundExists, err := ProjectFundExists(d, projectID, fundID)
 	if err != nil {
 		return err
 	}
 	if !projectFundExists {
 		return errors.New("project \"" + project + "\" does not have fund \"" + fund + "\"")
+	}
+	// ensure fund not being used in object
+	objectFundExists, err := objectFundExists(d, project, fundID)
+	if err != nil {
+		return err
+	}
+	if objectFundExists {
+		return errors.New("fund \"" + fund + "\" is referenced in set \"" + project + ".object\"")
 	}
 	// drop project fund
 	sql := "delete from ccms.project_fund where project_id=$1 and fund_id=$2"
@@ -583,10 +600,24 @@ func TrackID(d *dbx.DB, track string) (int64, error) {
 	}
 }
 
-func projectFundExists(d *dbx.DB, projectID, fundID int64) (bool, error) {
+func ProjectFundExists(d *dbx.DB, projectID, fundID int64) (bool, error) {
 	sql := "select 1 from ccms.project_fund where project_id=$1 and fund_id=$2"
 	var n int32
 	err := d.Q.QueryRow(d.C, sql, projectID, fundID).Scan(&n)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return false, nil
+	case err != nil:
+		return false, pgerr.Error(err)
+	default:
+		return true, nil
+	}
+}
+
+func objectFundExists(d *dbx.DB, project string, fundID int64) (bool, error) {
+	sql := "select 1 from " + project + ".object where fund_id=$1 limit 1"
+	var n int32
+	err := d.Q.QueryRow(d.C, sql, fundID).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -685,7 +716,7 @@ func AlterProjectSetProperty(d *dbx.DB, projectName, property, value string, str
 	return nil
 }
 
-func ProjectProperties(d *dbx.DB, projectName string) ([][2]string, error) {
+func ProjectProperties(d *dbx.DB, project string) ([][2]string, error) {
 	var title, action, mouLink, funds /*locations,*/, origins, destinations, tracks string
 	// loc as (
 	//     select p.id project_id,
@@ -740,10 +771,10 @@ select coalesce(p.title, '') title,
            left join dst on p.id=dst.project_id
            left join trk on p.id=trk.project_id
        where p.name=$1`
-	err := d.Q.QueryRow(d.C, sql, projectName).Scan(&title, &action, &mouLink, &funds /*&locations,*/, &origins, &destinations, &tracks)
+	err := d.Q.QueryRow(d.C, sql, project).Scan(&title, &action, &mouLink, &funds /*&locations,*/, &origins, &destinations, &tracks)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
-		return nil, fmt.Errorf("project %q does not exist", projectName)
+		return nil, fmt.Errorf("project %q does not exist", project)
 	case err != nil:
 		return nil, pgerr.Error(err)
 	default:

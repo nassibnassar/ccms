@@ -90,7 +90,7 @@ Supported operand types are:
 
 Supported attribute names are:
 
-[%header,width=75%,cols="4,3,5"]
+[%header,width=75%,cols="4,3,6"]
 |===
 |Attribute
 |Type
@@ -115,4 +115,12 @@ Supported attribute names are:
 |`availability`
 |`text`
 |`999 13 $z`
+
+|`decision`
+|`boolean`
+|true if the decision to take the project action has been made
+
+|`fund`
+|fund name
+|selected from the project property `funds`
 |===

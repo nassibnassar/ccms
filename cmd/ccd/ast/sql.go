@@ -70,7 +70,7 @@ func (s *SelectStmt) sql(b *strings.Builder) error {
 	switch s.AttrList.(*SelectAttrList).Attr {
 	case "*":
 		// projection = "a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability, coalesce(fund.name, '') fund"
-		projection = "a.id, a.author, a.title, a.full_vendor_name, a.availability, fund.name||':'||fund.title fund"
+		projection = "a.id, a.author, a.title, a.full_vendor_name, a.availability, object.decision, fund.name||':'||fund.title fund"
 	case "count(*)":
 		projection = "count(*)"
 	}
@@ -137,20 +137,26 @@ func (u *UpdateStmt) SQL() (string, error) {
 }
 
 func (u *UpdateStmt) sql(b *strings.Builder) error {
-	if u.Value == "" {
+	if u.ValueNull {
 		b.WriteString("update ")
 		b.WriteString(u.Set)
-		b.WriteString(" set fund_id=null where id=")
+		b.WriteString(" set ")
+		b.WriteString(u.Attr)
+		b.WriteString("=null where id=")
 		b.WriteString(u.IDValue.Value)
 	} else {
 		b.WriteString("insert into ")
 		b.WriteString(u.Set)
-		b.WriteString(" (id, fund_id) values (")
+		b.WriteString(" (id, ")
+		b.WriteString(u.Attr)
+		b.WriteString(") values (")
 		b.WriteString(u.IDValue.Value)
 		b.WriteString(", ")
 		b.WriteString(u.Value)
 		b.WriteString(")")
-		b.WriteString(" on conflict (id) do update set fund_id=")
+		b.WriteString(" on conflict (id) do update set ")
+		b.WriteString(u.Attr)
+		b.WriteRune('=')
 		b.WriteString(u.Value)
 	}
 	return nil

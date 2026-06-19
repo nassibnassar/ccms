@@ -132,6 +132,7 @@ func (*QueryClause) node() {}
 type UpdateStmt struct {
 	Set           string
 	Attr          string
+	ValueNull     bool
 	Value         string
 	StringLiteral bool
 	IDAttr        string

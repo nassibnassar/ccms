@@ -13,8 +13,8 @@ select version()
 
 Description
 
-The select command retrieves a list of objects from a set according to
-specified criteria.
+The select command retrieves data, typically a list of objects from a set
+according to specified criteria.
 
      The CCMS server returns to the client no more than 10000 records per
 Note select command. If a result set is larger than this, the server returns an
