@@ -1,4 +1,4 @@
-# main
+* Added the attribute `decision`.
 
 * Added the `select version()` command.
 
