@@ -36,14 +36,15 @@ type Response struct {
 func NewResponse() *Response {
 	return &Response{
 		resp: &jsonResponse{
-			Results: make([]*jsonResult, 0),
+			ErrorIndex: -1,
+			Results:    make([]*jsonResult, 0),
 		},
 	}
 }
 
 // set error index
 func (r *Response) SetError(e int) {
-	r.resp.Error = e
+	r.resp.ErrorIndex = e
 }
 
 // encode the reponse as JSON
@@ -54,9 +55,14 @@ func (r *Response) Encode(w http.ResponseWriter) error {
 	return nil
 }
 
-// return index of result having an error, or 0 if there was no error
-func (r *Response) Error() int {
-	return r.resp.Error
+// return true if an error occurred
+func (r *Response) Error() bool {
+	return r.resp.ErrorIndex != -1
+}
+
+// return index of result having an error, or -1 if there was no error
+func (r *Response) ErrorIndex() int {
+	return r.resp.ErrorIndex
 }
 
 // return an iterator over results contained in the response
@@ -87,8 +93,8 @@ func (r *Response) AddResult(result *Result) {
 }
 
 type jsonResponse struct {
-	Error   int           `json:"error"`   // result index with error, or 0 if no error
-	Results []*jsonResult `json:"results"` // result for each command
+	ErrorIndex int           `json:"errorIndex"` // result index with error, or -1 if no error
+	Results    []*jsonResult `json:"results"`    // result for each command
 }
 
 // result of a command

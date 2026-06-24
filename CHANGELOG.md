@@ -1,6 +1,10 @@
+# v0.0.27
+
 * Added the attribute `decision`.
 
 * Added the `select version()` command.
+
+* Added `Error()` and `ErrorIndex()` functions to `ccms.Response`.
 
 # v0.0.26
 
@@ -82,14 +86,11 @@
 
 # v0.0.18
 
-* Added `delete` command.  See also:
-  https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/#_delete
+* Added `delete` command.
 
-* Added `drop set` command.  See also:
-  https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/#_drop_set
+* Added `drop set` command.
 
 * Abstracted client interface to minimize breaking changes.
-  See also: https://pkg.go.dev/github.com/indexdata/ccms
 
 # v0.0.17
 
@@ -97,8 +98,7 @@
   separated by semicolons.  For this reason, `ccms.Response` now
   contains a slice of results that correspond to each command.
 
-* Added support for `offset` in the `select` command.  See also:
-  https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/#_select
+* Added support for `offset` in the `select` command.
 
 # v0.0.16
 
@@ -110,9 +110,7 @@
   `"bigint"` (`int64`).
 
 * Added support for Boolean expressions in the `where` clause of
-  `select` and `insert` commands.  See also:
-  https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/#_queries
+  `select` and `insert` commands.
 
-* Added support for `order by` in the `select` command.  See also:
-  https://d1f3dtrg62pav.cloudfront.net/ccms/doc/current/#_select
+* Added support for `order by` in the `select` command.
 

@@ -72,8 +72,8 @@ func UserID(d *dbx.DB, user string) (int64, error) {
 func CreateUser(secretKey []byte, d *dbx.DB, userName, password string, superuser, login bool) error {
 	salt := crypto.RandomKey()
 	hash := crypto.HashPassword(password, salt, secretKey)
-	q := "insert into ccms.auth (name, superuser, login, password, salt) values ($1, $2, $3, $4, $5)"
-	if _, err := d.Q.Exec(d.C, q, userName, superuser, login, hash, crypto.EncodeToHexString(salt)); err != nil {
+	sql := "insert into ccms.auth (name, superuser, login, password, salt) values ($1, $2, $3, $4, $5)"
+	if _, err := d.Q.Exec(d.C, sql, userName, superuser, login, hash, crypto.EncodeToHexString(salt)); err != nil {
 		return fmt.Errorf("registering user %q: %v", userName, pgerr.Error(err))
 	}
 	return nil
