@@ -1,0 +1,37 @@
+==== create filter
+
+Define a new filter
+
+[source,subs="verbatim,quotes"]
+----
+create filter `*_filter_name_*`
+    where `*_search_condition_*`
+----
+
+[discrete]
+===== Description
+
+The `filter` command defines a selection of objects from a source set
+according to specified criteria.
+
+[discrete]
+===== Parameters
+
+[discrete]
+====== where
+
+The `where` clause specifies a search condition in the form of a
+Boolean expression.  Only objects that satisfy this condition will be
+selected.
+
+See also *Reference > Queries*.
+
+[discrete]
+===== Examples
+
+To filter on records where decision = true:
+
+----
+create filter decided where decision = true;
+----
+

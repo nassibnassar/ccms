@@ -6,9 +6,9 @@ Insert objects into a set
 ----
 insert into `*_target_set_name_*`
     select *
-        from `*_source_set_name_*`
-        [ where `*_search_condition_*` ]
-        [ limit `*_count_*` ]
+           from `*_source_set_name_*`
+           [ where `*_search_condition_*` ]
+           [ limit `*_count_*` ]
 ----
 
 [discrete]

@@ -26,6 +26,13 @@ type ArchiveProjectStmt struct {
 
 func (*ArchiveProjectStmt) node() {}
 
+type CreateFilterStmt struct {
+	Filter string
+	Where  Node
+}
+
+func (*CreateFilterStmt) node() {}
+
 type CreateFundStmt struct {
 	Fund string
 }

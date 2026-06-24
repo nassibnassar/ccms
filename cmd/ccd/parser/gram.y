@@ -21,6 +21,7 @@ import (
 %type <nodeList> stmt_list
 %type <node> alter_project_stmt
 %type <node> archive_project_stmt
+%type <node> create_filter_stmt
 %type <node> create_fund_stmt
 %type <node> create_project_stmt
 %type <node> create_set_stmt
@@ -150,6 +151,10 @@ basic_stmt:
 		{
 			$$ = $1
 		}
+	| create_filter_stmt
+		{
+			$$ = $1
+		}
 	| create_fund_stmt
 		{
 			$$ = $1
@@ -233,6 +238,12 @@ alter_project_stmt:
 	| ALTER PROJECT name ALTER PROPERTY name DROP ALL ';'
 		{
 			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Drop, Value: "*"}
+		}
+
+create_filter_stmt:
+	CREATE FILTER name where_clause ';'
+		{
+			$$ = &ast.CreateFilterStmt{Filter: $3, Where: $4}
 		}
 
 create_fund_stmt:
@@ -515,6 +526,10 @@ primary_expr:
 	name
 		{
 			$$ = &ast.Name{Value: $1}
+		}
+	| FUND
+		{
+			$$ = &ast.Name{Value: "fund"}
 		}
 	| SLITERAL
 		{

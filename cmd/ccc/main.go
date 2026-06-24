@@ -517,6 +517,7 @@ var completer = readline.NewPrefixCompleter(
 	),
 	readline.PcItem("alter project"),
 	readline.PcItem("archive project"),
+	readline.PcItem("create filter"),
 	readline.PcItem("create fund"),
 	readline.PcItem("create project"),
 	readline.PcItem("create set"),

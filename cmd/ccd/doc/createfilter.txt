@@ -1,0 +1,27 @@
+create filter
+
+Define a new filter
+
+create filter filter_name
+    where search_condition
+
+Description
+
+The filter command defines a selection of objects from a source set according
+to specified criteria.
+
+Parameters
+
+where
+
+The where clause specifies a search condition in the form of a Boolean
+expression. Only objects that satisfy this condition will be selected.
+
+See also Reference > Queries.
+
+Examples
+
+To filter on records where decision = true;
+
+create filter decided where decision = true;
+

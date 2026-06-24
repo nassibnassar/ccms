@@ -152,7 +152,7 @@ func serve(s *svr) {
 	if s.opt.NoHarvest {
 		log.Warning("disabled harvesting")
 	}
-	cat.Init()
+	// cat.Init()
 	var err error
 	if s.opt.Listen == "" || s.opt.NoTLS {
 		err = httpsvr.ListenAndServe()
@@ -245,6 +245,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			result = alterProjectStmt(s, rqid, cmd)
 		case *ast.ArchiveProjectStmt:
 			result = archiveProjectStmt(s, rqid, cmd)
+		case *ast.CreateFilterStmt:
+			result = createFilterStmt(s, rqid, cmd)
 		case *ast.CreateFundStmt:
 			result = createFundStmt(s, rqid, cmd)
 		case *ast.CreateProjectStmt:

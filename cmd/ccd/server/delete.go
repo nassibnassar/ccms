@@ -43,7 +43,7 @@ func deleteStmt(s *svr, rqid int64, cmd *ast.DeleteStmt) *ccms.Result {
 		return cmderr(err.Error())
 	}
 	if _, err := s.d.Q.Exec(s.d.C, sql); err != nil {
-		return cmderr("deleting: " + pgerr.Error(err).Error())
+		return cmderr("deleting: " + pgerr.String(err))
 	}
 
 	return ccms.NewResult("delete")

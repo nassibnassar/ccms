@@ -12,6 +12,24 @@ import (
 
 // conversion to SQL
 
+func (d *CreateFilterStmt) SQL() (string, error) {
+	var b strings.Builder
+	if err := d.sql(&b); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
+
+func (d *CreateFilterStmt) sql(b *strings.Builder) error {
+	w := d.Where.(*WhereClause)
+	if w.Valid {
+		if err := evalExpr(b, w.Condition, true); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (d *DeleteStmt) SQL() (string, error) {
 	var b strings.Builder
 	if err := d.sql(&b); err != nil {
@@ -23,14 +41,28 @@ func (d *DeleteStmt) SQL() (string, error) {
 func (d *DeleteStmt) sql(b *strings.Builder) error {
 	fromSet := set.Parse(d.From)
 
+	fromTable := cat.SetTable(fromSet)
+	table := dbx.ParseTable(fromTable)
+
 	b.WriteString("delete from ")
-	b.WriteString(cat.SetTable(fromSet))
+	b.WriteString(fromTable)
 	w := d.Where.(*WhereClause)
 	if w.Valid {
-		b.WriteString(" t using ccms.attr a where t.id=a.id and (")
+		b.WriteString(" where id in (")
+		b.WriteString("select t.id from ")
+		b.WriteString(cat.SetTable(fromSet))
+
+		b.WriteString(" t join ccms.attr a on t.id=a.id")
+
+		b.WriteString(" left join " + table.Schema + ".object o on t.id=o.id")
+		b.WriteString(" left join ccms.fund on o.fund_id=fund.id")
+
+		b.WriteString(" where (")
 		if err := evalExpr(b, w.Condition, true); err != nil {
 			return err
 		}
+		b.WriteRune(')')
+
 		b.WriteRune(')')
 	}
 	return nil
@@ -70,7 +102,7 @@ func (s *SelectStmt) sql(b *strings.Builder) error {
 	switch s.AttrList.(*SelectAttrList).Attr {
 	case "*":
 		// projection = "a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability, coalesce(fund.name, '') fund"
-		projection = "a.id, a.author, a.title, a.full_vendor_name, a.availability, object.decision, fund.name||':'||fund.title fund"
+		projection = "a.id, a.author, a.title, a.full_vendor_name, a.availability, o.decision, fund.name||':'||fund.title fund"
 	case "count(*)":
 		projection = "count(*)"
 	}
@@ -98,8 +130,8 @@ func (q *QueryClause) sql(b *strings.Builder) error {
 	}
 	b.WriteString(" t join ccms.attr a on t.id=a.id")
 
-	b.WriteString(" left join " + table.Schema + ".object on t.id=object.id")
-	b.WriteString(" left join ccms.fund on object.fund_id=fund.id")
+	b.WriteString(" left join " + table.Schema + ".object o on t.id=o.id")
+	b.WriteString(" left join ccms.fund on o.fund_id=fund.id")
 
 	w := q.Where.(*WhereClause)
 	if w.Valid {
@@ -309,13 +341,41 @@ func evalExprList(b *strings.Builder, exprList []Node) error {
 func evalExprOptAttr(b *strings.Builder, expr Node) error {
 	switch e := expr.(type) {
 	case *Name:
-		if !cat.IsAttr(e.Value) {
-			return errors.New("attribute \"" + e.Value + "\" does not exist")
+		if cat.IsAttribute(e.Value) {
+			attrSQL(b, e.Value)
+		} else {
+			if e.Value == "true" || e.Value == "false" {
+				b.WriteString(e.Value)
+			} else {
+				b.WriteRune('\'')
+				b.WriteString(e.Value)
+				b.WriteRune('\'')
+				// return errors.New("attribute \"" + e.Value + "\" does not exist")
+			}
 		}
-		b.WriteString("a.")
-	}
-	if err := evalExpr(b, expr, false); err != nil {
-		return err
+	default:
+		if err := evalExpr(b, expr, false); err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func attrSQL(b *strings.Builder, attr string) {
+	switch attr {
+	case "id", "author", "title", "full_vendor_name", "availability":
+		b.WriteRune('a')
+		b.WriteRune('.')
+		b.WriteString(attr)
+	case "decision":
+		b.WriteString("coalesce(")
+		b.WriteRune('o')
+		b.WriteRune('.')
+		b.WriteString(attr)
+		b.WriteString(",false)")
+	case "fund":
+		b.WriteString("coalesce(fund.name,'')")
+	default:
+		b.WriteString(attr)
+	}
 }

@@ -4,9 +4,9 @@ Insert objects into a set
 
 insert into target_set_name
     select *
-        from source_set_name
-        [ where search_condition ]
-        [ limit count ]
+           from source_set_name
+           [ where search_condition ]
+           [ limit count ]
 
 Description
 

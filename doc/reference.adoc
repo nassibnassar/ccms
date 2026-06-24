@@ -88,7 +88,8 @@ Supported operand types are:
 
 ===== Attributes
 
-Supported attribute names are:
+Supported attributes are divided into two groups.  The first group are
+provided by CCMS or the original data source and cannot be modified:
 
 [%header,width=75%,cols="4,3,6"]
 |===
@@ -115,6 +116,16 @@ Supported attribute names are:
 |`availability`
 |`text`
 |`999 13 $z`
+|===
+
+The second group are shared within a project and may be modified using
+the `update` command:
+
+[%header,width=75%,cols="4,3,6"]
+|===
+|Attribute
+|Type
+|Description
 
 |`decision`
 |`boolean`
@@ -124,3 +135,4 @@ Supported attribute names are:
 |fund name
 |selected from the project property `funds`
 |===
+

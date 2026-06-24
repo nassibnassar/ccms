@@ -57,7 +57,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 
 	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
 	if o.Valid {
-		if !cat.IsAttr(o.Attr) {
+		if !cat.IsAttribute(o.Attr) {
 			return cmderr("attribute \"" + o.Attr + "\" does not exist")
 		}
 	}
