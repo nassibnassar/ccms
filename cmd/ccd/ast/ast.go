@@ -1,5 +1,7 @@
 package ast
 
+import "strings"
+
 type AlterAction int
 
 const (
@@ -309,4 +311,8 @@ func (*ParseTree) node() {}
 
 type Node interface {
 	node()
+}
+
+func DecodeSLiteral(s string) string {
+	return strings.ReplaceAll(s, "''", "'")
 }

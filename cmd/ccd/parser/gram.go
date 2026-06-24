@@ -765,7 +765,7 @@ yydefault:
 	case 25:
 		yyDollar = yyS[yypt-9 : yypt+1]
 		{
-			yyVAL.node = &ast.AlterProjectStmt{Project: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Set, Value: yyDollar[8].str, StringLiteral: true}
+			yyVAL.node = &ast.AlterProjectStmt{Project: yyDollar[3].str, Property: yyDollar[6].str, Action: ast.Set, Value: ast.DecodeSLiteral(yyDollar[8].str), StringLiteral: true}
 		}
 	case 26:
 		yyDollar = yyS[yypt-9 : yypt+1]
@@ -805,7 +805,7 @@ yydefault:
 	case 33:
 		yyDollar = yyS[yypt-8 : yypt+1]
 		{
-			yyVAL.node = &ast.CreateUserStmt{User: yyDollar[3].str, EncryptedPassword: yyDollar[7].str}
+			yyVAL.node = &ast.CreateUserStmt{User: yyDollar[3].str, EncryptedPassword: ast.DecodeSLiteral(yyDollar[7].str)}
 		}
 	case 34:
 		yyDollar = yyS[yypt-5 : yypt+1]
@@ -830,7 +830,7 @@ yydefault:
 	case 38:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.node = &ast.InfoStmt{Topic: yyDollar[2].str}
+			yyVAL.node = &ast.InfoStmt{Topic: ast.DecodeSLiteral(yyDollar[2].str)}
 		}
 	case 39:
 		yyDollar = yyS[yypt-7 : yypt+1]
@@ -1080,7 +1080,7 @@ yydefault:
 	case 88:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.node = &ast.SLiteral{Value: yyDollar[1].str}
+			yyVAL.node = &ast.SLiteral{Value: ast.DecodeSLiteral(yyDollar[1].str)}
 		}
 	case 89:
 		yyDollar = yyS[yypt-1 : yypt+1]

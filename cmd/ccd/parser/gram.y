@@ -225,7 +225,7 @@ alter_project_stmt:
 		}
 	| ALTER PROJECT name ALTER PROPERTY name SET SLITERAL ';'
 		{
-			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: true}
+			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Set, Value: ast.DecodeSLiteral($8), StringLiteral: true}
 		}
 	| ALTER PROJECT name ALTER PROPERTY name ADD name ';'
 		{
@@ -267,7 +267,7 @@ create_set_stmt:
 create_user_stmt:
 	CREATE USER name WITH ENCRYPTED PASSWORD SLITERAL ';'
 		{
-			$$ = &ast.CreateUserStmt{User: $3, EncryptedPassword: $7}
+			$$ = &ast.CreateUserStmt{User: $3, EncryptedPassword: ast.DecodeSLiteral($7)}
 		}
 
 delete_stmt:
@@ -295,7 +295,7 @@ info_stmt:
 		}
 	| INFO SLITERAL ';'
 		{
-			$$ = &ast.InfoStmt{Topic: $2}
+			$$ = &ast.InfoStmt{Topic: ast.DecodeSLiteral($2)}
 		}
 
 insert_stmt:
@@ -533,7 +533,7 @@ primary_expr:
 		}
 	| SLITERAL
 		{
-			$$ = &ast.SLiteral{Value: $1}
+			$$ = &ast.SLiteral{Value: ast.DecodeSLiteral($1)}
 		}
 	| NUMBER
 		{

@@ -12,7 +12,7 @@ import (
 	variable pe lex.pe;
 
 	identifier = [A-Za-z_][0-9A-Za-z_.]*;
-	sliteral = ['][^']*['];
+	sliteral = [']([^']|[']['])*['];
 }%%
 
 type lexer struct {
