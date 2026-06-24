@@ -71,7 +71,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		}
 	}
 
-	sql, err := cmd.SQL()
+	sql, err := cmd.SQL(s.d)
 	if err != nil {
 		return cmderr(err.Error())
 	}

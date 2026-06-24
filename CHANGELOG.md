@@ -1,10 +1,10 @@
 # v0.0.27
 
+* Added `Error()` and `ErrorIndex()` functions to `ccms.Response`.
+
 * Added the attribute `decision`.
 
 * Added the `select version()` command.
-
-* Added `Error()` and `ErrorIndex()` functions to `ccms.Response`.
 
 # v0.0.26
 

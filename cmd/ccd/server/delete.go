@@ -38,7 +38,7 @@ func deleteStmt(s *svr, rqid int64, cmd *ast.DeleteStmt) *ccms.Result {
 		return cmderr("set \"" + cmd.From + "\" does not exist")
 	}
 
-	sql, err := cmd.SQL()
+	sql, err := cmd.SQL(s.d)
 	if err != nil {
 		return cmderr(err.Error())
 	}

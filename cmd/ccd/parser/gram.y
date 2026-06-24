@@ -513,9 +513,9 @@ postfix_expr:
 		{
 			$$ = $1
 		}
-	| FILTER '(' arg_expr_list ')'
+	| FILTER '(' name ')'
 		{
-			$$ = &ast.FilterExpr{ExprList: $3}
+			$$ = &ast.FilterExpr{Filter: $3}
 		}
 	| TAG '(' arg_expr_list ')'
 		{

@@ -7,46 +7,48 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/internal/dbx"
+	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/indexdata/ccms/internal/set"
+	"github.com/jackc/pgx/v5"
 )
 
 // conversion to SQL
 
-func (d *CreateFilterStmt) SQL() (string, error) {
+func (s *CreateFilterStmt) SQL(d *dbx.DB) (string, error) {
 	var b strings.Builder
-	if err := d.sql(&b); err != nil {
+	if err := s.sql(d, &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func (d *CreateFilterStmt) sql(b *strings.Builder) error {
-	w := d.Where.(*WhereClause)
+func (s *CreateFilterStmt) sql(d *dbx.DB, b *strings.Builder) error {
+	w := s.Where.(*WhereClause)
 	if w.Valid {
-		if err := evalExpr(b, w.Condition, true); err != nil {
+		if err := evalExpr(d, b, w.Condition, true); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (d *DeleteStmt) SQL() (string, error) {
+func (s *DeleteStmt) SQL(d *dbx.DB) (string, error) {
 	var b strings.Builder
-	if err := d.sql(&b); err != nil {
+	if err := s.sql(d, &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func (d *DeleteStmt) sql(b *strings.Builder) error {
-	fromSet := set.Parse(d.From)
+func (s *DeleteStmt) sql(d *dbx.DB, b *strings.Builder) error {
+	fromSet := set.Parse(s.From)
 
 	fromTable := cat.SetTable(fromSet)
 	table := dbx.ParseTable(fromTable)
 
 	b.WriteString("delete from ")
 	b.WriteString(fromTable)
-	w := d.Where.(*WhereClause)
+	w := s.Where.(*WhereClause)
 	if w.Valid {
 		b.WriteString(" where id in (")
 		b.WriteString("select t.id from ")
@@ -58,7 +60,7 @@ func (d *DeleteStmt) sql(b *strings.Builder) error {
 		b.WriteString(" left join ccms.fund on o.fund_id=fund.id")
 
 		b.WriteString(" where (")
-		if err := evalExpr(b, w.Condition, true); err != nil {
+		if err := evalExpr(d, b, w.Condition, true); err != nil {
 			return err
 		}
 		b.WriteRune(')')
@@ -68,36 +70,36 @@ func (d *DeleteStmt) sql(b *strings.Builder) error {
 	return nil
 }
 
-func (i *InsertStmt) SQL() (string, error) {
+func (s *InsertStmt) SQL(d *dbx.DB) (string, error) {
 	var b strings.Builder
-	if err := i.sql(&b); err != nil {
+	if err := s.sql(d, &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func (i *InsertStmt) sql(b *strings.Builder) error {
-	intoSet := set.Parse(i.Into)
+func (s *InsertStmt) sql(d *dbx.DB, b *strings.Builder) error {
+	intoSet := set.Parse(s.Into)
 
 	b.WriteString("insert into ")
 	b.WriteString(cat.SetTable(intoSet))
 	b.WriteString(" select a.id ")
-	if err := i.Query.(*QueryClause).sql(b); err != nil {
+	if err := s.Query.(*QueryClause).sql(d, b); err != nil {
 		return err
 	}
 	b.WriteString(" on conflict do nothing")
 	return nil
 }
 
-func (s *SelectStmt) SQL() (string, error) {
+func (s *SelectStmt) SQL(d *dbx.DB) (string, error) {
 	var b strings.Builder
-	if err := s.sql(&b); err != nil {
+	if err := s.sql(d, &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func (s *SelectStmt) sql(b *strings.Builder) error {
+func (s *SelectStmt) sql(d *dbx.DB, b *strings.Builder) error {
 	var projection string
 	switch s.AttrList.(*SelectAttrList).Attr {
 	case "*":
@@ -110,14 +112,14 @@ func (s *SelectStmt) sql(b *strings.Builder) error {
 	b.WriteString("select ")
 	b.WriteString(projection)
 	b.WriteRune(' ')
-	if err := s.Query.(*QueryClause).sql(b); err != nil {
+	if err := s.Query.(*QueryClause).sql(d, b); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (q *QueryClause) sql(b *strings.Builder) error {
-	fromSet := set.Parse(q.From)
+func (s *QueryClause) sql(d *dbx.DB, b *strings.Builder) error {
+	fromSet := set.Parse(s.From)
 
 	fromTable := cat.SetTable(fromSet)
 	table := dbx.ParseTable(fromTable)
@@ -133,15 +135,15 @@ func (q *QueryClause) sql(b *strings.Builder) error {
 	b.WriteString(" left join " + table.Schema + ".object o on t.id=o.id")
 	b.WriteString(" left join ccms.fund on o.fund_id=fund.id")
 
-	w := q.Where.(*WhereClause)
+	w := s.Where.(*WhereClause)
 	if w.Valid {
 		b.WriteString(" where (")
-		if err := evalExpr(b, w.Condition, true); err != nil {
+		if err := evalExpr(d, b, w.Condition, true); err != nil {
 			return err
 		}
 		b.WriteRune(')')
 	}
-	o := q.Order.(*OrderClause)
+	o := s.Order.(*OrderClause)
 	if o.Valid {
 		b.WriteString(" order by ")
 		b.WriteString(o.Attr)
@@ -149,13 +151,13 @@ func (q *QueryClause) sql(b *strings.Builder) error {
 			b.WriteString(" desc")
 		}
 	}
-	if q.Limit.(*LimitClause).Valid {
+	if s.Limit.(*LimitClause).Valid {
 		b.WriteString(" limit ")
-		b.WriteString(q.Limit.(*LimitClause).Count)
+		b.WriteString(s.Limit.(*LimitClause).Count)
 	}
-	if q.Offset.(*OffsetClause).Valid {
+	if s.Offset.(*OffsetClause).Valid {
 		b.WriteString(" offset ")
-		b.WriteString(q.Offset.(*OffsetClause).Start)
+		b.WriteString(s.Offset.(*OffsetClause).Start)
 	}
 	return nil
 }
@@ -194,100 +196,109 @@ func (u *UpdateStmt) sql(b *strings.Builder) error {
 	return nil
 }
 
-func evalExpr(b *strings.Builder, expr Node, root bool) error {
+func evalExpr(d *dbx.DB, b *strings.Builder, expr Node, root bool) error {
 	switch e := expr.(type) {
 	case *OrExpr:
-		if err := evalExpr(b, e.Expr1, false); err != nil {
+		if err := evalExpr(d, b, e.Expr1, false); err != nil {
 			return err
 		}
 		b.WriteString(" or ")
-		if err := evalExpr(b, e.Expr2, false); err != nil {
+		if err := evalExpr(d, b, e.Expr2, false); err != nil {
 			return err
 		}
 	case *AndExpr:
-		if err := evalExpr(b, e.Expr1, false); err != nil {
+		if err := evalExpr(d, b, e.Expr1, false); err != nil {
 			return err
 		}
 		b.WriteString(" and ")
-		if err := evalExpr(b, e.Expr2, false); err != nil {
+		if err := evalExpr(d, b, e.Expr2, false); err != nil {
 			return err
 		}
 	case *NotExpr:
 		b.WriteString("not ")
-		if err := evalExpr(b, e.Expr, false); err != nil {
+		if err := evalExpr(d, b, e.Expr, false); err != nil {
 			return err
 		}
 	case *EqualExpr:
-		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
 			return err
 		}
 		b.WriteRune('=')
-		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
 			return err
 		}
 	case *LikeExpr:
-		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
 			return err
 		}
 		b.WriteString(" like ")
-		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
 			return err
 		}
 	case *ILikeExpr:
-		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
 			return err
 		}
 		b.WriteString(" ilike ")
-		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
 			return err
 		}
 	case *NotEqualExpr:
-		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
 			return err
 		}
 		b.WriteString("<>")
-		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
 			return err
 		}
 	case *LessThanExpr:
-		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
 			return err
 		}
 		b.WriteRune('<')
-		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
 			return err
 		}
 	case *GreaterThanExpr:
-		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
 			return err
 		}
 		b.WriteRune('>')
-		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
 			return err
 		}
 	case *LessThanOrEqualExpr:
-		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
 			return err
 		}
 		b.WriteString("<=")
-		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
 			return err
 		}
 	case *GreaterThanOrEqualExpr:
-		if err := evalExprOptAttr(b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
 			return err
 		}
 		b.WriteString(">=")
-		if err := evalExprOptAttr(b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
 			return err
 		}
 	case *FilterExpr:
-		return fmt.Errorf("filter() is not yet supported")
-		//b.WriteString("FILTER(")
-		//if err := evalExprList(b, e.ExprList); err != nil {
-		//        return err
-		//}
-		//b.WriteRune(')')
+		b.WriteRune('(')
+
+		// b.WriteString(e.Filter)
+		// if err := evalExprList(b, e.ExprList); err != nil {
+		// 	return err
+		// }
+
+		rows, _ := d.Q.Query(d.C, "select sql from ccms.filter where name=$1", e.Filter)
+		filter, err := pgx.CollectRows(rows, pgx.RowTo[string])
+		if err != nil {
+			return pgerr.Error(err)
+		}
+		b.WriteString(filter[0])
+
+		b.WriteRune(')')
 	case *TagExpr:
 		return fmt.Errorf("tag() is not yet supported")
 		//b.WriteString("TAG(")
@@ -314,7 +325,7 @@ func evalExpr(b *strings.Builder, expr Node, root bool) error {
 		b.WriteString(e.Value)
 	case *ParenExpr:
 		b.WriteRune('(')
-		if err := evalExpr(b, e.Expr, root); err != nil {
+		if err := evalExpr(d, b, e.Expr, root); err != nil {
 			return err
 		}
 		b.WriteRune(')')
@@ -324,12 +335,12 @@ func evalExpr(b *strings.Builder, expr Node, root bool) error {
 	return nil
 }
 
-func evalExprList(b *strings.Builder, exprList []Node) error {
+func evalExprList(d *dbx.DB, b *strings.Builder, exprList []Node) error {
 	for i := range exprList {
 		if i != 0 {
 			b.WriteRune(',')
 		}
-		if err := evalExpr(b, exprList[i], false); err != nil {
+		if err := evalExpr(d, b, exprList[i], false); err != nil {
 			return err
 		}
 	}
@@ -338,7 +349,7 @@ func evalExprList(b *strings.Builder, exprList []Node) error {
 
 // evaluate expr which may optionally be an attribute
 // if expr is of type Name, require that it be a valid attribute name
-func evalExprOptAttr(b *strings.Builder, expr Node) error {
+func evalExprOptAttr(d *dbx.DB, b *strings.Builder, expr Node) error {
 	switch e := expr.(type) {
 	case *Name:
 		if cat.IsAttribute(e.Value) {
@@ -354,7 +365,7 @@ func evalExprOptAttr(b *strings.Builder, expr Node) error {
 			}
 		}
 	default:
-		if err := evalExpr(b, expr, false); err != nil {
+		if err := evalExpr(d, b, expr, false); err != nil {
 			return err
 		}
 	}

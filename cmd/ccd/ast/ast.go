@@ -258,7 +258,7 @@ type NotExpr struct {
 func (*NotExpr) node() {}
 
 type FilterExpr struct {
-	ExprList []Node
+	Filter string
 }
 
 func (*FilterExpr) node() {}
