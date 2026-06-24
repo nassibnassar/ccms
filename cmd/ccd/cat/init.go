@@ -460,6 +460,15 @@ func writeAdminUser(tx pgx.Tx, security *config.Security) error {
 	}
 	////
 
+	//// temporary: add cyclops user
+	salt = crypto.RandomKey()
+	hash = crypto.HashPassword(crypto.HashPassword("testpass83", nil, nil), salt, security.SecretKey)
+	q = "insert into ccms.auth (name, superuser, login, password, salt) values ($1, false, true, $2, $3)"
+	if _, err := tx.Exec(context.TODO(), q, "cyclops", hash, crypto.EncodeToHexString(salt)); err != nil {
+		return fmt.Errorf("writing user \"cyclops\" to table ccms.auth: %v", err)
+	}
+	////
+
 	//// temporary: add nrn user
 	salt = crypto.RandomKey()
 	hash = crypto.HashPassword(crypto.HashPassword("testpass49", nil, nil), salt, security.SecretKey)
