@@ -136,3 +136,12 @@ the `update` command:
 |selected from the project property `funds`
 |===
 
+=== Lexical structure
+
+==== Constants
+
+String constants are enclosed in single quotes, for example, `'It is a
+beautiful day'`.
+
+A single quote within a string constant is written as two single
+quotes, for example, `'It''s a beautiful day'`.
