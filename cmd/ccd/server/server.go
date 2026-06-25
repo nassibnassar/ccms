@@ -202,6 +202,13 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 
 	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
 
+	defer func() {
+		if r := recover(); r != nil {
+			sendError(w, rqid, fmt.Sprintf("internal server error: %v", r))
+			return
+		}
+	}()
+
 	//fmt.Printf("### %#v --- %v\n", node, err)
 	var node ast.Node
 	node, err = parser.Parse(req.Commands)
