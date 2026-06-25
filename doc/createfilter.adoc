@@ -11,8 +11,9 @@ create filter `*_filter_name_*`
 [discrete]
 ===== Description
 
-The `filter` command defines a selection of objects from a source set
-according to specified criteria.
+The `create filter` command defines criteria for selecting objects.
+These criteria can then be used for querying sets via the `filter()`
+operator.
 
 [discrete]
 ===== Parameters
