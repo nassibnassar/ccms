@@ -233,7 +233,17 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	// 	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
 	// }
 
-	tx, err := s.dp.Begin(context.TODO())
+	///////////////////////////////////////////////////////////////
+	dc, err := newDBConn(context.TODO(), s.conf.DB.ConnString())
+	if err != nil {
+		sendError(w, rqid, err.Error())
+		return
+	}
+	defer dc.Close(context.TODO())
+	///////////////////////////////////////////////////////////////
+
+	// tx, err := s.dp.Begin(context.TODO())
+	tx, err := dc.Begin(context.TODO())
 	if err != nil {
 		sendError(w, rqid, "start transaction: "+err.Error())
 		return
@@ -422,6 +432,20 @@ func requestString(r *http.Request) string {
 	return fmt.Sprintf("host=%s port=%s method=%s uri=%s", remoteHost, remotePort, r.Method, r.URL)
 }
 
+func newDBConn(ctx context.Context, connString string) (*pgx.Conn, error) {
+	config, err := pgx.ParseConfig(connString)
+	if err != nil {
+		return nil, err
+	}
+	// config.AfterConnect = setDatabaseParameters
+	// config.MaxConns = 64
+	dc, err := pgx.ConnectConfig(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+	return dc, nil
+}
+
 func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	config, err := pgxpool.ParseConfig(connString)
 	if err != nil {
@@ -436,7 +460,6 @@ func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
 	return dp, nil
 }
 
-// func(ctx context.Context, conn *pgx.Conn) error {
 func setDatabaseParameters(ctx context.Context, conn *pgx.Conn) error {
 	q := "set search_path = 'public'"
 	if _, err := conn.Exec(ctx, q); err != nil {
