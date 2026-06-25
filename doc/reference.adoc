@@ -6,6 +6,8 @@ include::alterproject.adoc[]
 
 include::archiveproject.adoc[]
 
+include::createfilter.adoc[]
+
 include::createfund.adoc[]
 
 include::createproject.adoc[]
@@ -43,6 +45,10 @@ The supported operators, in order of precedence, are:
 |Operator
 |Associativity
 |Description
+
+|`filter()`
+|
+|filtering operator
 
 |`=` `<>` `<` `>` `\<=` `>=` `like` `ilike`
 |

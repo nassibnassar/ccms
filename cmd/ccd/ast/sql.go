@@ -7,25 +7,23 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/indexdata/ccms/internal/set"
-	"github.com/jackc/pgx/v5"
 )
 
 // conversion to SQL
 
-func (s *CreateFilterStmt) SQL(d *dbx.DB) (string, error) {
+func (s *CreateFilterStmt) SQL(d *dbx.DB, a *strings.Builder) (string, error) {
 	var b strings.Builder
-	if err := s.sql(d, &b); err != nil {
+	if err := s.sql(d, a, &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func (s *CreateFilterStmt) sql(d *dbx.DB, b *strings.Builder) error {
+func (s *CreateFilterStmt) sql(d *dbx.DB, a, b *strings.Builder) error {
 	w := s.Where.(*WhereClause)
 	if w.Valid {
-		if err := evalExpr(d, b, w.Condition, true); err != nil {
+		if err := evalExpr(d, a, b, w.Condition, true, evalState{filter: true}); err != nil {
 			return err
 		}
 	}
@@ -34,13 +32,13 @@ func (s *CreateFilterStmt) sql(d *dbx.DB, b *strings.Builder) error {
 
 func (s *DeleteStmt) SQL(d *dbx.DB) (string, error) {
 	var b strings.Builder
-	if err := s.sql(d, &b); err != nil {
+	if err := s.sql(d, new(strings.Builder), &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func (s *DeleteStmt) sql(d *dbx.DB, b *strings.Builder) error {
+func (s *DeleteStmt) sql(d *dbx.DB, a, b *strings.Builder) error {
 	fromSet := set.Parse(s.From)
 
 	fromTable := cat.SetTable(fromSet)
@@ -60,7 +58,7 @@ func (s *DeleteStmt) sql(d *dbx.DB, b *strings.Builder) error {
 		b.WriteString(" left join ccms.fund on o.fund_id=fund.id")
 
 		b.WriteString(" where (")
-		if err := evalExpr(d, b, w.Condition, true); err != nil {
+		if err := evalExpr(d, a, b, w.Condition, true, evalState{}); err != nil {
 			return err
 		}
 		b.WriteRune(')')
@@ -72,19 +70,19 @@ func (s *DeleteStmt) sql(d *dbx.DB, b *strings.Builder) error {
 
 func (s *InsertStmt) SQL(d *dbx.DB) (string, error) {
 	var b strings.Builder
-	if err := s.sql(d, &b); err != nil {
+	if err := s.sql(d, new(strings.Builder), &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func (s *InsertStmt) sql(d *dbx.DB, b *strings.Builder) error {
+func (s *InsertStmt) sql(d *dbx.DB, a, b *strings.Builder) error {
 	intoSet := set.Parse(s.Into)
 
 	b.WriteString("insert into ")
 	b.WriteString(cat.SetTable(intoSet))
 	b.WriteString(" select a.id ")
-	if err := s.Query.(*QueryClause).sql(d, b); err != nil {
+	if err := s.Query.(*QueryClause).sql(d, a, b); err != nil {
 		return err
 	}
 	b.WriteString(" on conflict do nothing")
@@ -93,13 +91,13 @@ func (s *InsertStmt) sql(d *dbx.DB, b *strings.Builder) error {
 
 func (s *SelectStmt) SQL(d *dbx.DB) (string, error) {
 	var b strings.Builder
-	if err := s.sql(d, &b); err != nil {
+	if err := s.sql(d, new(strings.Builder), &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func (s *SelectStmt) sql(d *dbx.DB, b *strings.Builder) error {
+func (s *SelectStmt) sql(d *dbx.DB, a, b *strings.Builder) error {
 	var projection string
 	switch s.AttrList.(*SelectAttrList).Attr {
 	case "*":
@@ -112,13 +110,13 @@ func (s *SelectStmt) sql(d *dbx.DB, b *strings.Builder) error {
 	b.WriteString("select ")
 	b.WriteString(projection)
 	b.WriteRune(' ')
-	if err := s.Query.(*QueryClause).sql(d, b); err != nil {
+	if err := s.Query.(*QueryClause).sql(d, a, b); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *QueryClause) sql(d *dbx.DB, b *strings.Builder) error {
+func (s *QueryClause) sql(d *dbx.DB, a, b *strings.Builder) error {
 	fromSet := set.Parse(s.From)
 
 	fromTable := cat.SetTable(fromSet)
@@ -138,7 +136,7 @@ func (s *QueryClause) sql(d *dbx.DB, b *strings.Builder) error {
 	w := s.Where.(*WhereClause)
 	if w.Valid {
 		b.WriteString(" where (")
-		if err := evalExpr(d, b, w.Condition, true); err != nil {
+		if err := evalExpr(d, a, b, w.Condition, true, evalState{}); err != nil {
 			return err
 		}
 		b.WriteRune(')')
@@ -196,94 +194,117 @@ func (u *UpdateStmt) sql(b *strings.Builder) error {
 	return nil
 }
 
-func evalExpr(d *dbx.DB, b *strings.Builder, expr Node, root bool) error {
+type evalState struct {
+	filter bool
+}
+
+func evalExpr(d *dbx.DB, a, b *strings.Builder, expr Node, root bool, state evalState) error {
 	switch e := expr.(type) {
 	case *OrExpr:
-		if err := evalExpr(d, b, e.Expr1, false); err != nil {
+		if err := evalExpr(d, a, b, e.Expr1, false, state); err != nil {
 			return err
 		}
+		a.WriteString(" or ")
 		b.WriteString(" or ")
-		if err := evalExpr(d, b, e.Expr2, false); err != nil {
+		if err := evalExpr(d, a, b, e.Expr2, false, state); err != nil {
 			return err
 		}
 	case *AndExpr:
-		if err := evalExpr(d, b, e.Expr1, false); err != nil {
+		if err := evalExpr(d, a, b, e.Expr1, false, state); err != nil {
 			return err
 		}
+		a.WriteString(" and ")
 		b.WriteString(" and ")
-		if err := evalExpr(d, b, e.Expr2, false); err != nil {
+		if err := evalExpr(d, a, b, e.Expr2, false, state); err != nil {
 			return err
 		}
 	case *NotExpr:
+		a.WriteString("not ")
 		b.WriteString("not ")
-		if err := evalExpr(d, b, e.Expr, false); err != nil {
+		if err := evalExpr(d, a, b, e.Expr, false, state); err != nil {
 			return err
 		}
 	case *EqualExpr:
-		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr1, state); err != nil {
 			return err
 		}
+		a.WriteString(" = ")
 		b.WriteRune('=')
-		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr2, state); err != nil {
 			return err
 		}
 	case *LikeExpr:
-		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr1, state); err != nil {
 			return err
 		}
+		a.WriteString(" like ")
 		b.WriteString(" like ")
-		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr2, state); err != nil {
 			return err
 		}
 	case *ILikeExpr:
-		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr1, state); err != nil {
 			return err
 		}
+		a.WriteString(" ilike ")
 		b.WriteString(" ilike ")
-		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr2, state); err != nil {
 			return err
 		}
 	case *NotEqualExpr:
-		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr1, state); err != nil {
 			return err
 		}
+		a.WriteString(" <> ")
 		b.WriteString("<>")
-		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr2, state); err != nil {
 			return err
 		}
 	case *LessThanExpr:
-		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr1, state); err != nil {
 			return err
 		}
+		a.WriteString(" < ")
 		b.WriteRune('<')
-		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr2, state); err != nil {
 			return err
 		}
 	case *GreaterThanExpr:
-		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr1, state); err != nil {
 			return err
 		}
+		a.WriteString(" > ")
 		b.WriteRune('>')
-		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr2, state); err != nil {
 			return err
 		}
 	case *LessThanOrEqualExpr:
-		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr1, state); err != nil {
 			return err
 		}
+		a.WriteString(" <= ")
 		b.WriteString("<=")
-		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr2, state); err != nil {
 			return err
 		}
 	case *GreaterThanOrEqualExpr:
-		if err := evalExprOptAttr(d, b, e.Expr1); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr1, state); err != nil {
 			return err
 		}
+		a.WriteString(" >= ")
 		b.WriteString(">=")
-		if err := evalExprOptAttr(d, b, e.Expr2); err != nil {
+		if err := evalExprOptAttr(d, a, b, e.Expr2, state); err != nil {
 			return err
 		}
 	case *FilterExpr:
+		if state.filter {
+			return errors.New("filter() cannot be used in filter definition")
+		}
+
+		a.WriteString("filter(")
+		a.WriteString(e.Filter)
+		a.WriteRune(')')
+
 		b.WriteRune('(')
 
 		// b.WriteString(e.Filter)
@@ -291,12 +312,20 @@ func evalExpr(d *dbx.DB, b *strings.Builder, expr Node, root bool) error {
 		// 	return err
 		// }
 
-		rows, _ := d.Q.Query(d.C, "select sql from ccms.filter where name=$1", e.Filter)
-		filter, err := pgx.CollectRows(rows, pgx.RowTo[string])
+		f, err := cat.FilterSQL(d, e.Filter)
 		if err != nil {
-			return pgerr.Error(err)
+			return err
 		}
-		b.WriteString(filter[0])
+		b.WriteString(f)
+		// rows, _ := d.Q.Query(d.C, "select sql from ccms.filter where name=$1", e.Filter)
+		// filter, err := pgx.CollectRows(rows, pgx.RowTo[string])
+		// if err != nil {
+		// 	return pgerr.Error(err)
+		// }
+		// if len(filter) == 0 {
+		// 	return errors.New("filter \"" + e.Filter + "\" does not exist")
+		// }
+		// b.WriteString(filter[0])
 
 		b.WriteRune(')')
 	case *TagExpr:
@@ -310,24 +339,31 @@ func evalExpr(d *dbx.DB, b *strings.Builder, expr Node, root bool) error {
 		if root {
 			return errors.New("invalid boolean expression")
 		}
+		a.WriteString(e.Value)
 		b.WriteString(e.Value)
 	case *SLiteral:
 		if root {
 			return errors.New("invalid boolean expression")
 		}
+		a.WriteRune('\'')
+		a.WriteString(encodeString(e.Value))
+		a.WriteRune('\'')
 		b.WriteRune('\'')
-		b.WriteString(e.Value)
+		b.WriteString(encodeString(e.Value))
 		b.WriteRune('\'')
 	case *Number:
 		if root {
 			return errors.New("invalid boolean expression")
 		}
+		a.WriteString(e.Value)
 		b.WriteString(e.Value)
 	case *ParenExpr:
+		a.WriteRune('(')
 		b.WriteRune('(')
-		if err := evalExpr(d, b, e.Expr, root); err != nil {
+		if err := evalExpr(d, a, b, e.Expr, root, state); err != nil {
 			return err
 		}
+		a.WriteRune(')')
 		b.WriteRune(')')
 	default:
 		return fmt.Errorf("unknown node %T", expr)
@@ -335,12 +371,13 @@ func evalExpr(d *dbx.DB, b *strings.Builder, expr Node, root bool) error {
 	return nil
 }
 
-func evalExprList(d *dbx.DB, b *strings.Builder, exprList []Node) error {
+func evalExprList(d *dbx.DB, a, b *strings.Builder, exprList []Node, state evalState) error {
 	for i := range exprList {
 		if i != 0 {
+			a.WriteString(", ")
 			b.WriteRune(',')
 		}
-		if err := evalExpr(d, b, exprList[i], false); err != nil {
+		if err := evalExpr(d, a, b, exprList[i], false, state); err != nil {
 			return err
 		}
 	}
@@ -349,15 +386,17 @@ func evalExprList(d *dbx.DB, b *strings.Builder, exprList []Node) error {
 
 // evaluate expr which may optionally be an attribute
 // if expr is of type Name, require that it be a valid attribute name
-func evalExprOptAttr(d *dbx.DB, b *strings.Builder, expr Node) error {
+func evalExprOptAttr(d *dbx.DB, a, b *strings.Builder, expr Node, state evalState) error {
 	switch e := expr.(type) {
 	case *Name:
 		if cat.IsAttribute(e.Value) {
-			attrSQL(b, e.Value)
+			attrSQL(a, b, e.Value)
 		} else {
 			if e.Value == "true" || e.Value == "false" {
+				a.WriteString(e.Value)
 				b.WriteString(e.Value)
 			} else {
+				a.WriteString(e.Value)
 				b.WriteRune('\'')
 				b.WriteString(e.Value)
 				b.WriteRune('\'')
@@ -365,14 +404,15 @@ func evalExprOptAttr(d *dbx.DB, b *strings.Builder, expr Node) error {
 			}
 		}
 	default:
-		if err := evalExpr(d, b, expr, false); err != nil {
+		if err := evalExpr(d, a, b, expr, false, state); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func attrSQL(b *strings.Builder, attr string) {
+func attrSQL(a, b *strings.Builder, attr string) {
+	a.WriteString(attr)
 	switch attr {
 	case "id", "author", "title", "full_vendor_name", "availability":
 		b.WriteRune('a')
@@ -389,4 +429,15 @@ func attrSQL(b *strings.Builder, attr string) {
 	default:
 		b.WriteString(attr)
 	}
+}
+
+func encodeString(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		if r == '\'' {
+			b.WriteRune('\'')
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
 }

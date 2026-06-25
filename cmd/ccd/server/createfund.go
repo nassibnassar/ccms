@@ -15,6 +15,10 @@ func createFundStmt(s *svr, rqid int64, cmd *ast.CreateFundStmt) *ccms.Result {
 		return cmderr("fund \"" + cmd.Fund + "\" already exists")
 	}
 
+	if !cat.IsValidFundName(cmd.Fund) {
+		return cmderr("invalid fund name \"" + cmd.Fund + "\"")
+	}
+
 	if err := cat.CreateFund(s.d, cmd.Fund); err != nil {
 		return cmderr("creating fund: " + err.Error())
 	}

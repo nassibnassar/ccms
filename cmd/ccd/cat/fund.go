@@ -3,6 +3,7 @@ package cat
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/pgerr"
@@ -52,4 +53,11 @@ func Funds(d *dbx.DB) (prop.Property, error) {
 		return nil, fmt.Errorf("reading funds: %v", err)
 	}
 	return funds, nil
+}
+
+func IsValidFundName(fund string) bool {
+	if strings.ContainsRune(fund, '.') {
+		return false
+	}
+	return true
 }

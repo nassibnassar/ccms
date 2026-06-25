@@ -4,6 +4,8 @@ List the values of a system variable
 
 [source,subs="verbatim,quotes"]
 ----
+show filters
+
 show funds
 
 show projects [ archived ]

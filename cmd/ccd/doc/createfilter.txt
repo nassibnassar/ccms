@@ -21,7 +21,7 @@ See also Reference > Queries.
 
 Examples
 
-To filter on records where decision = true;
+To filter on records where decision = true:
 
 create filter decided where decision = true;
 

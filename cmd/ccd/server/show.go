@@ -15,6 +15,10 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	switch cmd.Type {
 	case "filters":
 		result.AddField("filter_name", "text")
+		result.AddField("definition", "text")
+		if err := addShowFiltersData(s.d, result); err != nil {
+			return cmderr("retrieving filters: " + err.Error())
+		}
 	case "funds":
 		result.AddField("fund_name", "text")
 		result.AddField("fund_title", "text")
@@ -110,6 +114,18 @@ func addShowProjectData(d *dbx.DB, result *ccms.Result, projectName string) erro
 	}
 	for i := range prop {
 		result.AddData([]any{prop[i][0], prop[i][1]})
+	}
+	return nil
+}
+
+func addShowFiltersData(d *dbx.DB, result *ccms.Result) error {
+	filters, err := cat.Filters(d)
+	if err != nil {
+		return err
+	}
+	cat.SortFilters(filters)
+	for i := range filters {
+		result.AddData([]any{filters[i].Name, filters[i].Definition})
 	}
 	return nil
 }

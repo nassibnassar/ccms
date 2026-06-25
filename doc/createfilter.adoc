@@ -33,5 +33,6 @@ To filter on records where decision = true:
 
 ----
 create filter decided where decision = true;
-----
 
+select * from p.s where filter(decided);
+----

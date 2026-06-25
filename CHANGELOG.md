@@ -1,3 +1,6 @@
+* Added `create filter` and `show filters` commands and `filter()`
+  operator.
+
 # v0.0.27
 
 * Added `Error()` and `ErrorIndex()` functions to `ccms.Response`.
