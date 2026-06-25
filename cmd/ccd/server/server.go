@@ -249,8 +249,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		return
 	}
 	defer tx.Rollback(context.TODO())
-	s.d = &dbx.DB{C: context.TODO(), Q: tx}
-	// s.dq = tx
+	// s.d = &dbx.DB{C: context.TODO(), Q: tx}
+	s.d = &dbx.DB{C: context.TODO(), Q: dc}
 
 	errorState := false
 	resp := ccms.NewResponse()
