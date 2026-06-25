@@ -9,12 +9,12 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/marcxml"
+	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nassibnassar/goharvest/oai"
 )
 
-func Harvest(dp *pgxpool.Pool) {
+func Harvest(dp dbx.Queryable) {
 	for {
 		harvestLoop(dp)
 		time.Sleep(1 * time.Hour)
@@ -22,7 +22,7 @@ func Harvest(dp *pgxpool.Pool) {
 	}
 }
 
-func harvestLoop(dp *pgxpool.Pool) {
+func harvestLoop(dq dbx.Queryable) {
 	defer func() {
 		if r := recover(); r != nil {
 			logError(r)
@@ -132,6 +132,7 @@ func harvestLoop(dp *pgxpool.Pool) {
 			return
 		}
 
+		dp := dq.(*pgx.Conn)
 		tx, err := dp.Begin(context.TODO())
 		if err != nil {
 			logError("starting transaction" + err.Error())

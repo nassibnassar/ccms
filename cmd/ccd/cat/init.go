@@ -8,10 +8,10 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/config"
 	"github.com/indexdata/ccms/internal/crypto"
+	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type roleUsers struct {
@@ -25,7 +25,7 @@ type auth struct {
 	salt      []byte
 }
 
-func Initialize(program string, dp *pgxpool.Pool, security *config.Security) error {
+func Initialize(program string, dp dbx.Queryable, security *config.Security) error {
 	exists, err := initSchemaExists(dp)
 	if err != nil {
 		return fmt.Errorf("checking if database initialized: %w", err)
@@ -389,7 +389,7 @@ func createFilter(tx pgx.Tx) error {
 	return nil
 }
 
-func initSchemaExists(dp *pgxpool.Pool) (bool, error) {
+func initSchemaExists(dp dbx.Queryable) (bool, error) {
 	var q = "select 1 from pg_namespace where nspname=$1"
 	var n int32
 	err := dp.QueryRow(context.TODO(), q, "ccms").Scan(&n)
@@ -403,7 +403,8 @@ func initSchemaExists(dp *pgxpool.Pool) (bool, error) {
 	}
 }
 
-func createSystemSchema(program string, dp *pgxpool.Pool, security *config.Security) error {
+func createSystemSchema(program string, dq dbx.Queryable, security *config.Security) error {
+	dp := dq.(*pgx.Conn)
 	tx, err := dp.Begin(context.TODO())
 	if err != nil {
 		return pgerr.Error(err)

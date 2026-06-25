@@ -30,13 +30,12 @@ import (
 	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/indexdata/ccms/internal/protocol"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type svr struct {
 	d *dbx.DB
 	// cat *cat.Catalog
-	dp *pgxpool.Pool
+	dp dbx.Queryable
 	// ctx context.Context
 	// tx   pgx.Tx
 	// dq   dbx.Queryable
@@ -88,19 +87,27 @@ func databaseServer(opt *option.Server) error {
 		return fmt.Errorf("reading configuration file: %v", err)
 	}
 
-	dp, err := newPool(context.TODO(), conf.DB.ConnString())
+	// dp, err := newPool(context.TODO(), conf.DB.ConnString())
+	// if err != nil {
+	// 	return fmt.Errorf("creating database connection pool: %v", err)
+	// }
+	// defer dp.Close()
+
+	///////////////////////////////////////////////////////////////
+	dc, err := newDBConn(context.TODO(), conf.DB.ConnString())
 	if err != nil {
-		return fmt.Errorf("creating database connection pool: %v", err)
+		return err
 	}
-	defer dp.Close()
+	defer dc.Close(context.TODO())
+	///////////////////////////////////////////////////////////////
 
 	// ensure database is initialized and compatible
-	err = cat.Initialize(opt.Program, dp, conf.Security)
+	err = cat.Initialize(opt.Program, dc, conf.Security)
 	if err != nil {
 		return err
 	}
 
-	s := &svr{dp: dp, conf: conf, opt: opt}
+	s := &svr{dp: dc, conf: conf, opt: opt}
 
 	if err = startServer(s); err != nil {
 		return fmt.Errorf("server stopped: %s", err)
@@ -446,19 +453,19 @@ func newDBConn(ctx context.Context, connString string) (*pgx.Conn, error) {
 	return dc, nil
 }
 
-func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
-	config, err := pgxpool.ParseConfig(connString)
-	if err != nil {
-		return nil, err
-	}
-	config.AfterConnect = setDatabaseParameters
-	config.MaxConns = 64
-	dp, err := pgxpool.NewWithConfig(ctx, config)
-	if err != nil {
-		return nil, err
-	}
-	return dp, nil
-}
+// func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
+// 	config, err := pgxpool.ParseConfig(connString)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	config.AfterConnect = setDatabaseParameters
+// 	config.MaxConns = 64
+// 	dp, err := pgxpool.NewWithConfig(ctx, config)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return dp, nil
+// }
 
 func setDatabaseParameters(ctx context.Context, conn *pgx.Conn) error {
 	q := "set search_path = 'public'"
