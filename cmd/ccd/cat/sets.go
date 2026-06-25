@@ -61,7 +61,7 @@ func Sets(d *dbx.DB) ([]string, error) {
 	rows, _ := d.Q.Query(d.C, sql)
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, err
 	}
 
 	// add object sets
@@ -81,7 +81,7 @@ func SetsInProject(d *dbx.DB, project string) ([]string, error) {
 	rows, _ := d.Q.Query(d.C, sql, project)
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, err
 	}
 	sets = append(sets, project+".object")
 	return sets, nil

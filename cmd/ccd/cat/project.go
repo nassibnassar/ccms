@@ -65,7 +65,7 @@ func Projects(d *dbx.DB, archived bool) ([]string, error) {
 	rows, _ := d.Q.Query(d.C, sql, archived)
 	projects, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, err
 	}
 	return projects, nil
 }
