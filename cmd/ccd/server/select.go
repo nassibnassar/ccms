@@ -8,7 +8,6 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/internal/global"
-	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/indexdata/ccms/internal/set"
 	"github.com/jackc/pgx/v5/pgtype/zeronull"
 )
@@ -97,7 +96,7 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 func runQueryCount(s *svr, sql string) (*ccms.Result, error) {
 	var count int64
 	if err := s.d.Q.QueryRow(s.d.C, sql).Scan(&count); err != nil {
-		return nil, errors.New(internalError + pgerr.Error(err).Error())
+		return nil, errors.New(internalError + err.Error())
 	}
 	result := ccms.NewResult("select")
 	result.AddField("count", "bigint")
@@ -108,7 +107,7 @@ func runQueryCount(s *svr, sql string) (*ccms.Result, error) {
 func runQuery(s *svr, sql string) (*ccms.Result, error) {
 	rows, err := s.d.Q.Query(s.d.C, sql)
 	if err != nil {
-		return nil, errors.New(internalError + pgerr.Error(err).Error())
+		return nil, errors.New(internalError + err.Error())
 	}
 	defer rows.Close()
 	result := ccms.NewResult("select")
@@ -139,7 +138,7 @@ func runQuery(s *svr, sql string) (*ccms.Result, error) {
 		}
 	}
 	if err = rows.Err(); err != nil {
-		return nil, errors.New(internalError + pgerr.Error(err).Error())
+		return nil, errors.New(internalError + err.Error())
 	}
 	return result, nil
 }

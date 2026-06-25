@@ -29,7 +29,7 @@ func ProjectID(d *dbx.DB, project string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
 	case err != nil:
-		return 0, pgerr.Error(err)
+		return 0, err
 	default:
 		if archived {
 			return -1, nil
