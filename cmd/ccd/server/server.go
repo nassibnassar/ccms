@@ -235,7 +235,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 
 	tx, err := s.dp.Begin(context.TODO())
 	if err != nil {
-		sendError(w, rqid, "start transaction: "+pgerr.String(err))
+		sendError(w, rqid, "start transaction: "+err.Error())
 		return
 	}
 	defer tx.Rollback(context.TODO())
@@ -303,12 +303,12 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 
 	if errorState {
 		if err = tx.Rollback(context.TODO()); err != nil {
-			sendError(w, rqid, "rollback: "+pgerr.String(err))
+			sendError(w, rqid, "rollback: "+err.Error())
 			return
 		}
 	} else {
 		if err = tx.Commit(context.TODO()); err != nil {
-			sendError(w, rqid, "commit: "+pgerr.String(err))
+			sendError(w, rqid, "commit: "+err.Error())
 			return
 		}
 	}

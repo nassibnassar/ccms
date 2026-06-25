@@ -47,7 +47,7 @@ func ArchivedProjectID(d *dbx.DB, project string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
 	case err != nil:
-		return 0, pgerr.Error(err)
+		return 0, err
 	default:
 		return id, nil
 	}
@@ -62,7 +62,10 @@ func IsValidTargetProject(project string) bool {
 
 func Projects(d *dbx.DB, archived bool) ([]string, error) {
 	sql := "select name from ccms.project where archived=$1"
-	rows, _ := d.Q.Query(d.C, sql, archived)
+	rows, err := d.Q.Query(d.C, sql, archived)
+	if err != nil {
+		return nil, pgerr.Error(err)
+	}
 	projects, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
 		return nil, err
@@ -267,7 +270,10 @@ func alterProjectAddFund(d *dbx.DB, project, fund string, projectID int64) error
 func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) error {
 	if fund == "*" {
 		sql := "select f.name from ccms.project p join ccms.project_fund pf on p.id=pf.project_id join ccms.fund f on pf.fund_id=f.id where p.name=$1"
-		rows, _ := d.Q.Query(d.C, sql, project)
+		rows, err := d.Q.Query(d.C, sql, project)
+		if err != nil {
+			return pgerr.Error(err)
+		}
 		funds, err := pgx.CollectRows(rows, pgx.RowTo[string])
 		if err != nil {
 			return err

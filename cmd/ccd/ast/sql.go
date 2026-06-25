@@ -317,15 +317,6 @@ func evalExpr(d *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eval
 			return err
 		}
 		b.WriteString(f)
-		// rows, _ := d.Q.Query(d.C, "select sql from ccms.filter where name=$1", e.Filter)
-		// filter, err := pgx.CollectRows(rows, pgx.RowTo[string])
-		// if err != nil {
-		// 	return pgerr.Error(err)
-		// }
-		// if len(filter) == 0 {
-		// 	return errors.New("filter \"" + e.Filter + "\" does not exist")
-		// }
-		// b.WriteString(filter[0])
 
 		b.WriteRune(')')
 	case *TagExpr:

@@ -31,7 +31,10 @@ func FilterExists(d *dbx.DB, filter string) (bool, error) {
 }
 
 func FilterSQL(d *dbx.DB, filter string) (string, error) {
-	rows, _ := d.Q.Query(d.C, "select sql from ccms.filter where name=$1", filter)
+	rows, err := d.Q.Query(d.C, "select sql from ccms.filter where name=$1", filter)
+	if err != nil {
+		return "", pgerr.Error(err)
+	}
 	filterSQL, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
 		return "", err

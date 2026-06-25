@@ -58,7 +58,10 @@ func SetTable(set set.Set) string {
 
 func Sets(d *dbx.DB) ([]string, error) {
 	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id where not p.archived"
-	rows, _ := d.Q.Query(d.C, sql)
+	rows, err := d.Q.Query(d.C, sql)
+	if err != nil {
+		return nil, pgerr.Error(err)
+	}
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
 		return nil, err
@@ -78,7 +81,10 @@ func Sets(d *dbx.DB) ([]string, error) {
 
 func SetsInProject(d *dbx.DB, project string) ([]string, error) {
 	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id where p.name=$1"
-	rows, _ := d.Q.Query(d.C, sql, project)
+	rows, err := d.Q.Query(d.C, sql, project)
+	if err != nil {
+		return nil, pgerr.Error(err)
+	}
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
 		return nil, err
