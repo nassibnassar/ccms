@@ -107,7 +107,7 @@ func databaseServer(opt *option.Server) error {
 		return err
 	}
 
-	s := &svr{dp: dc, conf: conf, opt: opt}
+	s := &svr{dp: nil, conf: conf, opt: opt}
 
 	if err = startServer(s); err != nil {
 		return fmt.Errorf("server stopped: %s", err)
@@ -194,7 +194,16 @@ func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int64) {
-	s.d = &dbx.DB{C: context.TODO(), Q: s.dp}
+	///////////////////////////////////////////////////////////////
+	dc, err := newDBConn(context.TODO(), s.conf.DB.ConnString())
+	if err != nil {
+		sendError(w, rqid, err.Error())
+		return
+	}
+	defer dc.Close(context.TODO())
+	///////////////////////////////////////////////////////////////
+
+	s.d = &dbx.DB{C: context.TODO(), Q: dc}
 	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
 
 	var req protocol.Request
@@ -240,26 +249,20 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	// 	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
 	// }
 
-	///////////////////////////////////////////////////////////////
-	dc, err := newDBConn(context.TODO(), s.conf.DB.ConnString())
-	if err != nil {
-		sendError(w, rqid, err.Error())
-		return
-	}
-	defer dc.Close(context.TODO())
-	///////////////////////////////////////////////////////////////
-
-	// tx, err := s.dp.Begin(context.TODO())
-	tx, err := dc.Begin(context.TODO())
-	if err != nil {
-		sendError(w, rqid, "start transaction: "+err.Error())
-		return
-	}
-	defer tx.Rollback(context.TODO())
+	/*
+		// tx, err := s.dp.Begin(context.TODO())
+		tx, err := dc.Begin(context.TODO())
+		if err != nil {
+			sendError(w, rqid, "start transaction: "+err.Error())
+			return
+		}
+		defer tx.Rollback(context.TODO())
+	*/
 	// s.d = &dbx.DB{C: context.TODO(), Q: tx}
 	s.d = &dbx.DB{C: context.TODO(), Q: dc}
 
 	errorState := false
+	_ = errorState
 	resp := ccms.NewResponse()
 	cmds := node.(*ast.ParseTree).Commands
 	for i := range cmds {
@@ -318,17 +321,19 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		}
 	}
 
-	if errorState {
-		if err = tx.Rollback(context.TODO()); err != nil {
-			sendError(w, rqid, "rollback: "+err.Error())
-			return
+	/*
+		if errorState {
+			if err = tx.Rollback(context.TODO()); err != nil {
+				sendError(w, rqid, "rollback: "+err.Error())
+				return
+			}
+		} else {
+			if err = tx.Commit(context.TODO()); err != nil {
+				sendError(w, rqid, "commit: "+err.Error())
+				return
+			}
 		}
-	} else {
-		if err = tx.Commit(context.TODO()); err != nil {
-			sendError(w, rqid, "commit: "+err.Error())
-			return
-		}
-	}
+	*/
 
 	sendResponse(w, rqid, resp)
 }
