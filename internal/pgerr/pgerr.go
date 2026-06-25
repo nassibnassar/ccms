@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -12,7 +13,11 @@ func Error(err error) error {
 }
 
 func String(err error) string {
-	e := err.(*pgconn.PgError)
+	e, ok := err.(*pgconn.PgError)
+	if !ok {
+		log.Info("internal server error: pgerr: error is type %T", err)
+		return err.Error()
+	}
 	var b strings.Builder
 	b.WriteString(e.Message)
 	if e.Detail != "" {
