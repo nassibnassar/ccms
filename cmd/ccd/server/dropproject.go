@@ -4,14 +4,15 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/dbx"
 )
 
-func dropProjectStmt(s *svr, rqid int64, cmd *ast.DropProjectStmt) *ccms.Result {
+func dropProjectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.DropProjectStmt) *ccms.Result {
 	if !cat.IsValidTargetProject(cmd.Project) {
 		return cmderr("invalid target project \"" + cmd.Project + "\"")
 	}
 
-	projectID, err := cat.ProjectID(s.d, cmd.Project)
+	projectID, err := cat.ProjectID(d, cmd.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -22,7 +23,7 @@ func dropProjectStmt(s *svr, rqid int64, cmd *ast.DropProjectStmt) *ccms.Result 
 		return cmderr("project \"" + cmd.Project + "\" is not archived")
 	}
 
-	if err := cat.DropProject(s.d, cmd.Project); err != nil {
+	if err := cat.DropProject(d, cmd.Project); err != nil {
 		return cmderr("dropping project: " + err.Error())
 	}
 

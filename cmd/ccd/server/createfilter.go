@@ -6,11 +6,12 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/pgerr"
 )
 
-func createFilterStmt(s *svr, rqid int64, cmd *ast.CreateFilterStmt) *ccms.Result {
-	filterExists, err := cat.FilterExists(s.d, cmd.Filter)
+func createFilterStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateFilterStmt) *ccms.Result {
+	filterExists, err := cat.FilterExists(d, cmd.Filter)
 	if err != nil {
 		return cmderr(err.Error())
 	}
@@ -31,12 +32,12 @@ func createFilterStmt(s *svr, rqid int64, cmd *ast.CreateFilterStmt) *ccms.Resul
 	a.WriteString(cmd.Filter)
 	a.WriteString(" where ")
 
-	sql, err := cmd.SQL(s.d, &a)
+	sql, err := cmd.SQL(d, &a)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 	q := "insert into ccms.filter (name, command, sql) values ($1, $2, $3)"
-	if _, err := s.d.Q.Exec(s.d.C, q, cmd.Filter, a.String(), sql); err != nil {
+	if _, err := d.Q.Exec(d.C, q, cmd.Filter, a.String(), sql); err != nil {
 		return cmderr(pgerr.String(err))
 	}
 	return ccms.NewResult("create filter")

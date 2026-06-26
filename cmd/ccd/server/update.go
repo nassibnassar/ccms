@@ -13,13 +13,13 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
+func updateStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	set := set.Parse(cmd.Set)
 
 	if set.Set != "object" {
 		return cmderr("set \"" + cmd.Set + "\" is not valid for update")
 	}
-	projectID, err := cat.ProjectID(s.d, set.Project)
+	projectID, err := cat.ProjectID(d, set.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -36,7 +36,7 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	}
 
 	idInt, _ := strconv.ParseInt(cmd.IDValue.Value, 10, 64)
-	idExists, err := objectIDExists(s.d, idInt)
+	idExists, err := objectIDExists(d, idInt)
 	if err != nil {
 		return cmderr("checking if object ID exists: " + err.Error())
 	}
@@ -57,7 +57,7 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 		if !cmd.ValueNull {
 			// look up fund id
 			var fundID int64
-			fundID, err = cat.FundID(s.d, cmd.Value)
+			fundID, err = cat.FundID(d, cmd.Value)
 			if err != nil {
 				return cmderr("looking up fund: " + err.Error())
 			}
@@ -66,7 +66,7 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 			}
 			// ensure fund is valid for project
 			var inProject bool
-			inProject, err = cat.ProjectFundExists(s.d, projectID, fundID)
+			inProject, err = cat.ProjectFundExists(d, projectID, fundID)
 			if err != nil {
 				return cmderr("looking up project fund: " + err.Error())
 			}
@@ -83,7 +83,7 @@ func updateStmt(s *svr, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	if _, err := s.d.Q.Exec(s.d.C, sql); err != nil {
+	if _, err := d.Q.Exec(d.C, sql); err != nil {
 		return cmderr("executing update: " + err.Error())
 	}
 

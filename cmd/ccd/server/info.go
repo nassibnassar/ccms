@@ -4,9 +4,10 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/doc"
+	"github.com/indexdata/ccms/internal/dbx"
 )
 
-func infoStmt(s *svr, cmd *ast.InfoStmt) *ccms.Result {
+func infoStmt(s *svr, d *dbx.DB, cmd *ast.InfoStmt) *ccms.Result {
 	if cmd.Topic == "" {
 		result := ccms.NewResult("info")
 		result.AddField("info", "text")

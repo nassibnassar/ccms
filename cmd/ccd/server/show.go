@@ -10,19 +10,19 @@ import (
 	"github.com/indexdata/ccms/internal/dbx"
 )
 
-func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
+func showStmt(s *svr, d *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 	result := ccms.NewResult("show")
 	switch cmd.Type {
 	case "filters":
 		result.AddField("filter_name", "text")
 		result.AddField("definition", "text")
-		if err := addShowFiltersData(s.d, result); err != nil {
+		if err := addShowFiltersData(d, result); err != nil {
 			return cmderr("retrieving filters: " + err.Error())
 		}
 	case "funds":
 		result.AddField("fund_name", "text")
 		result.AddField("fund_title", "text")
-		if err := addShowFundsData(s.d, result); err != nil {
+		if err := addShowFundsData(d, result); err != nil {
 			return cmderr("retrieving funds: " + err.Error())
 		}
 	//case "roles":
@@ -31,19 +31,19 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 	//        addShowRolesData(s.cat, result)
 	case "projects":
 		result.AddField("project_name", "text")
-		err := addShowProjectsData(s.d, result, cmd.Archived)
+		err := addShowProjectsData(d, result, cmd.Archived)
 		if err != nil {
 			return cmderr("retrieving projects: " + err.Error())
 		}
 	case "project":
 		result.AddField("property", "text")
 		result.AddField("value", "text")
-		if err := addShowProjectData(s.d, result, cmd.Name); err != nil {
+		if err := addShowProjectData(d, result, cmd.Name); err != nil {
 			return cmderr("retrieving project data: " + err.Error())
 		}
 	case "sets":
 		if cmd.In != "" {
-			projectID, err := cat.ProjectID(s.d, cmd.In)
+			projectID, err := cat.ProjectID(d, cmd.In)
 			if err != nil {
 				return cmderr("checking if project exists: " + err.Error())
 			}
@@ -52,7 +52,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 			}
 		}
 		result.AddField("set_name", "text")
-		if err := addShowSetsData(s.d, result, cmd.In); err != nil {
+		if err := addShowSetsData(d, result, cmd.In); err != nil {
 			return cmderr("retrieving sets: " + err.Error())
 		}
 	case "tags":
@@ -61,7 +61,7 @@ func showStmt(s *svr, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("user_name", "text")
 		result.AddField("superuser", "boolean")
 		result.AddField("login", "boolean")
-		if err := addShowUsersData(s.d, result); err != nil {
+		if err := addShowUsersData(d, result); err != nil {
 			return cmderr("retrieving users: " + err.Error())
 		}
 	default:

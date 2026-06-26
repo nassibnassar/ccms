@@ -4,14 +4,15 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/dbx"
 )
 
-func archiveProjectStmt(s *svr, rqid int64, cmd *ast.ArchiveProjectStmt) *ccms.Result {
+func archiveProjectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.ArchiveProjectStmt) *ccms.Result {
 	if !cat.IsValidTargetProject(cmd.Project) {
 		return cmderr("invalid target project \"" + cmd.Project + "\"")
 	}
 
-	projectID, err := cat.ProjectID(s.d, cmd.Project)
+	projectID, err := cat.ProjectID(d, cmd.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -22,7 +23,7 @@ func archiveProjectStmt(s *svr, rqid int64, cmd *ast.ArchiveProjectStmt) *ccms.R
 		return cmderr("project \"" + cmd.Project + "\" is already archived")
 	}
 
-	newProjectName, err := cat.ArchiveProject(s.d, cmd.Project)
+	newProjectName, err := cat.ArchiveProject(d, cmd.Project)
 	if err != nil {
 		return cmderr("archiving project: " + err.Error())
 	}

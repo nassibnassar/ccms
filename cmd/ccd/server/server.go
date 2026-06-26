@@ -33,12 +33,8 @@ import (
 )
 
 type svr struct {
-	d *dbx.DB
 	// cat *cat.Catalog
-	dp dbx.Queryable
-	// ctx context.Context
-	// tx   pgx.Tx
-	// dq   dbx.Queryable
+	dp   dbx.Queryable
 	conf *config.Config
 	opt  *option.Server
 }
@@ -203,11 +199,12 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	defer dc.Close(context.TODO())
 	///////////////////////////////////////////////////////////////
 
-	s.d = &dbx.DB{C: context.TODO(), Q: dc}
+	d := &dbx.DB{C: context.TODO(), Q: dc}
+
 	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
 
 	var req protocol.Request
-	user, err := s.ReadRequest(w, r, &req)
+	user, err := s.ReadRequest(d, w, r, &req)
 	if err != nil {
 		log.Info("[%d] %s - error: %v", rqid, addr, err)
 		resp := ccms.NewResponse()
@@ -259,7 +256,7 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		defer tx.Rollback(context.TODO())
 	*/
 	// s.d = &dbx.DB{C: context.TODO(), Q: tx}
-	s.d = &dbx.DB{C: context.TODO(), Q: dc}
+	// d = &dbx.DB{C: context.TODO(), Q: dc}
 
 	errorState := false
 	_ = errorState
@@ -269,39 +266,39 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		var result *ccms.Result
 		switch cmd := cmds[i].(type) {
 		case *ast.AlterProjectStmt:
-			result = alterProjectStmt(s, rqid, cmd)
+			result = alterProjectStmt(s, d, rqid, cmd)
 		case *ast.ArchiveProjectStmt:
-			result = archiveProjectStmt(s, rqid, cmd)
+			result = archiveProjectStmt(s, d, rqid, cmd)
 		case *ast.CreateFilterStmt:
-			result = createFilterStmt(s, rqid, cmd)
+			result = createFilterStmt(s, d, rqid, cmd)
 		case *ast.CreateFundStmt:
-			result = createFundStmt(s, rqid, cmd)
+			result = createFundStmt(s, d, rqid, cmd)
 		case *ast.CreateProjectStmt:
-			result = createProjectStmt(s, rqid, cmd)
+			result = createProjectStmt(s, d, rqid, cmd)
 		case *ast.CreateSetStmt:
-			result = createSetStmt(s, rqid, cmd)
+			result = createSetStmt(s, d, rqid, cmd)
 		case *ast.CreateUserStmt:
-			result = createUserStmt(s, rqid, cmd)
+			result = createUserStmt(s, d, rqid, cmd)
 		case *ast.DeleteStmt:
-			result = deleteStmt(s, rqid, cmd)
+			result = deleteStmt(s, d, rqid, cmd)
 		// case *ast.DropProjectStmt:
-		// 	result = dropProjectStmt(s, rqid, cmd)
+		// 	result = dropProjectStmt(s,d, rqid, cmd)
 		case *ast.DropSetStmt:
-			result = dropSetStmt(s, rqid, cmd)
+			result = dropSetStmt(s, d, rqid, cmd)
 		case *ast.InfoStmt:
-			result = infoStmt(s, cmd)
+			result = infoStmt(s, d, cmd)
 		case *ast.InsertStmt:
-			result = insertStmt(s, rqid, cmd)
+			result = insertStmt(s, d, rqid, cmd)
 		case *ast.PingStmt:
 			result = ccms.NewResult("ping")
 		case *ast.SelectStmt:
-			result = selectStmt(s, rqid, cmd)
+			result = selectStmt(s, d, rqid, cmd)
 		case *ast.SelectVersionStmt:
-			result = selectVersionStmt(s, rqid, cmd)
+			result = selectVersionStmt(s, d, rqid, cmd)
 		case *ast.ShowStmt:
-			result = showStmt(s, cmd)
+			result = showStmt(s, d, cmd)
 		case *ast.UpdateStmt:
-			result = updateStmt(s, rqid, cmd)
+			result = updateStmt(s, d, rqid, cmd)
 		case nil:
 			continue
 		default:
@@ -367,8 +364,8 @@ func cmderr(message string) *ccms.Result {
 // 	HTTPError(w, errString, statusCode)
 // }
 
-func (s *svr) ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct any) (string, error) {
-	user, err := s.HandleBasicAuth(w, r)
+func (s *svr) ReadRequest(d *dbx.DB, w http.ResponseWriter, r *http.Request, requestStruct any) (string, error) {
+	user, err := s.HandleBasicAuth(d, w, r)
 	if err != nil {
 		return "", err
 	}
@@ -386,12 +383,12 @@ func (s *svr) ReadRequest(w http.ResponseWriter, r *http.Request, requestStruct 
 	return user, nil
 }
 
-func (s *svr) HandleBasicAuth(w http.ResponseWriter, r *http.Request) (string, error) {
+func (s *svr) HandleBasicAuth(d *dbx.DB, w http.ResponseWriter, r *http.Request) (string, error) {
 	user, password, ok := r.BasicAuth()
 	if !ok {
 		return "", fmt.Errorf("authentication failed")
 	}
-	auth, err := cat.Authenticate(s.conf.Security.SecretKey, s.d, user, password)
+	auth, err := cat.Authenticate(s.conf.Security.SecretKey, d, user, password)
 	if err != nil {
 		return "", err
 	}

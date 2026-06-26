@@ -7,19 +7,20 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/global"
 	"github.com/indexdata/ccms/internal/set"
 	"github.com/jackc/pgx/v5/pgtype/zeronull"
 )
 
-func selectVersionStmt(s *svr, rqid int64, cmd *ast.SelectVersionStmt) *ccms.Result {
+func selectVersionStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.SelectVersionStmt) *ccms.Result {
 	result := ccms.NewResult("select")
 	result.AddField("version", "text")
 	result.AddData([]any{"CCMS " + global.Version})
 	return result
 }
 
-func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
+func selectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 
 	f := cmd.Query.(*ast.QueryClause).Offset.(*ast.OffsetClause)
 	if f.Valid {
@@ -39,14 +40,14 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		return cmderr("set \"reserve\" is no longer supported; use \"<project>.object\"")
 	}
 	fromSet := set.Parse(from)
-	projectID, err := cat.ProjectID(s.d, fromSet.Project)
+	projectID, err := cat.ProjectID(d, fromSet.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
 	if projectID == 0 {
 		return cmderr("project \"" + fromSet.Project + "\" does not exist")
 	}
-	setExists, err := cat.SetExists(s.d, fromSet)
+	setExists, err := cat.SetExists(d, fromSet)
 	if err != nil {
 		return cmderr("checking if set exists: " + err.Error())
 	}
@@ -70,20 +71,20 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 		}
 	}
 
-	sql, err := cmd.SQL(s.d)
+	sql, err := cmd.SQL(d)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 
 	switch a.Attr {
 	case "*":
-		result, err := runQuery(s, sql)
+		result, err := runQuery(s, d, sql)
 		if err != nil {
 			return cmderr(err.Error())
 		}
 		return result
 	case "count(*)":
-		result, err := runQueryCount(s, sql)
+		result, err := runQueryCount(s, d, sql)
 		if err != nil {
 			return cmderr(err.Error())
 		}
@@ -93,9 +94,9 @@ func selectStmt(s *svr, rqid int64, cmd *ast.SelectStmt) *ccms.Result {
 	}
 }
 
-func runQueryCount(s *svr, sql string) (*ccms.Result, error) {
+func runQueryCount(s *svr, d *dbx.DB, sql string) (*ccms.Result, error) {
 	var count int64
-	if err := s.d.Q.QueryRow(s.d.C, sql).Scan(&count); err != nil {
+	if err := d.Q.QueryRow(d.C, sql).Scan(&count); err != nil {
 		return nil, errors.New(internalError + err.Error())
 	}
 	result := ccms.NewResult("select")
@@ -104,8 +105,8 @@ func runQueryCount(s *svr, sql string) (*ccms.Result, error) {
 	return result, nil
 }
 
-func runQuery(s *svr, sql string) (*ccms.Result, error) {
-	rows, err := s.d.Q.Query(s.d.C, sql)
+func runQuery(s *svr, d *dbx.DB, sql string) (*ccms.Result, error) {
+	rows, err := d.Q.Query(d.C, sql)
 	if err != nil {
 		return nil, errors.New(internalError + err.Error())
 	}

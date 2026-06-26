@@ -4,10 +4,11 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
+	"github.com/indexdata/ccms/internal/dbx"
 )
 
-func createProjectStmt(s *svr, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Result {
-	projectID, err := cat.ProjectID(s.d, cmd.Project)
+func createProjectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Result {
+	projectID, err := cat.ProjectID(d, cmd.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -19,7 +20,7 @@ func createProjectStmt(s *svr, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Res
 		return cmderr("invalid project name \"" + cmd.Project + "\"")
 	}
 
-	if err := cat.CreateProject(s.d, cmd.Project); err != nil {
+	if err := cat.CreateProject(d, cmd.Project); err != nil {
 		return cmderr(err.Error())
 	}
 
