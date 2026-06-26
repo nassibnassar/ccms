@@ -7,8 +7,8 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -64,7 +64,7 @@ func Projects(d *dbx.DB, archived bool) ([]string, error) {
 	sql := "select name from ccms.project where archived=$1"
 	rows, err := d.Q.Query(d.C, sql, archived)
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, dberr.Error(err)
 	}
 	projects, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
@@ -84,15 +84,15 @@ func DropProject(d *dbx.DB, project string) error {
 
 	sql := "drop table " + project + ".object"
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	sql = "drop schema " + project
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	sql = "delete from ccms.project where name=$1"
 	if _, err := d.Q.Exec(d.C, sql, project); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -101,11 +101,11 @@ func ArchiveProject(d *dbx.DB, project string) (string, error) {
 	newName := archivalProjectName(project)
 	sql := "update ccms.project set name='" + newName + "', archived=true where name='" + project + "'"
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
-		return "", pgerr.Error(err)
+		return "", dberr.Error(err)
 	}
 	sql = "alter schema " + project + " rename to " + newName
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
-		return "", pgerr.Error(err)
+		return "", dberr.Error(err)
 	}
 	return newName, nil
 }
@@ -118,18 +118,18 @@ func archivalProjectName(project string) string {
 func CreateProject(d *dbx.DB, project string) error {
 	sql := "create schema " + project
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	sql = "insert into ccms.project (name, title) values ($1, $2)"
 	if _, err := d.Q.Exec(d.C, sql, project, makeTitle(project)); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	sql = "create table " + project + ".object (" +
 		"id bigint primary key," +
 		"decision boolean not null default false," +
 		"fund_id integer references ccms.fund (id))"
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -262,7 +262,7 @@ func alterProjectAddFund(d *dbx.DB, project, fund string, projectID int64) error
 	// add project fund
 	sql := "insert into ccms.project_fund (project_id, fund_id) values ($1, $2)"
 	if _, err := d.Q.Exec(d.C, sql, projectID, fundID); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -272,7 +272,7 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 		sql := "select f.name from ccms.project p join ccms.project_fund pf on p.id=pf.project_id join ccms.fund f on pf.fund_id=f.id where p.name=$1"
 		rows, err := d.Q.Query(d.C, sql, project)
 		if err != nil {
-			return pgerr.Error(err)
+			return dberr.Error(err)
 		}
 		funds, err := pgx.CollectRows(rows, pgx.RowTo[string])
 		if err != nil {
@@ -313,7 +313,7 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 	// drop project fund
 	sql := "delete from ccms.project_fund where project_id=$1 and fund_id=$2"
 	if _, err := d.Q.Exec(d.C, sql, projectID, fundID); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -338,7 +338,7 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 // 	// add project location
 // 	sql := "insert into ccms.project_location (project_id, location_id) values ($1, $2)"
 // 	if _, err := d.Q.Exec(d.C, sql, projectID, locationID); err != nil {
-// 		return pgerr.Error(err)
+// 		return dberr.Error(err)
 // 	}
 // 	return nil
 // }
@@ -347,7 +347,7 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 // 	if location == "*" {
 // 		sql := "delete from ccms.project_location where project_id=$1"
 // 		if _, err := d.Q.Exec(d.C, sql, projectID); err != nil {
-// 			return pgerr.Error(err)
+// 			return dberr.Error(err)
 // 		}
 // 		return nil
 // 	}
@@ -370,7 +370,7 @@ func alterProjectDropFund(d *dbx.DB, project, fund string, projectID int64) erro
 // 	// drop project location
 // 	sql := "delete from ccms.project_location where project_id=$1 and location_id=$2"
 // 	if _, err := d.Q.Exec(d.C, sql, projectID, locationID); err != nil {
-// 		return pgerr.Error(err)
+// 		return dberr.Error(err)
 // 	}
 // 	return nil
 // }
@@ -395,7 +395,7 @@ func alterProjectAddOrigin(d *dbx.DB, project, origin string, projectID int64) e
 	// add project origin
 	sql := "insert into ccms.project_origin (project_id, origin_id) values ($1, $2)"
 	if _, err := d.Q.Exec(d.C, sql, projectID, originID); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -404,7 +404,7 @@ func alterProjectDropOrigin(d *dbx.DB, project, origin string, projectID int64) 
 	if origin == "*" {
 		sql := "delete from ccms.project_origin where project_id=$1"
 		if _, err := d.Q.Exec(d.C, sql, projectID); err != nil {
-			return pgerr.Error(err)
+			return dberr.Error(err)
 		}
 		return nil
 	}
@@ -427,7 +427,7 @@ func alterProjectDropOrigin(d *dbx.DB, project, origin string, projectID int64) 
 	// drop project origin
 	sql := "delete from ccms.project_origin where project_id=$1 and origin_id=$2"
 	if _, err := d.Q.Exec(d.C, sql, projectID, originID); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -452,7 +452,7 @@ func alterProjectAddDestination(d *dbx.DB, project, destination string, projectI
 	// add project destination
 	sql := "insert into ccms.project_destination (project_id, destination_id) values ($1, $2)"
 	if _, err := d.Q.Exec(d.C, sql, projectID, destinationID); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -461,7 +461,7 @@ func alterProjectDropDestination(d *dbx.DB, project, destination string, project
 	if destination == "*" {
 		sql := "delete from ccms.project_destination where project_id=$1"
 		if _, err := d.Q.Exec(d.C, sql, projectID); err != nil {
-			return pgerr.Error(err)
+			return dberr.Error(err)
 		}
 		return nil
 	}
@@ -484,7 +484,7 @@ func alterProjectDropDestination(d *dbx.DB, project, destination string, project
 	// drop project destination
 	sql := "delete from ccms.project_destination where project_id=$1 and destination_id=$2"
 	if _, err := d.Q.Exec(d.C, sql, projectID, destinationID); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -509,7 +509,7 @@ func alterProjectAddTrack(d *dbx.DB, project, track string, projectID int64) err
 	// add project track
 	sql := "insert into ccms.project_track (project_id, track_id) values ($1, $2)"
 	if _, err := d.Q.Exec(d.C, sql, projectID, trackID); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -518,7 +518,7 @@ func alterProjectDropTrack(d *dbx.DB, project, track string, projectID int64) er
 	if track == "*" {
 		sql := "delete from ccms.project_track where project_id=$1"
 		if _, err := d.Q.Exec(d.C, sql, projectID); err != nil {
-			return pgerr.Error(err)
+			return dberr.Error(err)
 		}
 		return nil
 	}
@@ -541,7 +541,7 @@ func alterProjectDropTrack(d *dbx.DB, project, track string, projectID int64) er
 	// drop project track
 	sql := "delete from ccms.project_track where project_id=$1 and track_id=$2"
 	if _, err := d.Q.Exec(d.C, sql, projectID, trackID); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -555,7 +555,7 @@ func LocationID(d *dbx.DB, location string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
 	case err != nil:
-		return 0, pgerr.Error(err)
+		return 0, dberr.Error(err)
 	default:
 		return id, nil
 	}
@@ -570,7 +570,7 @@ func OriginID(d *dbx.DB, origin string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
 	case err != nil:
-		return 0, pgerr.Error(err)
+		return 0, dberr.Error(err)
 	default:
 		return id, nil
 	}
@@ -585,7 +585,7 @@ func DestinationID(d *dbx.DB, destination string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
 	case err != nil:
-		return 0, pgerr.Error(err)
+		return 0, dberr.Error(err)
 	default:
 		return id, nil
 	}
@@ -600,7 +600,7 @@ func TrackID(d *dbx.DB, track string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
 	case err != nil:
-		return 0, pgerr.Error(err)
+		return 0, dberr.Error(err)
 	default:
 		return id, nil
 	}
@@ -614,7 +614,7 @@ func ProjectFundExists(d *dbx.DB, projectID, fundID int64) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return false, dberr.Error(err)
 	default:
 		return true, nil
 	}
@@ -628,7 +628,7 @@ func objectFundExists(d *dbx.DB, project string, fundID int64) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return false, dberr.Error(err)
 	default:
 		return true, nil
 	}
@@ -642,7 +642,7 @@ func objectFundExists(d *dbx.DB, project string, fundID int64) (bool, error) {
 // 	case errors.Is(err, pgx.ErrNoRows):
 // 		return false, nil
 // 	case err != nil:
-// 		return false, pgerr.Error(err)
+// 		return false, dberr.Error(err)
 // 	default:
 // 		return true, nil
 // 	}
@@ -656,7 +656,7 @@ func projectOriginExists(d *dbx.DB, projectID, originID int64) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return false, dberr.Error(err)
 	default:
 		return true, nil
 	}
@@ -670,7 +670,7 @@ func projectDestinationExists(d *dbx.DB, projectID, destinationID int64) (bool, 
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return false, dberr.Error(err)
 	default:
 		return true, nil
 	}
@@ -684,7 +684,7 @@ func projectTrackExists(d *dbx.DB, projectID, trackID int64) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return false, dberr.Error(err)
 	default:
 		return true, nil
 	}
@@ -717,7 +717,7 @@ func AlterProjectSetProperty(d *dbx.DB, projectName, property, value string, str
 
 	sql := "update ccms.project set \"" + property + "\"=nullif($1, '') where name=$2"
 	if _, err := d.Q.Exec(d.C, sql, value, projectName); err != nil {
-		return errors.New("updating project: " + pgerr.String(err))
+		return errors.New("updating project: " + dberr.String(err))
 	}
 	return nil
 }
@@ -782,7 +782,7 @@ select coalesce(p.title, '') title,
 	case errors.Is(err, pgx.ErrNoRows):
 		return nil, fmt.Errorf("project %q does not exist", project)
 	case err != nil:
-		return nil, pgerr.Error(err)
+		return nil, dberr.Error(err)
 	default:
 	}
 	if action != "" {

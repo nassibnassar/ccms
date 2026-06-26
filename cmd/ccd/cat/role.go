@@ -5,14 +5,14 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
 func CreateRole(d *dbx.DB, role string) error {
 	sql := "insert into ccms.role (rolename) values ($1)"
 	if _, err := d.Q.Exec(d.C, sql, role); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -32,14 +32,14 @@ func Roles(d *dbx.DB) ([]Role, error) {
 	q := "select r.name, u.name from ccms.role r left join ccms.role_user ru on r.id=ru.role_id left join ccms.auth u on ru.user_id=u.id"
 	rows, err := d.Q.Query(d.C, q)
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, dberr.Error(err)
 	}
 	defer rows.Close()
 	roles := make(map[string]roleUsers)
 	for rows.Next() {
 		var rolename, username string
 		if err := rows.Scan(&rolename, &username); err != nil {
-			return nil, pgerr.Error(err)
+			return nil, dberr.Error(err)
 		}
 		users := roles[rolename]
 		if users.users == nil {
@@ -51,7 +51,7 @@ func Roles(d *dbx.DB) ([]Role, error) {
 		}
 	}
 	if err := rows.Err(); err != nil {
-		return nil, pgerr.Error(err)
+		return nil, dberr.Error(err)
 	}
 
 	roles1 := make([]Role, len(roles))

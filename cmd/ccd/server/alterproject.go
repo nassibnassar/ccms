@@ -4,7 +4,7 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
-	"github.com/indexdata/ccms/internal/dbx"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
 func alterProjectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.AlterProjectStmt) *ccms.Result {

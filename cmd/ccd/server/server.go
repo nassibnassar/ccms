@@ -18,16 +18,16 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/cmd/ccd/config"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/cmd/ccd/harvest"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/option"
 	"github.com/indexdata/ccms/cmd/ccd/osutil"
 	"github.com/indexdata/ccms/cmd/ccd/parser"
 	"github.com/indexdata/ccms/cmd/ccd/process"
-	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/global"
-	"github.com/indexdata/ccms/internal/pgerr"
 	"github.com/indexdata/ccms/internal/protocol"
 	"github.com/jackc/pgx/v5"
 )
@@ -472,27 +472,27 @@ func newDBConn(ctx context.Context, connString string) (*pgx.Conn, error) {
 func setDatabaseParameters(ctx context.Context, conn *pgx.Conn) error {
 	q := "set search_path = 'public'"
 	if _, err := conn.Exec(ctx, q); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	q = "set idle_in_transaction_session_timeout=0"
 	if _, err := conn.Exec(ctx, q); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	q = "set idle_session_timeout=0"
 	if _, err := conn.Exec(ctx, q); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	q = "set statement_timeout=0"
 	if _, err := conn.Exec(ctx, q); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	q = "set timezone='UTC'"
 	if _, err := conn.Exec(ctx, q); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	q = "set default_transaction_isolation=serializable"
 	if _, err := conn.Exec(ctx, q); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }

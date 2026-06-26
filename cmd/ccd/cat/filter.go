@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -24,7 +24,7 @@ func FilterExists(d *dbx.DB, filter string) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return false, dberr.Error(err)
 	default:
 		return true, nil
 	}
@@ -33,7 +33,7 @@ func FilterExists(d *dbx.DB, filter string) (bool, error) {
 func FilterSQL(d *dbx.DB, filter string) (string, error) {
 	rows, err := d.Q.Query(d.C, "select sql from ccms.filter where name=$1", filter)
 	if err != nil {
-		return "", pgerr.Error(err)
+		return "", dberr.Error(err)
 	}
 	filterSQL, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
@@ -49,14 +49,14 @@ func Filters(d *dbx.DB) ([]Filter, error) {
 	sql := "select name, command from ccms.filter"
 	rows, err := d.Q.Query(d.C, sql)
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, dberr.Error(err)
 	}
 	defer rows.Close()
 	filters := make([]Filter, 0)
 	for rows.Next() {
 		var name, command string
 		if err := rows.Scan(&name, &command); err != nil {
-			return nil, pgerr.Error(err)
+			return nil, dberr.Error(err)
 		}
 		filters = append(filters, Filter{
 			Name:       name,
@@ -64,7 +64,7 @@ func Filters(d *dbx.DB) ([]Filter, error) {
 		})
 	}
 	if err := rows.Err(); err != nil {
-		return nil, pgerr.Error(err)
+		return nil, dberr.Error(err)
 	}
 	return filters, nil
 }

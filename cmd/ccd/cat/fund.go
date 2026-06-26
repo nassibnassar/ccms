@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/prop"
 	"github.com/jackc/pgx/v5"
 )
@@ -14,7 +14,7 @@ import (
 func CreateFund(d *dbx.DB, fund string) error {
 	sql := "insert into ccms.fund (name, title) values ($1, $2)"
 	if _, err := d.Q.Exec(d.C, sql, fund, makeTitle(fund)); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -28,7 +28,7 @@ func FundID(d *dbx.DB, fund string) (int64, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
 	case err != nil:
-		return 0, pgerr.Error(err)
+		return 0, dberr.Error(err)
 	default:
 		return id, nil
 	}

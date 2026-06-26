@@ -6,8 +6,8 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
-	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
 func createFilterStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateFilterStmt) *ccms.Result {
@@ -38,7 +38,7 @@ func createFilterStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateFilterStmt) 
 	}
 	q := "insert into ccms.filter (name, command, sql) values ($1, $2, $3)"
 	if _, err := d.Q.Exec(d.C, q, cmd.Filter, a.String(), sql); err != nil {
-		return cmderr(pgerr.String(err))
+		return cmderr(dberr.String(err))
 	}
 	return ccms.NewResult("create filter")
 }

@@ -6,8 +6,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/internal/set"
 	"github.com/jackc/pgx/v5"
 )
@@ -28,7 +28,7 @@ func SetExists(d *dbx.DB, set set.Set) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return false, dberr.Error(err)
 	default:
 		return true, nil
 	}
@@ -60,7 +60,7 @@ func Sets(d *dbx.DB) ([]string, error) {
 	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id where not p.archived"
 	rows, err := d.Q.Query(d.C, sql)
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, dberr.Error(err)
 	}
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
@@ -83,7 +83,7 @@ func SetsInProject(d *dbx.DB, project string) ([]string, error) {
 	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id where p.name=$1"
 	rows, err := d.Q.Query(d.C, sql, project)
 	if err != nil {
-		return nil, pgerr.Error(err)
+		return nil, dberr.Error(err)
 	}
 	sets, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
@@ -111,7 +111,7 @@ func CreateSet(d *dbx.DB, set set.Set) error {
 	sql := "create table " + SetTable(set) + "(" +
 		"id bigint primary key)"
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	projectID, err := ProjectID(d, set.Project)
 	if err != nil {
@@ -119,7 +119,7 @@ func CreateSet(d *dbx.DB, set set.Set) error {
 	}
 	sql = "insert into ccms.sets (project_id, name) values ($1, $2)"
 	if _, err := d.Q.Exec(d.C, sql, projectID, set.Set); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }
@@ -127,7 +127,7 @@ func CreateSet(d *dbx.DB, set set.Set) error {
 func DropSet(d *dbx.DB, set set.Set) error {
 	q := "drop table " + SetTable(set)
 	if _, err := d.Q.Exec(d.C, q); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	projectID, err := ProjectID(d, set.Project)
 	if err != nil {
@@ -135,7 +135,7 @@ func DropSet(d *dbx.DB, set set.Set) error {
 	}
 	sql := "delete from ccms.sets where project_id=$1 and name=$2"
 	if _, err := d.Q.Exec(d.C, sql, projectID, set.Set); err != nil {
-		return pgerr.Error(err)
+		return dberr.Error(err)
 	}
 	return nil
 }

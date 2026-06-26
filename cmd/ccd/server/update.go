@@ -7,8 +7,8 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
-	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/internal/set"
 	"github.com/jackc/pgx/v5"
 )
@@ -98,7 +98,7 @@ func objectIDExists(d *dbx.DB, id int64) (bool, error) {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
 	case err != nil:
-		return false, pgerr.Error(err)
+		return false, dberr.Error(err)
 	default:
 		return true, nil
 	}

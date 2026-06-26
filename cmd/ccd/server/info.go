@@ -3,8 +3,8 @@ package server
 import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/cmd/ccd/doc"
-	"github.com/indexdata/ccms/internal/dbx"
 )
 
 func infoStmt(s *svr, d *dbx.DB, cmd *ast.InfoStmt) *ccms.Result {

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/marcxml"
-	"github.com/indexdata/ccms/internal/dbx"
 	"github.com/jackc/pgx/v5"
 	"github.com/nassibnassar/goharvest/oai"
 )

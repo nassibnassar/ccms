@@ -6,7 +6,7 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
-	"github.com/indexdata/ccms/internal/dbx"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
 func createUserStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateUserStmt) *ccms.Result {

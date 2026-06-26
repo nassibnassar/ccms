@@ -4,8 +4,8 @@ import (
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
-	"github.com/indexdata/ccms/internal/dbx"
-	"github.com/indexdata/ccms/internal/pgerr"
+	"github.com/indexdata/ccms/cmd/ccd/dberr"
+	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/internal/set"
 )
 
@@ -44,7 +44,7 @@ func deleteStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.DeleteStmt) *ccms.Result
 		return cmderr(err.Error())
 	}
 	if _, err := d.Q.Exec(d.C, sql); err != nil {
-		return cmderr("deleting: " + pgerr.String(err))
+		return cmderr("deleting: " + dberr.String(err))
 	}
 
 	return ccms.NewResult("delete")

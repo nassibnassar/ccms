@@ -1,4 +1,4 @@
-package pgerr
+package dberr
 
 import (
 	"errors"
