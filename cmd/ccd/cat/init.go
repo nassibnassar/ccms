@@ -25,13 +25,20 @@ type auth struct {
 	salt      []byte
 }
 
-func Initialize(program string, dp dbx.Queryable, security *config.Security) error {
-	exists, err := initSchemaExists(dp)
+func Initialize(program string, connString string, security *config.Security) error {
+	ctx := context.TODO()
+	conn, err := dbx.Connect(ctx, connString)
 	if err != nil {
-		return fmt.Errorf("checking if database initialized: %w", err)
+		return err
+	}
+	defer conn.Close(ctx)
+
+	exists, err := initSchemaExists(conn, ctx)
+	if err != nil {
+		return fmt.Errorf("checking if database initialized: %v", err)
 	}
 	if !exists {
-		if err = createSystemSchema(program, dp, security); err != nil {
+		if err = createSystemSchema(program, conn, ctx, security); err != nil {
 			return err
 		}
 	} else {
@@ -389,10 +396,10 @@ func createFilter(tx pgx.Tx) error {
 	return nil
 }
 
-func initSchemaExists(dp dbx.Queryable) (bool, error) {
+func initSchemaExists(conn *pgx.Conn, ctx context.Context) (bool, error) {
 	var q = "select 1 from pg_namespace where nspname=$1"
 	var n int32
-	err := dp.QueryRow(context.TODO(), q, "ccms").Scan(&n)
+	err := conn.QueryRow(ctx, q, "ccms").Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -403,21 +410,20 @@ func initSchemaExists(dp dbx.Queryable) (bool, error) {
 	}
 }
 
-func createSystemSchema(program string, dq dbx.Queryable, security *config.Security) error {
-	dp := dq.(*pgx.Conn)
-	tx, err := dp.Begin(context.TODO())
+func createSystemSchema(program string, conn *pgx.Conn, ctx context.Context, security *config.Security) error {
+	tx, err := conn.Begin(ctx)
 	if err != nil {
 		return dberr.Error(err)
 	}
-	defer tx.Rollback(context.TODO())
+	defer tx.Rollback(ctx)
 
 	q := "create extension if not exists pg_trgm"
-	if _, err = tx.Exec(context.TODO(), q); err != nil {
+	if _, err = tx.Exec(ctx, q); err != nil {
 		return fmt.Errorf("creating pg_trgm extension: %v", dberr.Error(err))
 	}
 
 	q = "create schema ccms"
-	if _, err = tx.Exec(context.TODO(), q); err != nil {
+	if _, err = tx.Exec(ctx, q); err != nil {
 		return fmt.Errorf("creating ccms schema: %v", dberr.Error(err))
 	}
 
@@ -430,7 +436,7 @@ func createSystemSchema(program string, dq dbx.Queryable, security *config.Secur
 		return fmt.Errorf("adding admin user: %v", dberr.Error(err))
 	}
 
-	if err = tx.Commit(context.TODO()); err != nil {
+	if err = tx.Commit(ctx); err != nil {
 		return fmt.Errorf("initializing system database: committing changes: %v", dberr.Error(err))
 	}
 	return nil

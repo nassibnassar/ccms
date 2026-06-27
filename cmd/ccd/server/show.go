@@ -17,13 +17,13 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("filter_name", "text")
 		result.AddField("definition", "text")
 		if err := addShowFiltersData(db, result); err != nil {
-			return cmderr("retrieving filters: " + err.Error())
+			return cmderr(err.Error())
 		}
 	case "funds":
 		result.AddField("fund_name", "text")
 		result.AddField("fund_title", "text")
 		if err := addShowFundsData(db, result); err != nil {
-			return cmderr("retrieving funds: " + err.Error())
+			return cmderr(err.Error())
 		}
 	//case "roles":
 	//        result.AddField("role_name", "text")
@@ -33,19 +33,19 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("project_name", "text")
 		err := addShowProjectsData(db, result, cmd.Archived)
 		if err != nil {
-			return cmderr("retrieving projects: " + err.Error())
+			return cmderr(err.Error())
 		}
 	case "project":
 		result.AddField("property", "text")
 		result.AddField("value", "text")
 		if err := addShowProjectData(db, result, cmd.Name); err != nil {
-			return cmderr("retrieving project data: " + err.Error())
+			return cmderr(err.Error())
 		}
 	case "sets":
 		if cmd.In != "" {
 			projectID, err := cat.ProjectID(db, cmd.In)
 			if err != nil {
-				return cmderr("checking if project exists: " + err.Error())
+				return cmderr(err.Error())
 			}
 			if projectID == 0 {
 				return cmderr("project \"" + cmd.In + "\" does not exist")
@@ -53,7 +53,7 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 		}
 		result.AddField("set_name", "text")
 		if err := addShowSetsData(db, result, cmd.In); err != nil {
-			return cmderr("retrieving sets: " + err.Error())
+			return cmderr(err.Error())
 		}
 	case "tags":
 		result.AddField("tag_name", "text")
@@ -62,7 +62,7 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("superuser", "boolean")
 		result.AddField("login", "boolean")
 		if err := addShowUsersData(db, result); err != nil {
-			return cmderr("retrieving users: " + err.Error())
+			return cmderr(err.Error())
 		}
 	default:
 		return cmderr("unknown variable \"" + cmd.Type + "\"")

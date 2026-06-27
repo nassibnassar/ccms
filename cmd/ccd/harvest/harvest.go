@@ -14,20 +14,29 @@ import (
 	"github.com/nassibnassar/goharvest/oai"
 )
 
-func Harvest(dp dbx.Queryable) {
+func Harvest(connString string) {
 	for {
-		harvestLoop(dp)
+		harvestLoop(connString)
 		time.Sleep(1 * time.Hour)
 		log.Info("restarting harvest")
 	}
 }
 
-func harvestLoop(dq dbx.Queryable) {
+func harvestLoop(connString string) {
 	defer func() {
 		if r := recover(); r != nil {
 			logError(r)
 		}
 	}()
+
+	ctx := context.TODO()
+	conn, err := dbx.Connect(ctx, connString)
+	if err != nil {
+		logError(err)
+		return
+	}
+	defer conn.Close(ctx)
+
 	/*
 		(&oai.Request{
 			BaseURL: "http://services.kb.nl/mdo/oai", Set: "DTS", MetadataPrefix: "dcx",
@@ -132,18 +141,17 @@ func harvestLoop(dq dbx.Queryable) {
 			return
 		}
 
-		dp := dq.(*pgx.Conn)
-		tx, err := dp.Begin(context.TODO())
+		tx, err := conn.Begin(ctx)
 		if err != nil {
 			logError("starting transaction" + err.Error())
 			return
 		}
-		defer tx.Rollback(context.TODO())
+		defer tx.Rollback(ctx)
 
 		var id int64
 		q := "insert into ccms.md (identifier, retrieved, date_stamp, data) " +
 			"values ($1, $2, $3, $4) on conflict do nothing returning id"
-		err = tx.QueryRow(context.TODO(), q, identifier, time.Now(), dateStamp, metadata).Scan(&id)
+		err = tx.QueryRow(ctx, q, identifier, time.Now(), dateStamp, metadata).Scan(&id)
 		switch {
 		case errors.Is(err, pgx.ErrNoRows):
 			//log.Info("conflict: skipping record %s", identifier)
@@ -156,14 +164,14 @@ func harvestLoop(dq dbx.Queryable) {
 		if id != 0 {
 			q = "insert into ccms.attr (id, author, title, full_vendor_name, availability) " +
 				"values ($1, $2, $3, $4, $5) on conflict do nothing"
-			if _, err = tx.Exec(context.TODO(), q, id, author, title, fullVendorName, availability); err != nil {
+			if _, err = tx.Exec(ctx, q, id, author, title, fullVendorName, availability); err != nil {
 				logError("writing to table attr: " + err.Error())
 				return
 			}
 
 			q = "insert into ccms.reserve (id) " +
 				"values ($1) on conflict do nothing"
-			if _, err = tx.Exec(context.TODO(), q, id); err != nil {
+			if _, err = tx.Exec(ctx, q, id); err != nil {
 				logError("writing to table reserve: " + err.Error())
 				return
 			}
@@ -171,7 +179,7 @@ func harvestLoop(dq dbx.Queryable) {
 			//log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)
 		}
 
-		if err = tx.Commit(context.TODO()); err != nil {
+		if err = tx.Commit(ctx); err != nil {
 			logError("committing transaction: " + err.Error())
 			return
 		}

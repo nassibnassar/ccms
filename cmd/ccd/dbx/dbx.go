@@ -6,8 +6,71 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+func Connect(ctx context.Context, connString string) (*pgx.Conn, error) {
+	conn, err := pgx.Connect(ctx, connString)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
+// func newDBConn(ctx context.Context, connString string) (*pgx.Conn, error) {
+// 	config, err := pgx.ParseConfig(connString)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	// config.AfterConnect = setDatabaseParameters
+// 	// config.MaxConns = 64
+// 	dc, err := pgx.ConnectConfig(ctx, config)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return dc, nil
+// }
+
+// func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
+// 	config, err := pgxpool.ParseConfig(connString)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	config.AfterConnect = setDatabaseParameters
+// 	config.MaxConns = 64
+// 	dp, err := pgxpool.NewWithConfig(ctx, config)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return dp, nil
+// }
+
+// func setDatabaseParameters(ctx context.Context, conn *pgx.Conn) error {
+// 	q := "set search_path = 'public'"
+// 	if _, err := conn.Exec(ctx, q); err != nil {
+// 		return dberr.Error(err)
+// 	}
+// 	q = "set idle_in_transaction_session_timeout=0"
+// 	if _, err := conn.Exec(ctx, q); err != nil {
+// 		return dberr.Error(err)
+// 	}
+// 	q = "set idle_session_timeout=0"
+// 	if _, err := conn.Exec(ctx, q); err != nil {
+// 		return dberr.Error(err)
+// 	}
+// 	q = "set statement_timeout=0"
+// 	if _, err := conn.Exec(ctx, q); err != nil {
+// 		return dberr.Error(err)
+// 	}
+// 	q = "set timezone='UTC'"
+// 	if _, err := conn.Exec(ctx, q); err != nil {
+// 		return dberr.Error(err)
+// 	}
+// 	q = "set default_transaction_isolation=serializable"
+// 	if _, err := conn.Exec(ctx, q); err != nil {
+// 		return dberr.Error(err)
+// 	}
+// 	return nil
+// }
 
 type Table struct {
 	Schema string
@@ -39,6 +102,6 @@ type Queryable interface {
 	SendBatch(ctx context.Context, b *pgx.Batch) (br pgx.BatchResults)
 }
 
-var _ Queryable = (*pgxpool.Pool)(nil)
+// var _ Queryable = (*pgxpool.Pool)(nil)
 var _ Queryable = (*pgx.Conn)(nil)
 var _ Queryable = (pgx.Tx)(nil)

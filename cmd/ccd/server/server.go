@@ -18,7 +18,6 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/ast"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/cmd/ccd/config"
-	"github.com/indexdata/ccms/cmd/ccd/dberr"
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/cmd/ccd/harvest"
 	"github.com/indexdata/ccms/cmd/ccd/log"
@@ -29,12 +28,10 @@ import (
 	"github.com/indexdata/ccms/internal/eout"
 	"github.com/indexdata/ccms/internal/global"
 	"github.com/indexdata/ccms/internal/protocol"
-	"github.com/jackc/pgx/v5"
 )
 
 type svr struct {
 	// cat *cat.Catalog
-	dp   dbx.Queryable
 	conf *config.Config
 	opt  *option.Server
 }
@@ -83,27 +80,13 @@ func databaseServer(opt *option.Server) error {
 		return fmt.Errorf("reading configuration file: %v", err)
 	}
 
-	// dp, err := newPool(context.TODO(), conf.DB.ConnString())
-	// if err != nil {
-	// 	return fmt.Errorf("creating database connection pool: %v", err)
-	// }
-	// defer dp.Close()
-
-	///////////////////////////////////////////////////////////////
-	dc, err := newDBConn(context.TODO(), conf.DB.ConnString())
-	if err != nil {
-		return err
-	}
-	defer dc.Close(context.TODO())
-	///////////////////////////////////////////////////////////////
-
 	// ensure database is initialized and compatible
-	err = cat.Initialize(opt.Program, dc, conf.Security)
+	err = cat.Initialize(opt.Program, conf.DB.ConnString(), conf.Security)
 	if err != nil {
 		return err
 	}
 
-	s := &svr{dp: nil, conf: conf, opt: opt}
+	s := &svr{conf: conf, opt: opt}
 
 	if err = startServer(s); err != nil {
 		return fmt.Errorf("server stopped: %s", err)
@@ -121,7 +104,7 @@ func startServer(s *svr) error {
 
 	go serve(s)
 	if !s.opt.NoHarvest {
-		go harvest.Harvest(s.dp)
+		go harvest.Harvest(s.conf.DB.ConnString())
 	}
 
 	for {
@@ -190,21 +173,18 @@ func (s *svr) handleCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int64) {
-	///////////////////////////////////////////////////////////////
-	dc, err := newDBConn(context.TODO(), s.conf.DB.ConnString())
+	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
+
+	ctx := context.TODO()
+	conn, err := dbx.Connect(ctx, s.conf.DB.ConnString())
 	if err != nil {
 		sendError(w, rqid, err.Error())
 		return
 	}
-	defer dc.Close(context.TODO())
-	///////////////////////////////////////////////////////////////
-
-	db := &dbx.DB{Ctx: context.TODO(), Queryable: dc}
-
-	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
+	defer conn.Close(context.TODO())
 
 	var req protocol.Request
-	user, err := s.ReadRequest(db, w, r, &req)
+	user, err := s.ReadRequest(&dbx.DB{Ctx: ctx, Queryable: conn}, w, r, &req)
 	if err != nil {
 		log.Info("[%d] %s - error: %v", rqid, addr, err)
 		resp := ccms.NewResponse()
@@ -246,59 +226,54 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	// 	log.Info("[%d] %s (%s) - %q", rqid, addr, user, req.Commands)
 	// }
 
-	/*
-		// tx, err := s.dp.Begin(context.TODO())
-		tx, err := dc.Begin(context.TODO())
-		if err != nil {
-			sendError(w, rqid, "start transaction: "+err.Error())
-			return
-		}
-		defer tx.Rollback(context.TODO())
-	*/
-	// s.d = &dbx.DB{C: context.TODO(), Q: tx}
-	// d = &dbx.DB{C: context.TODO(), Q: dc}
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		sendError(w, rqid, "start transaction: "+err.Error())
+		return
+	}
+	defer tx.Rollback(ctx)
 
+	dbtx := &dbx.DB{Ctx: ctx, Queryable: tx}
 	errorState := false
-	_ = errorState
 	resp := ccms.NewResponse()
 	cmds := node.(*ast.ParseTree).Commands
 	for i := range cmds {
 		var result *ccms.Result
 		switch cmd := cmds[i].(type) {
 		case *ast.AlterProjectStmt:
-			result = alterProjectStmt(s, db, rqid, cmd)
+			result = alterProjectStmt(s, dbtx, rqid, cmd)
 		case *ast.ArchiveProjectStmt:
-			result = archiveProjectStmt(s, db, rqid, cmd)
+			result = archiveProjectStmt(s, dbtx, rqid, cmd)
 		case *ast.CreateFilterStmt:
-			result = createFilterStmt(s, db, rqid, cmd)
+			result = createFilterStmt(s, dbtx, rqid, cmd)
 		case *ast.CreateFundStmt:
-			result = createFundStmt(s, db, rqid, cmd)
+			result = createFundStmt(s, dbtx, rqid, cmd)
 		case *ast.CreateProjectStmt:
-			result = createProjectStmt(s, db, rqid, cmd)
+			result = createProjectStmt(s, dbtx, rqid, cmd)
 		case *ast.CreateSetStmt:
-			result = createSetStmt(s, db, rqid, cmd)
+			result = createSetStmt(s, dbtx, rqid, cmd)
 		case *ast.CreateUserStmt:
-			result = createUserStmt(s, db, rqid, cmd)
+			result = createUserStmt(s, dbtx, rqid, cmd)
 		case *ast.DeleteStmt:
-			result = deleteStmt(s, db, rqid, cmd)
+			result = deleteStmt(s, dbtx, rqid, cmd)
 		// case *ast.DropProjectStmt:
 		// 	result = dropProjectStmt(s,d, rqid, cmd)
 		case *ast.DropSetStmt:
-			result = dropSetStmt(s, db, rqid, cmd)
+			result = dropSetStmt(s, dbtx, rqid, cmd)
 		case *ast.InfoStmt:
-			result = infoStmt(s, db, cmd)
+			result = infoStmt(s, dbtx, cmd)
 		case *ast.InsertStmt:
-			result = insertStmt(s, db, rqid, cmd)
+			result = insertStmt(s, dbtx, rqid, cmd)
 		case *ast.PingStmt:
 			result = ccms.NewResult("ping")
 		case *ast.SelectStmt:
-			result = selectStmt(s, db, rqid, cmd)
+			result = selectStmt(s, dbtx, rqid, cmd)
 		case *ast.SelectVersionStmt:
-			result = selectVersionStmt(s, db, rqid, cmd)
+			result = selectVersionStmt(s, dbtx, rqid, cmd)
 		case *ast.ShowStmt:
-			result = showStmt(s, db, cmd)
+			result = showStmt(s, dbtx, cmd)
 		case *ast.UpdateStmt:
-			result = updateStmt(s, db, rqid, cmd)
+			result = updateStmt(s, dbtx, rqid, cmd)
 		case nil:
 			continue
 		default:
@@ -318,19 +293,17 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		}
 	}
 
-	/*
-		if errorState {
-			if err = tx.Rollback(context.TODO()); err != nil {
-				sendError(w, rqid, "rollback: "+err.Error())
-				return
-			}
-		} else {
-			if err = tx.Commit(context.TODO()); err != nil {
-				sendError(w, rqid, "commit: "+err.Error())
-				return
-			}
+	if errorState {
+		if err = tx.Rollback(ctx); err != nil {
+			sendError(w, rqid, "rollback: "+err.Error())
+			return
 		}
-	*/
+	} else {
+		if err = tx.Commit(ctx); err != nil {
+			sendError(w, rqid, "commit: "+err.Error())
+			return
+		}
+	}
 
 	sendResponse(w, rqid, resp)
 }
@@ -439,60 +412,4 @@ func requestString(r *http.Request) string {
 	var remoteHost, remotePort string
 	remoteHost, remotePort, _ = net.SplitHostPort(r.RemoteAddr)
 	return fmt.Sprintf("host=%s port=%s method=%s uri=%s", remoteHost, remotePort, r.Method, r.URL)
-}
-
-func newDBConn(ctx context.Context, connString string) (*pgx.Conn, error) {
-	config, err := pgx.ParseConfig(connString)
-	if err != nil {
-		return nil, err
-	}
-	// config.AfterConnect = setDatabaseParameters
-	// config.MaxConns = 64
-	dc, err := pgx.ConnectConfig(ctx, config)
-	if err != nil {
-		return nil, err
-	}
-	return dc, nil
-}
-
-// func newPool(ctx context.Context, connString string) (*pgxpool.Pool, error) {
-// 	config, err := pgxpool.ParseConfig(connString)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	config.AfterConnect = setDatabaseParameters
-// 	config.MaxConns = 64
-// 	dp, err := pgxpool.NewWithConfig(ctx, config)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return dp, nil
-// }
-
-func setDatabaseParameters(ctx context.Context, conn *pgx.Conn) error {
-	q := "set search_path = 'public'"
-	if _, err := conn.Exec(ctx, q); err != nil {
-		return dberr.Error(err)
-	}
-	q = "set idle_in_transaction_session_timeout=0"
-	if _, err := conn.Exec(ctx, q); err != nil {
-		return dberr.Error(err)
-	}
-	q = "set idle_session_timeout=0"
-	if _, err := conn.Exec(ctx, q); err != nil {
-		return dberr.Error(err)
-	}
-	q = "set statement_timeout=0"
-	if _, err := conn.Exec(ctx, q); err != nil {
-		return dberr.Error(err)
-	}
-	q = "set timezone='UTC'"
-	if _, err := conn.Exec(ctx, q); err != nil {
-		return dberr.Error(err)
-	}
-	q = "set default_transaction_isolation=serializable"
-	if _, err := conn.Exec(ctx, q); err != nil {
-		return dberr.Error(err)
-	}
-	return nil
 }

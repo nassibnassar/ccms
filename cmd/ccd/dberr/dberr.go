@@ -8,24 +8,34 @@ import (
 )
 
 func Error(err error) error {
-	return errors.New(String(err))
+	switch e := err.(type) {
+	case *pgconn.PgError:
+		return errors.New(pgString(e))
+	default:
+		return err
+	}
 }
 
 func String(err error) string {
-	e, ok := err.(*pgconn.PgError)
-	if !ok {
-		// log.Info("internal server error: pgerr: error is type %T", err)
+	switch e := err.(type) {
+	case *pgconn.PgError:
+		return pgString(e)
+	default:
 		return err.Error()
 	}
+}
+
+func pgString(err *pgconn.PgError) string {
 	var b strings.Builder
-	b.WriteString(e.Message)
-	if e.Detail != "" {
+	b.WriteString("internal server error: ")
+	b.WriteString(err.Message)
+	if err.Detail != "" {
 		b.WriteString(": ")
-		b.WriteString(e.Detail)
+		b.WriteString(err.Detail)
 	}
-	if e.Hint != "" {
+	if err.Hint != "" {
 		b.WriteString(" (")
-		b.WriteString(e.Hint)
+		b.WriteString(err.Hint)
 		b.WriteRune(')')
 	}
 	return b.String()
