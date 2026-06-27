@@ -73,7 +73,7 @@ func Sets(db *dbx.DB) ([]string, error) {
 		return nil, err
 	}
 	for i := range projects {
-		sets = append(sets, projects[i]+".object")
+		sets = append(sets, projects[i].Name+".object")
 	}
 
 	return sets, nil

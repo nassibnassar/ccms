@@ -9,15 +9,9 @@ import (
 
 	"github.com/indexdata/ccms/cmd/ccd/dberr"
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
+	"github.com/indexdata/ccms/prop"
 	"github.com/jackc/pgx/v5"
 )
-
-// type Project struct {
-// 	ProjectName string
-// 	//ProjectTitle string
-// 	//Action       string
-// 	//MOULink      string
-// }
 
 // returns project ID, or -1 if the project is archived or 0 if it does not exist
 func ProjectID(db *dbx.DB, project string) (int32, error) {
@@ -60,13 +54,13 @@ func IsValidTargetProject(project string) bool {
 	return true
 }
 
-func Projects(db *dbx.DB, archived bool) ([]string, error) {
-	sql := "select name from ccms.project where archived=$1"
+func Projects(db *dbx.DB, archived bool) (prop.Property, error) {
+	sql := "select name, title from ccms.project where archived=$1"
 	rows, err := db.Query(db.Ctx, sql, archived)
 	if err != nil {
 		return nil, dberr.Error(err)
 	}
-	projects, err := pgx.CollectRows(rows, pgx.RowTo[string])
+	projects, err := pgx.CollectRows(rows, pgx.RowToStructByPos[prop.Prop])
 	if err != nil {
 		return nil, err
 	}

@@ -1,3 +1,5 @@
+* The `show projects` command now returns the project title.
+
 * Added `create filter` and `show filters` commands and `filter()`
   operator.
 

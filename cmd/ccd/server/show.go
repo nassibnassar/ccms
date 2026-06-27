@@ -14,23 +14,24 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 	result := ccms.NewResult("show")
 	switch cmd.Type {
 	case "filters":
-		result.AddField("filter_name", "text")
+		result.AddField("name", "text")
 		result.AddField("definition", "text")
 		if err := addShowFiltersData(db, result); err != nil {
 			return cmderr(err.Error())
 		}
 	case "funds":
-		result.AddField("fund_name", "text")
-		result.AddField("fund_title", "text")
+		result.AddField("name", "text")
+		result.AddField("title", "text")
 		if err := addShowFundsData(db, result); err != nil {
 			return cmderr(err.Error())
 		}
 	//case "roles":
-	//        result.AddField("role_name", "text")
-	//        result.AddField("user_names", "text")
+	//        result.AddField("name", "text")
+	//        result.AddField("users", "text")
 	//        addShowRolesData(s.cat, result)
 	case "projects":
-		result.AddField("project_name", "text")
+		result.AddField("name", "text")
+		result.AddField("title", "text")
 		err := addShowProjectsData(db, result, cmd.Archived)
 		if err != nil {
 			return cmderr(err.Error())
@@ -51,14 +52,14 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 				return cmderr("project \"" + cmd.In + "\" does not exist")
 			}
 		}
-		result.AddField("set_name", "text")
+		result.AddField("name", "text")
 		if err := addShowSetsData(db, result, cmd.In); err != nil {
 			return cmderr(err.Error())
 		}
 	case "tags":
-		result.AddField("tag_name", "text")
+		result.AddField("name", "text")
 	case "users":
-		result.AddField("user_name", "text")
+		result.AddField("name", "text")
 		result.AddField("superuser", "boolean")
 		result.AddField("login", "boolean")
 		if err := addShowUsersData(db, result); err != nil {
@@ -100,9 +101,9 @@ func addShowProjectsData(db *dbx.DB, result *ccms.Result, archived bool) error {
 	if err != nil {
 		return err
 	}
-	slices.Sort(projects)
+	projects.Sort()
 	for i := range projects {
-		result.AddData([]any{projects[i]})
+		result.AddData([]any{projects[i].Name, projects[i].Title})
 	}
 	return nil
 }

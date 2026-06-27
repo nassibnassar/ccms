@@ -2,7 +2,6 @@ package cat
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/indexdata/ccms/cmd/ccd/dberr"
@@ -35,22 +34,14 @@ func FundID(db *dbx.DB, fund string) (int32, error) {
 }
 
 func Funds(db *dbx.DB) (prop.Property, error) {
-	q := "select name, title from ccms.fund"
-	rows, err := db.Query(db.Ctx, q)
+	sql := "select name, title from ccms.fund"
+	rows, err := db.Query(db.Ctx, sql)
 	if err != nil {
-		return nil, fmt.Errorf("selecting funds: %v", err)
+		return nil, dberr.Error(err)
 	}
-	defer rows.Close()
-	funds := make([]prop.Prop, 0)
-	for rows.Next() {
-		var f prop.Prop
-		if err := rows.Scan(&f.Name, &f.Title); err != nil {
-			return nil, fmt.Errorf("reading funds: %v", err)
-		}
-		funds = append(funds, f)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("reading funds: %v", err)
+	funds, err := pgx.CollectRows(rows, pgx.RowToStructByPos[prop.Prop])
+	if err != nil {
+		return nil, err
 	}
 	return funds, nil
 }
