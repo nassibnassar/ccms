@@ -8,7 +8,7 @@ import (
 	"github.com/indexdata/ccms/internal/set"
 )
 
-func insertStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
+func insertStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.InsertStmt) *ccms.Result {
 	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
 	if o.Valid {
 		return cmderr("\"order by\" is not supported with insert")
@@ -19,7 +19,7 @@ func insertStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.InsertStmt) *ccms.Result
 	}
 
 	intoSet := set.Parse(cmd.Into)
-	validTargetSet, err := cat.IsValidTargetSet(d, intoSet)
+	validTargetSet, err := cat.IsValidTargetSet(db, intoSet)
 	if err != nil {
 		return cmderr("checking if target set valid: " + err.Error())
 	}
@@ -27,7 +27,7 @@ func insertStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.InsertStmt) *ccms.Result
 		return cmderr("invalid target set \"" + cmd.Into + "\"")
 	}
 
-	projectID, err := cat.ProjectID(d, intoSet.Project)
+	projectID, err := cat.ProjectID(db, intoSet.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -38,7 +38,7 @@ func insertStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.InsertStmt) *ccms.Result
 		return cmderr("project \"" + intoSet.Project + "\" is archived")
 	}
 
-	intoSetExists, err := cat.SetExists(d, intoSet)
+	intoSetExists, err := cat.SetExists(db, intoSet)
 	if err != nil {
 		return cmderr("checking if set exists: " + err.Error())
 	}
@@ -51,7 +51,7 @@ func insertStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.InsertStmt) *ccms.Result
 		return cmderr("set \"reserve\" is no longer supported; use \"<project>.object\"")
 	}
 	fromSet := set.Parse(from)
-	fromSetExists, err := cat.SetExists(d, fromSet)
+	fromSetExists, err := cat.SetExists(db, fromSet)
 	if err != nil {
 		return cmderr("checking if set exists: " + err.Error())
 	}
@@ -59,11 +59,11 @@ func insertStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.InsertStmt) *ccms.Result
 		return cmderr("set \"" + from + "\" does not exist")
 	}
 
-	sql, err := cmd.SQL(d)
+	sql, err := cmd.SQL(db)
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	if _, err := d.Q.Exec(d.C, sql); err != nil {
+	if _, err := db.Exec(db.Ctx, sql); err != nil {
 		return cmderr("inserting data into \"" + cmd.Into + "\": " + err.Error())
 	}
 

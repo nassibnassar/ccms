@@ -28,8 +28,8 @@ func (t Table) String() string {
 }
 
 type DB struct {
-	C context.Context
-	Q Queryable
+	Ctx context.Context
+	Queryable
 }
 
 type Queryable interface {

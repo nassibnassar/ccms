@@ -11,19 +11,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func CreateFund(d *dbx.DB, fund string) error {
+func CreateFund(db *dbx.DB, fund string) error {
 	sql := "insert into ccms.fund (name, title) values ($1, $2)"
-	if _, err := d.Q.Exec(d.C, sql, fund, makeTitle(fund)); err != nil {
+	if _, err := db.Exec(db.Ctx, sql, fund, makeTitle(fund)); err != nil {
 		return dberr.Error(err)
 	}
 	return nil
 }
 
 // returns fund ID, or 0 if fund does not exist
-func FundID(d *dbx.DB, fund string) (int64, error) {
+func FundID(db *dbx.DB, fund string) (int64, error) {
 	var q = "select id from ccms.fund where name=$1"
 	var id int64
-	err := d.Q.QueryRow(d.C, q, fund).Scan(&id)
+	err := db.QueryRow(db.Ctx, q, fund).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
@@ -34,9 +34,9 @@ func FundID(d *dbx.DB, fund string) (int64, error) {
 	}
 }
 
-func Funds(d *dbx.DB) (prop.Property, error) {
+func Funds(db *dbx.DB) (prop.Property, error) {
 	q := "select name, title from ccms.fund"
-	rows, err := d.Q.Query(d.C, q)
+	rows, err := db.Query(db.Ctx, q)
 	if err != nil {
 		return nil, fmt.Errorf("selecting funds: %v", err)
 	}

@@ -9,9 +9,9 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func CreateRole(d *dbx.DB, role string) error {
+func CreateRole(db *dbx.DB, role string) error {
 	sql := "insert into ccms.role (rolename) values ($1)"
-	if _, err := d.Q.Exec(d.C, sql, role); err != nil {
+	if _, err := db.Exec(db.Ctx, sql, role); err != nil {
 		return dberr.Error(err)
 	}
 	return nil
@@ -28,9 +28,9 @@ func SortRoles(roles []Role) {
 	})
 }
 
-func Roles(d *dbx.DB) ([]Role, error) {
+func Roles(db *dbx.DB) ([]Role, error) {
 	q := "select r.name, u.name from ccms.role r left join ccms.role_user ru on r.id=ru.role_id left join ccms.auth u on ru.user_id=u.id"
-	rows, err := d.Q.Query(d.C, q)
+	rows, err := db.Query(db.Ctx, q)
 	if err != nil {
 		return nil, dberr.Error(err)
 	}

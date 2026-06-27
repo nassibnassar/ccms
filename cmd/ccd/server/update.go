@@ -13,13 +13,13 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func updateStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
+func updateStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Result {
 	set := set.Parse(cmd.Set)
 
 	if set.Set != "object" {
 		return cmderr("set \"" + cmd.Set + "\" is not valid for update")
 	}
-	projectID, err := cat.ProjectID(d, set.Project)
+	projectID, err := cat.ProjectID(db, set.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -36,7 +36,7 @@ func updateStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Result
 	}
 
 	idInt, _ := strconv.ParseInt(cmd.IDValue.Value, 10, 64)
-	idExists, err := objectIDExists(d, idInt)
+	idExists, err := objectIDExists(db, idInt)
 	if err != nil {
 		return cmderr("checking if object ID exists: " + err.Error())
 	}
@@ -57,7 +57,7 @@ func updateStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Result
 		if !cmd.ValueNull {
 			// look up fund id
 			var fundID int64
-			fundID, err = cat.FundID(d, cmd.Value)
+			fundID, err = cat.FundID(db, cmd.Value)
 			if err != nil {
 				return cmderr("looking up fund: " + err.Error())
 			}
@@ -66,7 +66,7 @@ func updateStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Result
 			}
 			// ensure fund is valid for project
 			var inProject bool
-			inProject, err = cat.ProjectFundExists(d, projectID, fundID)
+			inProject, err = cat.ProjectFundExists(db, projectID, fundID)
 			if err != nil {
 				return cmderr("looking up project fund: " + err.Error())
 			}
@@ -83,17 +83,17 @@ func updateStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Result
 	if err != nil {
 		return cmderr(err.Error())
 	}
-	if _, err := d.Q.Exec(d.C, sql); err != nil {
+	if _, err := db.Exec(db.Ctx, sql); err != nil {
 		return cmderr("executing update: " + err.Error())
 	}
 
 	return ccms.NewResult("update")
 }
 
-func objectIDExists(d *dbx.DB, id int64) (bool, error) {
+func objectIDExists(db *dbx.DB, id int64) (bool, error) {
 	var q = "select 1 from ccms.reserve where id=$1"
 	var n int32
-	err := d.Q.QueryRow(d.C, q, id).Scan(&n)
+	err := db.QueryRow(db.Ctx, q, id).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil

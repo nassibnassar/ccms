@@ -10,8 +10,8 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func createFilterStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateFilterStmt) *ccms.Result {
-	filterExists, err := cat.FilterExists(d, cmd.Filter)
+func createFilterStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateFilterStmt) *ccms.Result {
+	filterExists, err := cat.FilterExists(db, cmd.Filter)
 	if err != nil {
 		return cmderr(err.Error())
 	}
@@ -32,12 +32,12 @@ func createFilterStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateFilterStmt) 
 	a.WriteString(cmd.Filter)
 	a.WriteString(" where ")
 
-	sql, err := cmd.SQL(d, &a)
+	sql, err := cmd.SQL(db, &a)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 	q := "insert into ccms.filter (name, command, sql) values ($1, $2, $3)"
-	if _, err := d.Q.Exec(d.C, q, cmd.Filter, a.String(), sql); err != nil {
+	if _, err := db.Exec(db.Ctx, q, cmd.Filter, a.String(), sql); err != nil {
 		return cmderr(dberr.String(err))
 	}
 	return ccms.NewResult("create filter")

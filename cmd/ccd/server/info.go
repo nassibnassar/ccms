@@ -7,7 +7,7 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/doc"
 )
 
-func infoStmt(s *svr, d *dbx.DB, cmd *ast.InfoStmt) *ccms.Result {
+func infoStmt(s *svr, db *dbx.DB, cmd *ast.InfoStmt) *ccms.Result {
 	if cmd.Topic == "" {
 		result := ccms.NewResult("info")
 		result.AddField("info", "text")

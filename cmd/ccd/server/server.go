@@ -199,12 +199,12 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	defer dc.Close(context.TODO())
 	///////////////////////////////////////////////////////////////
 
-	d := &dbx.DB{C: context.TODO(), Q: dc}
+	db := &dbx.DB{Ctx: context.TODO(), Queryable: dc}
 
 	addr, _, _ := net.SplitHostPort(r.RemoteAddr)
 
 	var req protocol.Request
-	user, err := s.ReadRequest(d, w, r, &req)
+	user, err := s.ReadRequest(db, w, r, &req)
 	if err != nil {
 		log.Info("[%d] %s - error: %v", rqid, addr, err)
 		resp := ccms.NewResponse()
@@ -266,39 +266,39 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 		var result *ccms.Result
 		switch cmd := cmds[i].(type) {
 		case *ast.AlterProjectStmt:
-			result = alterProjectStmt(s, d, rqid, cmd)
+			result = alterProjectStmt(s, db, rqid, cmd)
 		case *ast.ArchiveProjectStmt:
-			result = archiveProjectStmt(s, d, rqid, cmd)
+			result = archiveProjectStmt(s, db, rqid, cmd)
 		case *ast.CreateFilterStmt:
-			result = createFilterStmt(s, d, rqid, cmd)
+			result = createFilterStmt(s, db, rqid, cmd)
 		case *ast.CreateFundStmt:
-			result = createFundStmt(s, d, rqid, cmd)
+			result = createFundStmt(s, db, rqid, cmd)
 		case *ast.CreateProjectStmt:
-			result = createProjectStmt(s, d, rqid, cmd)
+			result = createProjectStmt(s, db, rqid, cmd)
 		case *ast.CreateSetStmt:
-			result = createSetStmt(s, d, rqid, cmd)
+			result = createSetStmt(s, db, rqid, cmd)
 		case *ast.CreateUserStmt:
-			result = createUserStmt(s, d, rqid, cmd)
+			result = createUserStmt(s, db, rqid, cmd)
 		case *ast.DeleteStmt:
-			result = deleteStmt(s, d, rqid, cmd)
+			result = deleteStmt(s, db, rqid, cmd)
 		// case *ast.DropProjectStmt:
 		// 	result = dropProjectStmt(s,d, rqid, cmd)
 		case *ast.DropSetStmt:
-			result = dropSetStmt(s, d, rqid, cmd)
+			result = dropSetStmt(s, db, rqid, cmd)
 		case *ast.InfoStmt:
-			result = infoStmt(s, d, cmd)
+			result = infoStmt(s, db, cmd)
 		case *ast.InsertStmt:
-			result = insertStmt(s, d, rqid, cmd)
+			result = insertStmt(s, db, rqid, cmd)
 		case *ast.PingStmt:
 			result = ccms.NewResult("ping")
 		case *ast.SelectStmt:
-			result = selectStmt(s, d, rqid, cmd)
+			result = selectStmt(s, db, rqid, cmd)
 		case *ast.SelectVersionStmt:
-			result = selectVersionStmt(s, d, rqid, cmd)
+			result = selectVersionStmt(s, db, rqid, cmd)
 		case *ast.ShowStmt:
-			result = showStmt(s, d, cmd)
+			result = showStmt(s, db, cmd)
 		case *ast.UpdateStmt:
-			result = updateStmt(s, d, rqid, cmd)
+			result = updateStmt(s, db, rqid, cmd)
 		case nil:
 			continue
 		default:
@@ -364,8 +364,8 @@ func cmderr(message string) *ccms.Result {
 // 	HTTPError(w, errString, statusCode)
 // }
 
-func (s *svr) ReadRequest(d *dbx.DB, w http.ResponseWriter, r *http.Request, requestStruct any) (string, error) {
-	user, err := s.HandleBasicAuth(d, w, r)
+func (s *svr) ReadRequest(db *dbx.DB, w http.ResponseWriter, r *http.Request, requestStruct any) (string, error) {
+	user, err := s.HandleBasicAuth(db, w, r)
 	if err != nil {
 		return "", err
 	}
@@ -383,12 +383,12 @@ func (s *svr) ReadRequest(d *dbx.DB, w http.ResponseWriter, r *http.Request, req
 	return user, nil
 }
 
-func (s *svr) HandleBasicAuth(d *dbx.DB, w http.ResponseWriter, r *http.Request) (string, error) {
+func (s *svr) HandleBasicAuth(db *dbx.DB, w http.ResponseWriter, r *http.Request) (string, error) {
 	user, password, ok := r.BasicAuth()
 	if !ok {
 		return "", fmt.Errorf("authentication failed")
 	}
-	auth, err := cat.Authenticate(s.conf.Security.SecretKey, d, user, password)
+	auth, err := cat.Authenticate(s.conf.Security.SecretKey, db, user, password)
 	if err != nil {
 		return "", err
 	}

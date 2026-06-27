@@ -8,10 +8,10 @@ import (
 	"github.com/indexdata/ccms/internal/set"
 )
 
-func dropSetStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.DropSetStmt) *ccms.Result {
+func dropSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropSetStmt) *ccms.Result {
 	set := set.Parse(cmd.Set)
 
-	validTargetSet, err := cat.IsValidTargetSet(d, set)
+	validTargetSet, err := cat.IsValidTargetSet(db, set)
 	if err != nil {
 		return cmderr("checking if target set valid: " + err.Error())
 	}
@@ -19,7 +19,7 @@ func dropSetStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.DropSetStmt) *ccms.Resu
 		return cmderr("invalid target set \"" + cmd.Set + "\"")
 	}
 
-	projectID, err := cat.ProjectID(d, set.Project)
+	projectID, err := cat.ProjectID(db, set.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -30,7 +30,7 @@ func dropSetStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.DropSetStmt) *ccms.Resu
 		return cmderr("project \"" + set.Project + "\" is archived")
 	}
 
-	setExists, err := cat.SetExists(d, set)
+	setExists, err := cat.SetExists(db, set)
 	if err != nil {
 		return cmderr("checking if set exists: " + err.Error())
 	}
@@ -38,7 +38,7 @@ func dropSetStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.DropSetStmt) *ccms.Resu
 		return cmderr("set \"" + cmd.Set + "\" does not exist")
 	}
 
-	if err := cat.DropSet(d, set); err != nil {
+	if err := cat.DropSet(db, set); err != nil {
 		return cmderr("dropping set: " + err.Error())
 	}
 

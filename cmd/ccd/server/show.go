@@ -10,19 +10,19 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func showStmt(s *svr, d *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
+func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 	result := ccms.NewResult("show")
 	switch cmd.Type {
 	case "filters":
 		result.AddField("filter_name", "text")
 		result.AddField("definition", "text")
-		if err := addShowFiltersData(d, result); err != nil {
+		if err := addShowFiltersData(db, result); err != nil {
 			return cmderr("retrieving filters: " + err.Error())
 		}
 	case "funds":
 		result.AddField("fund_name", "text")
 		result.AddField("fund_title", "text")
-		if err := addShowFundsData(d, result); err != nil {
+		if err := addShowFundsData(db, result); err != nil {
 			return cmderr("retrieving funds: " + err.Error())
 		}
 	//case "roles":
@@ -31,19 +31,19 @@ func showStmt(s *svr, d *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 	//        addShowRolesData(s.cat, result)
 	case "projects":
 		result.AddField("project_name", "text")
-		err := addShowProjectsData(d, result, cmd.Archived)
+		err := addShowProjectsData(db, result, cmd.Archived)
 		if err != nil {
 			return cmderr("retrieving projects: " + err.Error())
 		}
 	case "project":
 		result.AddField("property", "text")
 		result.AddField("value", "text")
-		if err := addShowProjectData(d, result, cmd.Name); err != nil {
+		if err := addShowProjectData(db, result, cmd.Name); err != nil {
 			return cmderr("retrieving project data: " + err.Error())
 		}
 	case "sets":
 		if cmd.In != "" {
-			projectID, err := cat.ProjectID(d, cmd.In)
+			projectID, err := cat.ProjectID(db, cmd.In)
 			if err != nil {
 				return cmderr("checking if project exists: " + err.Error())
 			}
@@ -52,7 +52,7 @@ func showStmt(s *svr, d *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 			}
 		}
 		result.AddField("set_name", "text")
-		if err := addShowSetsData(d, result, cmd.In); err != nil {
+		if err := addShowSetsData(db, result, cmd.In); err != nil {
 			return cmderr("retrieving sets: " + err.Error())
 		}
 	case "tags":
@@ -61,7 +61,7 @@ func showStmt(s *svr, d *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 		result.AddField("user_name", "text")
 		result.AddField("superuser", "boolean")
 		result.AddField("login", "boolean")
-		if err := addShowUsersData(d, result); err != nil {
+		if err := addShowUsersData(db, result); err != nil {
 			return cmderr("retrieving users: " + err.Error())
 		}
 	default:
@@ -70,8 +70,8 @@ func showStmt(s *svr, d *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 	return result
 }
 
-func addShowFundsData(d *dbx.DB, result *ccms.Result) error {
-	funds, err := cat.Funds(d)
+func addShowFundsData(db *dbx.DB, result *ccms.Result) error {
+	funds, err := cat.Funds(db)
 	if err != nil {
 		return err
 	}
@@ -82,8 +82,8 @@ func addShowFundsData(d *dbx.DB, result *ccms.Result) error {
 	return nil
 }
 
-func addShowRolesData(d *dbx.DB, result *ccms.Result) error {
-	roles, err := cat.Roles(d)
+func addShowRolesData(db *dbx.DB, result *ccms.Result) error {
+	roles, err := cat.Roles(db)
 	if err != nil {
 		return err
 	}
@@ -95,8 +95,8 @@ func addShowRolesData(d *dbx.DB, result *ccms.Result) error {
 	return nil
 }
 
-func addShowProjectsData(d *dbx.DB, result *ccms.Result, archived bool) error {
-	projects, err := cat.Projects(d, archived)
+func addShowProjectsData(db *dbx.DB, result *ccms.Result, archived bool) error {
+	projects, err := cat.Projects(db, archived)
 	if err != nil {
 		return err
 	}
@@ -107,8 +107,8 @@ func addShowProjectsData(d *dbx.DB, result *ccms.Result, archived bool) error {
 	return nil
 }
 
-func addShowProjectData(d *dbx.DB, result *ccms.Result, projectName string) error {
-	prop, err := cat.ProjectProperties(d, projectName)
+func addShowProjectData(db *dbx.DB, result *ccms.Result, projectName string) error {
+	prop, err := cat.ProjectProperties(db, projectName)
 	if err != nil {
 		return err
 	}
@@ -118,8 +118,8 @@ func addShowProjectData(d *dbx.DB, result *ccms.Result, projectName string) erro
 	return nil
 }
 
-func addShowFiltersData(d *dbx.DB, result *ccms.Result) error {
-	filters, err := cat.Filters(d)
+func addShowFiltersData(db *dbx.DB, result *ccms.Result) error {
+	filters, err := cat.Filters(db)
 	if err != nil {
 		return err
 	}
@@ -130,13 +130,13 @@ func addShowFiltersData(d *dbx.DB, result *ccms.Result) error {
 	return nil
 }
 
-func addShowSetsData(d *dbx.DB, result *ccms.Result, in string) error {
+func addShowSetsData(db *dbx.DB, result *ccms.Result, in string) error {
 	var sets []string
 	var err error
 	if in == "" {
-		sets, err = cat.Sets(d)
+		sets, err = cat.Sets(db)
 	} else {
-		sets, err = cat.SetsInProject(d, in)
+		sets, err = cat.SetsInProject(db, in)
 	}
 	if err != nil {
 		return err
@@ -148,8 +148,8 @@ func addShowSetsData(d *dbx.DB, result *ccms.Result, in string) error {
 	return nil
 }
 
-func addShowUsersData(d *dbx.DB, result *ccms.Result) error {
-	users, err := cat.Users(d)
+func addShowUsersData(db *dbx.DB, result *ccms.Result) error {
+	users, err := cat.Users(db)
 	if err != nil {
 		return err
 	}

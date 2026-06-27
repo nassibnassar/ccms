@@ -16,10 +16,10 @@ type Filter struct {
 	Definition string
 }
 
-func FilterExists(d *dbx.DB, filter string) (bool, error) {
+func FilterExists(db *dbx.DB, filter string) (bool, error) {
 	sql := "select 1 from ccms.filter where name=$1"
 	var n int32
-	err := d.Q.QueryRow(d.C, sql, filter).Scan(&n)
+	err := db.QueryRow(db.Ctx, sql, filter).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -30,8 +30,8 @@ func FilterExists(d *dbx.DB, filter string) (bool, error) {
 	}
 }
 
-func FilterSQL(d *dbx.DB, filter string) (string, error) {
-	rows, err := d.Q.Query(d.C, "select sql from ccms.filter where name=$1", filter)
+func FilterSQL(db *dbx.DB, filter string) (string, error) {
+	rows, err := db.Query(db.Ctx, "select sql from ccms.filter where name=$1", filter)
 	if err != nil {
 		return "", dberr.Error(err)
 	}
@@ -45,9 +45,9 @@ func FilterSQL(d *dbx.DB, filter string) (string, error) {
 	return filterSQL[0], nil
 }
 
-func Filters(d *dbx.DB) ([]Filter, error) {
+func Filters(db *dbx.DB) ([]Filter, error) {
 	sql := "select name, command from ccms.filter"
-	rows, err := d.Q.Query(d.C, sql)
+	rows, err := db.Query(db.Ctx, sql)
 	if err != nil {
 		return nil, dberr.Error(err)
 	}

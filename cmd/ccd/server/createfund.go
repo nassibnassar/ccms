@@ -7,8 +7,8 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func createFundStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateFundStmt) *ccms.Result {
-	fundID, err := cat.FundID(d, cmd.Fund)
+func createFundStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateFundStmt) *ccms.Result {
+	fundID, err := cat.FundID(db, cmd.Fund)
 	if err != nil {
 		return cmderr(err.Error())
 	}
@@ -20,7 +20,7 @@ func createFundStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateFundStmt) *ccm
 		return cmderr("invalid fund name \"" + cmd.Fund + "\"")
 	}
 
-	if err := cat.CreateFund(d, cmd.Fund); err != nil {
+	if err := cat.CreateFund(db, cmd.Fund); err != nil {
 		return cmderr("creating fund: " + err.Error())
 	}
 

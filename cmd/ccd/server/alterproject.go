@@ -7,8 +7,8 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func alterProjectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.AlterProjectStmt) *ccms.Result {
-	projectID, err := cat.ProjectID(d, cmd.Project)
+func alterProjectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.AlterProjectStmt) *ccms.Result {
+	projectID, err := cat.ProjectID(db, cmd.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -21,15 +21,15 @@ func alterProjectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.AlterProjectStmt) 
 
 	switch cmd.Action {
 	case ast.Set:
-		if err := cat.AlterProjectSetProperty(d, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
+		if err := cat.AlterProjectSetProperty(db, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	case ast.Add:
-		if err := cat.AlterProjectAddToProperty(d, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
+		if err := cat.AlterProjectAddToProperty(db, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	case ast.Drop:
-		if err := cat.AlterProjectDropFromProperty(d, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
+		if err := cat.AlterProjectDropFromProperty(db, cmd.Project, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	default:

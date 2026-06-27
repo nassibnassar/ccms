@@ -12,9 +12,9 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func SetExists(d *dbx.DB, set set.Set) (bool, error) {
+func SetExists(db *dbx.DB, set set.Set) (bool, error) {
 	if set.Set == "object" {
-		projectID, err := ProjectID(d, set.Project)
+		projectID, err := ProjectID(db, set.Project)
 		if err != nil {
 			return false, err
 		}
@@ -23,7 +23,7 @@ func SetExists(d *dbx.DB, set set.Set) (bool, error) {
 
 	sql := "select 1 from ccms.sets s join ccms.project p on s.project_id=p.id where p.name=$1 and s.name=$2"
 	var n int32
-	err := d.Q.QueryRow(d.C, sql, set.Project, set.Set).Scan(&n)
+	err := db.QueryRow(db.Ctx, sql, set.Project, set.Set).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -34,14 +34,14 @@ func SetExists(d *dbx.DB, set set.Set) (bool, error) {
 	}
 }
 
-func IsValidTargetSet(d *dbx.DB, set set.Set) (bool, error) {
+func IsValidTargetSet(db *dbx.DB, set set.Set) (bool, error) {
 	if set.Project == "" || set.Set == "" {
 		return false, nil
 	}
 	if set.Set == "object" {
 		return false, nil
 	}
-	projectID, err := ProjectID(d, set.Project)
+	projectID, err := ProjectID(db, set.Project)
 	if err != nil {
 		return false, err
 	}
@@ -56,9 +56,9 @@ func SetTable(set set.Set) string {
 	return set.Project + ".s_" + set.Set
 }
 
-func Sets(d *dbx.DB) ([]string, error) {
+func Sets(db *dbx.DB) ([]string, error) {
 	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id where not p.archived"
-	rows, err := d.Q.Query(d.C, sql)
+	rows, err := db.Query(db.Ctx, sql)
 	if err != nil {
 		return nil, dberr.Error(err)
 	}
@@ -68,7 +68,7 @@ func Sets(d *dbx.DB) ([]string, error) {
 	}
 
 	// add object sets
-	projects, err := Projects(d, false)
+	projects, err := Projects(db, false)
 	if err != nil {
 		return nil, err
 	}
@@ -79,9 +79,9 @@ func Sets(d *dbx.DB) ([]string, error) {
 	return sets, nil
 }
 
-func SetsInProject(d *dbx.DB, project string) ([]string, error) {
+func SetsInProject(db *dbx.DB, project string) ([]string, error) {
 	sql := "select p.name||'.'||s.name from ccms.sets s join ccms.project p on s.project_id=p.id where p.name=$1"
-	rows, err := d.Q.Query(d.C, sql, project)
+	rows, err := db.Query(db.Ctx, sql, project)
 	if err != nil {
 		return nil, dberr.Error(err)
 	}
@@ -107,34 +107,34 @@ func sortSetNames(sets []string) {
 	})
 }
 
-func CreateSet(d *dbx.DB, set set.Set) error {
+func CreateSet(db *dbx.DB, set set.Set) error {
 	sql := "create table " + SetTable(set) + "(" +
 		"id bigint primary key)"
-	if _, err := d.Q.Exec(d.C, sql); err != nil {
+	if _, err := db.Exec(db.Ctx, sql); err != nil {
 		return dberr.Error(err)
 	}
-	projectID, err := ProjectID(d, set.Project)
+	projectID, err := ProjectID(db, set.Project)
 	if err != nil {
 		return err
 	}
 	sql = "insert into ccms.sets (project_id, name) values ($1, $2)"
-	if _, err := d.Q.Exec(d.C, sql, projectID, set.Set); err != nil {
+	if _, err := db.Exec(db.Ctx, sql, projectID, set.Set); err != nil {
 		return dberr.Error(err)
 	}
 	return nil
 }
 
-func DropSet(d *dbx.DB, set set.Set) error {
+func DropSet(db *dbx.DB, set set.Set) error {
 	q := "drop table " + SetTable(set)
-	if _, err := d.Q.Exec(d.C, q); err != nil {
+	if _, err := db.Exec(db.Ctx, q); err != nil {
 		return dberr.Error(err)
 	}
-	projectID, err := ProjectID(d, set.Project)
+	projectID, err := ProjectID(db, set.Project)
 	if err != nil {
 		return err
 	}
 	sql := "delete from ccms.sets where project_id=$1 and name=$2"
-	if _, err := d.Q.Exec(d.C, sql, projectID, set.Set); err != nil {
+	if _, err := db.Exec(db.Ctx, sql, projectID, set.Set); err != nil {
 		return dberr.Error(err)
 	}
 	return nil

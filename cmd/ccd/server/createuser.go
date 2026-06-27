@@ -9,8 +9,8 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func createUserStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateUserStmt) *ccms.Result {
-	userExists, err := cat.UserExists(d, cmd.User)
+func createUserStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateUserStmt) *ccms.Result {
+	userExists, err := cat.UserExists(db, cmd.User)
 	if err != nil {
 		return cmderr("checking if user exists: " + err.Error())
 	}
@@ -22,7 +22,7 @@ func createUserStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateUserStmt) *ccm
 		return cmderr("password is required")
 	}
 
-	if err := cat.CreateUser(s.conf.Security.SecretKey, d, cmd.User, cmd.EncryptedPassword, false, true); err != nil {
+	if err := cat.CreateUser(s.conf.Security.SecretKey, db, cmd.User, cmd.EncryptedPassword, false, true); err != nil {
 		return cmderr("writing user: " + err.Error())
 	}
 

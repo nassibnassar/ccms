@@ -7,8 +7,8 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func createProjectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Result {
-	projectID, err := cat.ProjectID(d, cmd.Project)
+func createProjectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Result {
+	projectID, err := cat.ProjectID(db, cmd.Project)
 	if err != nil {
 		return cmderr("checking if project exists: " + err.Error())
 	}
@@ -20,7 +20,7 @@ func createProjectStmt(s *svr, d *dbx.DB, rqid int64, cmd *ast.CreateProjectStmt
 		return cmderr("invalid project name \"" + cmd.Project + "\"")
 	}
 
-	if err := cat.CreateProject(d, cmd.Project); err != nil {
+	if err := cat.CreateProject(db, cmd.Project); err != nil {
 		return cmderr(err.Error())
 	}
 

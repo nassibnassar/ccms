@@ -24,11 +24,11 @@ func SortUsers(users []User) {
 	})
 }
 
-func Authenticate(secretKey []byte, d *dbx.DB, user, password string) (bool, error) {
+func Authenticate(secretKey []byte, db *dbx.DB, user, password string) (bool, error) {
 	sql := "select login, password, salt from ccms.auth where name=$1"
 	var login bool
 	var passwd, salt string
-	err := d.Q.QueryRow(d.C, sql, user).Scan(&login, &passwd, &salt)
+	err := db.QueryRow(db.Ctx, sql, user).Scan(&login, &passwd, &salt)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -40,10 +40,10 @@ func Authenticate(secretKey []byte, d *dbx.DB, user, password string) (bool, err
 	}
 }
 
-func UserExists(d *dbx.DB, user string) (bool, error) {
+func UserExists(db *dbx.DB, user string) (bool, error) {
 	var q = "select 1 from ccms.auth where name=$1"
 	var n int32
-	err := d.Q.QueryRow(d.C, q, user).Scan(&n)
+	err := db.QueryRow(db.Ctx, q, user).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
@@ -55,10 +55,10 @@ func UserExists(d *dbx.DB, user string) (bool, error) {
 }
 
 // returns user ID, or 0 if user does not exist
-func UserID(d *dbx.DB, user string) (int64, error) {
+func UserID(db *dbx.DB, user string) (int64, error) {
 	var q = "select id from ccms.auth where name=$1"
 	var id int64
-	err := d.Q.QueryRow(d.C, q, user).Scan(&id)
+	err := db.QueryRow(db.Ctx, q, user).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return 0, nil
@@ -69,19 +69,19 @@ func UserID(d *dbx.DB, user string) (int64, error) {
 	}
 }
 
-func CreateUser(secretKey []byte, d *dbx.DB, userName, password string, superuser, login bool) error {
+func CreateUser(secretKey []byte, db *dbx.DB, userName, password string, superuser, login bool) error {
 	salt := crypto.RandomKey()
 	hash := crypto.HashPassword(password, salt, secretKey)
 	sql := "insert into ccms.auth (name, superuser, login, password, salt) values ($1, $2, $3, $4, $5)"
-	if _, err := d.Q.Exec(d.C, sql, userName, superuser, login, hash, crypto.EncodeToHexString(salt)); err != nil {
+	if _, err := db.Exec(db.Ctx, sql, userName, superuser, login, hash, crypto.EncodeToHexString(salt)); err != nil {
 		return fmt.Errorf("registering user %q: %v", userName, dberr.Error(err))
 	}
 	return nil
 }
 
-func Users(d *dbx.DB) ([]User, error) {
+func Users(db *dbx.DB) ([]User, error) {
 	sql := "select name, superuser, login, password, salt from ccms.auth"
-	rows, err := d.Q.Query(d.C, sql)
+	rows, err := db.Query(db.Ctx, sql)
 	if err != nil {
 		return nil, dberr.Error(err)
 	}

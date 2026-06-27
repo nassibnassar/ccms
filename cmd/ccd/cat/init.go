@@ -46,7 +46,7 @@ func Initialize(program string, dp dbx.Queryable, security *config.Security) err
 	return nil
 }
 
-// func addSampleProject(d *dbx.DB) error {
+// func addSampleProject(db *dbx.DB) error {
 // 	projects, err := Projects(d, false)
 // 	if err != nil {
 // 		return err
