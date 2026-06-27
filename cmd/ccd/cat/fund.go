@@ -20,9 +20,9 @@ func CreateFund(db *dbx.DB, fund string) error {
 }
 
 // returns fund ID, or 0 if fund does not exist
-func FundID(db *dbx.DB, fund string) (int64, error) {
+func FundID(db *dbx.DB, fund string) (int32, error) {
 	var q = "select id from ccms.fund where name=$1"
-	var id int64
+	var id int32
 	err := db.QueryRow(db.Ctx, q, fund).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):

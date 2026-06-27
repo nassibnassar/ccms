@@ -56,7 +56,7 @@ func updateStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Resul
 		cmd.Attr = "fund_id"
 		if !cmd.ValueNull {
 			// look up fund id
-			var fundID int64
+			var fundID int32
 			fundID, err = cat.FundID(db, cmd.Value)
 			if err != nil {
 				return cmderr("looking up fund: " + err.Error())
@@ -73,7 +73,7 @@ func updateStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Resul
 			if !inProject {
 				return cmderr("fund \"" + cmd.Value + "\" is not selected for project")
 			}
-			cmd.Value = strconv.FormatInt(fundID, 10)
+			cmd.Value = strconv.FormatInt(int64(fundID), 10)
 		}
 	default:
 		return cmderr("attribute \"" + cmd.Attr + "\" is not valid for update")

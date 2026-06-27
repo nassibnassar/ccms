@@ -20,9 +20,9 @@ import (
 // }
 
 // returns project ID, or -1 if the project is archived or 0 if it does not exist
-func ProjectID(db *dbx.DB, project string) (int64, error) {
+func ProjectID(db *dbx.DB, project string) (int32, error) {
 	sql := "select id, archived from ccms.project where name=$1"
-	var id int64
+	var id int32
 	var archived bool
 	err := db.QueryRow(db.Ctx, sql, project).Scan(&id, &archived)
 	switch {
@@ -39,9 +39,9 @@ func ProjectID(db *dbx.DB, project string) (int64, error) {
 }
 
 // returns project ID, or 0 if project does not exist
-func ArchivedProjectID(db *dbx.DB, project string) (int64, error) {
+func ArchivedProjectID(db *dbx.DB, project string) (int32, error) {
 	sql := "select id from ccms.project where name=$1 and archived=true"
-	var id int64
+	var id int32
 	err := db.QueryRow(db.Ctx, sql, project).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
@@ -242,7 +242,7 @@ func AlterProjectDropFromProperty(db *dbx.DB, project, property, value string, s
 	return nil
 }
 
-func alterProjectAddFund(db *dbx.DB, project, fund string, projectID int64) error {
+func alterProjectAddFund(db *dbx.DB, project, fund string, projectID int32) error {
 	// look up fund id
 	fundID, err := FundID(db, fund)
 	if err != nil {
@@ -267,7 +267,7 @@ func alterProjectAddFund(db *dbx.DB, project, fund string, projectID int64) erro
 	return nil
 }
 
-func alterProjectDropFund(db *dbx.DB, project, fund string, projectID int64) error {
+func alterProjectDropFund(db *dbx.DB, project, fund string, projectID int32) error {
 	if fund == "*" {
 		sql := "select f.name from ccms.project p join ccms.project_fund pf on p.id=pf.project_id join ccms.fund f on pf.fund_id=f.id where p.name=$1"
 		rows, err := db.Query(db.Ctx, sql, project)
@@ -318,7 +318,7 @@ func alterProjectDropFund(db *dbx.DB, project, fund string, projectID int64) err
 	return nil
 }
 
-// func alterProjectAddLocation(db *dbx.DB, project, location string, projectID int64) error {
+// func alterProjectAddLocation(db *dbx.DB, project, location string, projectID int32) error {
 // 	// look up location id
 // 	locationID, err := LocationID(d, location)
 // 	if err != nil {
@@ -343,7 +343,7 @@ func alterProjectDropFund(db *dbx.DB, project, fund string, projectID int64) err
 // 	return nil
 // }
 
-// func alterProjectDropLocation(db *dbx.DB, project, location string, projectID int64) error {
+// func alterProjectDropLocation(db *dbx.DB, project, location string, projectID int32) error {
 // 	if location == "*" {
 // 		sql := "delete from ccms.project_location where project_id=$1"
 // 		if _, err := db.Exec(db.Ctx, sql, projectID); err != nil {
@@ -375,7 +375,7 @@ func alterProjectDropFund(db *dbx.DB, project, fund string, projectID int64) err
 // 	return nil
 // }
 
-func alterProjectAddOrigin(db *dbx.DB, project, origin string, projectID int64) error {
+func alterProjectAddOrigin(db *dbx.DB, project, origin string, projectID int32) error {
 	// look up origin id
 	originID, err := OriginID(db, origin)
 	if err != nil {
@@ -400,7 +400,7 @@ func alterProjectAddOrigin(db *dbx.DB, project, origin string, projectID int64) 
 	return nil
 }
 
-func alterProjectDropOrigin(db *dbx.DB, project, origin string, projectID int64) error {
+func alterProjectDropOrigin(db *dbx.DB, project, origin string, projectID int32) error {
 	if origin == "*" {
 		sql := "delete from ccms.project_origin where project_id=$1"
 		if _, err := db.Exec(db.Ctx, sql, projectID); err != nil {
@@ -432,7 +432,7 @@ func alterProjectDropOrigin(db *dbx.DB, project, origin string, projectID int64)
 	return nil
 }
 
-func alterProjectAddDestination(db *dbx.DB, project, destination string, projectID int64) error {
+func alterProjectAddDestination(db *dbx.DB, project, destination string, projectID int32) error {
 	// look up destination id
 	destinationID, err := DestinationID(db, destination)
 	if err != nil {
@@ -457,7 +457,7 @@ func alterProjectAddDestination(db *dbx.DB, project, destination string, project
 	return nil
 }
 
-func alterProjectDropDestination(db *dbx.DB, project, destination string, projectID int64) error {
+func alterProjectDropDestination(db *dbx.DB, project, destination string, projectID int32) error {
 	if destination == "*" {
 		sql := "delete from ccms.project_destination where project_id=$1"
 		if _, err := db.Exec(db.Ctx, sql, projectID); err != nil {
@@ -489,7 +489,7 @@ func alterProjectDropDestination(db *dbx.DB, project, destination string, projec
 	return nil
 }
 
-func alterProjectAddTrack(db *dbx.DB, project, track string, projectID int64) error {
+func alterProjectAddTrack(db *dbx.DB, project, track string, projectID int32) error {
 	// look up track id
 	trackID, err := TrackID(db, track)
 	if err != nil {
@@ -514,7 +514,7 @@ func alterProjectAddTrack(db *dbx.DB, project, track string, projectID int64) er
 	return nil
 }
 
-func alterProjectDropTrack(db *dbx.DB, project, track string, projectID int64) error {
+func alterProjectDropTrack(db *dbx.DB, project, track string, projectID int32) error {
 	if track == "*" {
 		sql := "delete from ccms.project_track where project_id=$1"
 		if _, err := db.Exec(db.Ctx, sql, projectID); err != nil {
@@ -547,9 +547,9 @@ func alterProjectDropTrack(db *dbx.DB, project, track string, projectID int64) e
 }
 
 // returns location ID, or 0 if location does not exist
-func LocationID(db *dbx.DB, location string) (int64, error) {
+func LocationID(db *dbx.DB, location string) (int32, error) {
 	sql := "select id from ccms.location where name=$1"
-	var id int64
+	var id int32
 	err := db.QueryRow(db.Ctx, sql, location).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
@@ -562,9 +562,9 @@ func LocationID(db *dbx.DB, location string) (int64, error) {
 }
 
 // returns origin ID, or 0 if origin does not exist
-func OriginID(db *dbx.DB, origin string) (int64, error) {
+func OriginID(db *dbx.DB, origin string) (int32, error) {
 	var sql = "select id from ccms.origin where name=$1"
-	var id int64
+	var id int32
 	err := db.QueryRow(db.Ctx, sql, origin).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
@@ -577,9 +577,9 @@ func OriginID(db *dbx.DB, origin string) (int64, error) {
 }
 
 // returns destination ID, or 0 if destination does not exist
-func DestinationID(db *dbx.DB, destination string) (int64, error) {
+func DestinationID(db *dbx.DB, destination string) (int32, error) {
 	sql := "select id from ccms.destination where name=$1"
-	var id int64
+	var id int32
 	err := db.QueryRow(db.Ctx, sql, destination).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
@@ -592,9 +592,9 @@ func DestinationID(db *dbx.DB, destination string) (int64, error) {
 }
 
 // returns track ID, or 0 if track does not exist
-func TrackID(db *dbx.DB, track string) (int64, error) {
+func TrackID(db *dbx.DB, track string) (int32, error) {
 	sql := "select id from ccms.track where name=$1"
-	var id int64
+	var id int32
 	err := db.QueryRow(db.Ctx, sql, track).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
@@ -606,7 +606,7 @@ func TrackID(db *dbx.DB, track string) (int64, error) {
 	}
 }
 
-func ProjectFundExists(db *dbx.DB, projectID, fundID int64) (bool, error) {
+func ProjectFundExists(db *dbx.DB, projectID, fundID int32) (bool, error) {
 	sql := "select 1 from ccms.project_fund where project_id=$1 and fund_id=$2"
 	var n int32
 	err := db.QueryRow(db.Ctx, sql, projectID, fundID).Scan(&n)
@@ -620,7 +620,7 @@ func ProjectFundExists(db *dbx.DB, projectID, fundID int64) (bool, error) {
 	}
 }
 
-func objectFundExists(db *dbx.DB, project string, fundID int64) (bool, error) {
+func objectFundExists(db *dbx.DB, project string, fundID int32) (bool, error) {
 	sql := "select 1 from " + project + ".object where fund_id=$1 limit 1"
 	var n int32
 	err := db.QueryRow(db.Ctx, sql, fundID).Scan(&n)
@@ -648,7 +648,7 @@ func objectFundExists(db *dbx.DB, project string, fundID int64) (bool, error) {
 // 	}
 // }
 
-func projectOriginExists(db *dbx.DB, projectID, originID int64) (bool, error) {
+func projectOriginExists(db *dbx.DB, projectID, originID int32) (bool, error) {
 	sql := "select 1 from ccms.project_origin where project_id=$1 and origin_id=$2"
 	var n int32
 	err := db.QueryRow(db.Ctx, sql, projectID, originID).Scan(&n)
@@ -662,7 +662,7 @@ func projectOriginExists(db *dbx.DB, projectID, originID int64) (bool, error) {
 	}
 }
 
-func projectDestinationExists(db *dbx.DB, projectID, destinationID int64) (bool, error) {
+func projectDestinationExists(db *dbx.DB, projectID, destinationID int32) (bool, error) {
 	sql := "select 1 from ccms.project_destination where project_id=$1 and destination_id=$2"
 	var n int32
 	err := db.QueryRow(db.Ctx, sql, projectID, destinationID).Scan(&n)
@@ -676,7 +676,7 @@ func projectDestinationExists(db *dbx.DB, projectID, destinationID int64) (bool,
 	}
 }
 
-func projectTrackExists(db *dbx.DB, projectID, trackID int64) (bool, error) {
+func projectTrackExists(db *dbx.DB, projectID, trackID int32) (bool, error) {
 	sql := "select 1 from ccms.project_track where project_id=$1 and track_id=$2"
 	var n int32
 	err := db.QueryRow(db.Ctx, sql, projectID, trackID).Scan(&n)

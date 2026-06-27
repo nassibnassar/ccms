@@ -55,9 +55,9 @@ func UserExists(db *dbx.DB, user string) (bool, error) {
 }
 
 // returns user ID, or 0 if user does not exist
-func UserID(db *dbx.DB, user string) (int64, error) {
+func UserID(db *dbx.DB, user string) (int32, error) {
 	var q = "select id from ccms.auth where name=$1"
-	var id int64
+	var id int32
 	err := db.QueryRow(db.Ctx, q, user).Scan(&id)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
