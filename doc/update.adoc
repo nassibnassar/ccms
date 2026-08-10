@@ -6,14 +6,14 @@ Update object attributes
 ----
 update `**_project_name_**`.object
     set `**_attribute_**` = { `*_value_*` | null } [, ...]
-    where `*_search_condition_*`
+    [ where `*_search_condition_*` ]
 ----
 
 [discrete]
 ===== Description
 
-The `update` command changes the value of specified attributes for an
-object having a specified ID.
+The `update` command changes the value of specified attributes for
+selected objects.
 
 Note that the values of updated attributes are shared by all sets
 within a project.
@@ -31,9 +31,10 @@ The `set` clause specifies the attributes to set and their new values.
 [discrete]
 ====== where
 
-The `where` clause specifies a search condition in the form of a
-Boolean expression.  Only objects that satisfy this condition will be
-updated.
+The optional `where` clause specifies a search condition in the form
+of a Boolean expression.  If the `where` clause is present, only
+objects that satisfy the condition will be updated; otherwise all
+objects will be updated.
 
 See also *Reference > Queries*.
 

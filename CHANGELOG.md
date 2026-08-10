@@ -1,10 +1,9 @@
 # development
 
-* The command `update` now supports setting multiple attributes at
-  once.
-
-* The command `update` now supports a general search condition in the
-  `where` clause.
+* The command `update` now supports:
+  - setting multiple attributes at once
+  - a general search condition in the `where` clause
+  - updating all objects by omitting the `where` clause
 
 * Search conditions now support the `in` operator to test equality
   with multiple values.

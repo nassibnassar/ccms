@@ -75,7 +75,7 @@ func updateStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Resul
 		return cmderr(err.Error())
 	}
 	if _, err := db.Exec(db.Ctx, sql); err != nil {
-		return cmderr("executing update: " + err.Error())
+		return cmderr(dberr.String(err))
 	}
 
 	return ccms.NewResult("update")

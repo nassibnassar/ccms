@@ -179,11 +179,6 @@ func (u *UpdateStmt) SQL(db *dbx.DB) (string, error) {
 }
 
 func (u *UpdateStmt) sql(db *dbx.DB, a, b *strings.Builder) error {
-	w := u.Where.(*WhereClause)
-	if !w.Valid {
-		return errors.New("\"where\" clause is required")
-	}
-
 	project, set, err := util.ParsePair(u.Set)
 	if err != nil {
 		return err
@@ -200,32 +195,42 @@ func (u *UpdateStmt) sql(db *dbx.DB, a, b *strings.Builder) error {
 	}
 	b.WriteString(" a left join ")
 	b.WriteString(project)
-	b.WriteString(".object o on a.id=o.id where (")
-
-	if err := evalExpr(db, a, b, w.Condition, true, evalState{}); err != nil {
-		return err
+	b.WriteString(".object o on a.id=o.id")
+	b.WriteString(" left join ccms.fund on o.fund_id=fund.id")
+	where := u.Where.(*WhereClause)
+	if where.Valid {
+		b.WriteString(" where (")
+		if err := evalExpr(db, a, b, where.Condition, true, evalState{}); err != nil {
+			return err
+		}
+		b.WriteRune(')')
 	}
-
-	b.WriteString(") on conflict (id) do nothing; ")
+	b.WriteString(" on conflict (id) do nothing; ")
 
 	// update
 	b.WriteString("update ")
 	b.WriteString(project)
-	b.WriteString(".object o set ")
+	b.WriteString(".object oo set ")
 	updateSetClauseSQL(b, u.SetClause)
 	b.WriteString(" from ")
+
+	b.WriteString(project)
+	b.WriteString(".object o left join ")
+
 	if set == "object" {
 		b.WriteString("ccms.attr")
 	} else {
 		b.WriteString(cat.SetTable(project, set))
 	}
-	b.WriteString(" a where o.id=a.id and (")
 
-	if err := evalExpr(db, a, b, w.Condition, true, evalState{}); err != nil {
-		return err
+	b.WriteString(" a on o.id=a.id left join ccms.fund on o.fund_id=fund.id where oo.id=o.id")
+	if where.Valid {
+		b.WriteString(" and (")
+		if err := evalExpr(db, a, b, where.Condition, true, evalState{}); err != nil {
+			return err
+		}
+		b.WriteRune(')')
 	}
-
-	b.WriteRune(')')
 	b.WriteRune(';')
 
 	return nil
