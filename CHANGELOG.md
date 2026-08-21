@@ -1,4 +1,4 @@
-# development
+# v0.0.30
 
 * The command `update` now supports:
   - setting multiple attributes at once
