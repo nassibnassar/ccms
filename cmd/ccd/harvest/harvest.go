@@ -128,6 +128,9 @@ func harvestLoop(connString string) {
 		availability := m.Lookup("999", "1", "3", "z")
 		//placePub := m.Lookup("260", "a")
 
+		libraryHoldingsCount := m.LookupLibraryHoldingsCount()
+		onlineDatabaseHoldingsCount := m.LookupOnlineDatabaseHoldingsCount()
+		vendorHoldingsCount := m.LookupVendorHoldingsCount()
 		holdingsCount := m.LookupHoldingsCount()
 
 		_ = m
@@ -164,9 +167,9 @@ func harvestLoop(connString string) {
 		}
 
 		if id != 0 {
-			q = "insert into ccms.attr (id, author, title, full_vendor_name, availability, holdings_count) " +
-				"values ($1, $2, $3, $4, $5, $6) on conflict do nothing"
-			if _, err = tx.Exec(ctx, q, id, author, title, fullVendorName, availability, holdingsCount); err != nil {
+			q = "insert into ccms.attr (id, author, title, full_vendor_name, availability, library_holdings_count, online_database_holdings_count, vendor_holdings_count, holdings_count) " +
+				"values ($1, $2, $3, $4, $5, $6, $7, $8, $9) on conflict do nothing"
+			if _, err = tx.Exec(ctx, q, id, author, title, fullVendorName, availability, libraryHoldingsCount, onlineDatabaseHoldingsCount, vendorHoldingsCount, holdingsCount); err != nil {
 				logError("writing to table attr: " + err.Error())
 				return
 			}

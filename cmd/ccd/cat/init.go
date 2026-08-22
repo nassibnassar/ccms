@@ -133,6 +133,9 @@ func createTableAttr(tx pgx.Tx) error {
 		"title text," +
 		"full_vendor_name text," +
 		"availability text," +
+		"library_holdings_count smallint not null," +
+		"online_database_holdings_count smallint not null," +
+		"vendor_holdings_count smallint not null," +
 		"holdings_count smallint not null)"
 		//"place_of_publication text)"
 	if _, err := tx.Exec(context.TODO(), q); err != nil {
@@ -148,6 +151,15 @@ func createTableAttr(tx pgx.Tx) error {
 		return err
 	}
 	if err := createGinIndex(tx, "availability"); err != nil {
+		return err
+	}
+	if err := createBtreeIndex(tx, "library_holdings_count"); err != nil {
+		return err
+	}
+	if err := createBtreeIndex(tx, "online_database_holdings_count"); err != nil {
+		return err
+	}
+	if err := createBtreeIndex(tx, "vendor_holdings_count"); err != nil {
 		return err
 	}
 	if err := createBtreeIndex(tx, "holdings_count"); err != nil {

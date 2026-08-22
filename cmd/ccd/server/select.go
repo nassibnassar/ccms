@@ -114,6 +114,9 @@ func runQuery(s *svr, db *dbx.DB, sql string) (*ccms.Result, error) {
 	result.AddField("title", "text")
 	result.AddField("full_vendor_name", "text")
 	result.AddField("availability", "text")
+	result.AddField("library_holdings_count", "smallint")
+	result.AddField("online_database_holdings_count", "smallint")
+	result.AddField("vendor_holdings_count", "smallint")
 	result.AddField("holdings_count", "smallint")
 	result.AddField("decision", "boolean")
 	result.AddField("fund", "text")
@@ -121,9 +124,9 @@ func runQuery(s *svr, db *dbx.DB, sql string) (*ccms.Result, error) {
 	for rows.Next() {
 		var id int64
 		var author, title, full_vendor_name, availability, fund zeronull.Text
-		var holdingsCount int16
+		var libraryHoldingsCount, onlineDatabaseHoldingsCount, vendorHoldingsCount, holdingsCount int16
 		var decisionNull *bool
-		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability, &holdingsCount, &decisionNull, &fund)
+		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability, &libraryHoldingsCount, &onlineDatabaseHoldingsCount, &vendorHoldingsCount, &holdingsCount, &decisionNull, &fund)
 		if err != nil {
 			return nil, dberr.Error(err)
 		}
@@ -131,7 +134,7 @@ func runQuery(s *svr, db *dbx.DB, sql string) (*ccms.Result, error) {
 		if decisionNull != nil {
 			decision = *decisionNull
 		}
-		result.AddData([]any{id, author, title, full_vendor_name, availability, holdingsCount, decision, fund})
+		result.AddData([]any{id, author, title, full_vendor_name, availability, libraryHoldingsCount, onlineDatabaseHoldingsCount, vendorHoldingsCount, holdingsCount, decision, fund})
 		count++
 		if count > 10000 {
 			return nil, errors.New("result set too large")

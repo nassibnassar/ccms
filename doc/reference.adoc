@@ -131,6 +131,18 @@ provided by CCMS or the original data source and cannot be modified:
 |`text`
 |`999 13 $z`
 
+|`library_holdings_count`
+|`smallint`
+|number of library holdings
+
+|`online_database_holdings_count`
+|`smallint`
+|number of online database holdings
+
+|`vendor_holdings_count`
+|`smallint`
+|number of vendor holdings
+
 |`holdings_count`
 |`smallint`
 |number of holdings

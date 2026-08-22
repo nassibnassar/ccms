@@ -56,6 +56,39 @@ func (m *MARCXML) LookupHoldingsCount() int16 {
 	return count
 }
 
+func (m *MARCXML) LookupLibraryHoldingsCount() int16 {
+	var count int16
+	df := m.Datafields
+	for i := range df {
+		if df[i].Tag == "999" && df[i].Ind1 == "1" && df[i].Ind2 == "1" {
+			count++
+		}
+	}
+	return count
+}
+
+func (m *MARCXML) LookupOnlineDatabaseHoldingsCount() int16 {
+	var count int16
+	df := m.Datafields
+	for i := range df {
+		if df[i].Tag == "999" && df[i].Ind1 == "1" && df[i].Ind2 == "2" {
+			count++
+		}
+	}
+	return count
+}
+
+func (m *MARCXML) LookupVendorHoldingsCount() int16 {
+	var count int16
+	df := m.Datafields
+	for i := range df {
+		if df[i].Tag == "999" && df[i].Ind1 == "1" && df[i].Ind2 == "3" {
+			count++
+		}
+	}
+	return count
+}
+
 func (m *MARCXML) Lookup(tag, ind1, ind2, subfield string) string {
 	content := make([]string, 0)
 	cf := m.Controlfields
