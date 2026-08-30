@@ -572,6 +572,10 @@ equality_expr:
 		{
 			$$ = &ast.InExpr{Expr1: $1, ValueList: $4}
 		}
+	| equality_expr NOT IN '(' value_expr_list ')'
+		{
+			$$ = &ast.NotInExpr{Expr1: $1, ValueList: $5}
+		}
 	| equality_expr IS NULL
 		{
 			$$ = &ast.IsNullExpr{Expr1: $1}

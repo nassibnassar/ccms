@@ -1,7 +1,7 @@
 # development
 
-* Search conditions now support `is null` and `is not null` for
-  applicable attributes.
+* Search conditions now support `is null`, `is not null`, and `not in`
+  for applicable attributes.
 
 # v0.0.30
 

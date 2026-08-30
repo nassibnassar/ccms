@@ -262,6 +262,13 @@ type InExpr struct {
 
 func (*InExpr) node() {}
 
+type NotInExpr struct {
+	Expr1     Node
+	ValueList []Node
+}
+
+func (*NotInExpr) node() {}
+
 func (*LikeExpr) node() {}
 
 type ILikeExpr struct {

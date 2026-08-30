@@ -314,6 +314,17 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		}
 		a.WriteRune(')')
 		b.WriteRune(')')
+	case *NotInExpr:
+		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
+			return err
+		}
+		a.WriteString(" not in (")
+		b.WriteString(" not in (")
+		if err := evalExprValueList(db, a, b, e.ValueList, state); err != nil {
+			return err
+		}
+		a.WriteRune(')')
+		b.WriteRune(')')
 	case *LikeExpr:
 		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
 			return err
