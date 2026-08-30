@@ -73,7 +73,9 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'info'i => { tok = INFO; fbreak; };
 			'insert'i => { tok = INSERT; fbreak; };
 			'in'i => { tok = IN; fbreak; };
+			'is'i => { tok = IS; fbreak; };
 			'into'i => { tok = INTO; fbreak; };
+			'is'i => { tok = IS; fbreak; };
 			'like'i => { tok = LIKE; fbreak; };
 			'limit'i => { tok = LIMIT; fbreak; };
 			'not'i => { tok = NOT; fbreak; };

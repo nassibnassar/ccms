@@ -238,6 +238,18 @@ type EqualExpr struct {
 
 func (*EqualExpr) node() {}
 
+type IsNullExpr struct {
+	Expr1 Node
+}
+
+func (*IsNullExpr) node() {}
+
+type IsNotNullExpr struct {
+	Expr1 Node
+}
+
+func (*IsNotNullExpr) node() {}
+
 type LikeExpr struct {
 	Expr1 Node
 	Expr2 Node
@@ -339,6 +351,11 @@ type Number struct {
 }
 
 func (*Number) node() {}
+
+type Null struct {
+}
+
+func (*Null) node() {}
 
 type Option struct {
 	Action string

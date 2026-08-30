@@ -1,3 +1,8 @@
+# development
+
+* Search conditions now support `is null` and `is not null` for
+  applicable attributes.
+
 # v0.0.30
 
 * The command `update` now supports:

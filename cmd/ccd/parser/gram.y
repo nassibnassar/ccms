@@ -90,6 +90,7 @@ import (
 %token INFO
 %token INSERT
 %token INTO
+%token IS
 %token LIKE
 %token LIMIT
 %token NOT
@@ -571,6 +572,14 @@ equality_expr:
 		{
 			$$ = &ast.InExpr{Expr1: $1, ValueList: $4}
 		}
+	| equality_expr IS NULL
+		{
+			$$ = &ast.IsNullExpr{Expr1: $1}
+		}
+	| equality_expr IS NOT NULL
+		{
+			$$ = &ast.IsNotNullExpr{Expr1: $1}
+		}
 
 value_expr_list:
 	value_expr
@@ -645,6 +654,12 @@ primary_expr:
 		{
 			$$ = &ast.ParenExpr{Expr: $2}
 		}
+/*
+	| NULL
+		{
+			$$ = &ast.Null{}
+		}
+*/
 
 arg_expr_list:
 	arg_expr

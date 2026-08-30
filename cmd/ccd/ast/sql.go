@@ -291,6 +291,18 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		if err := evalExprOptAttr(db, a, b, e.Expr2, state); err != nil {
 			return err
 		}
+	case *IsNullExpr:
+		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
+			return err
+		}
+		a.WriteString(" is null")
+		b.WriteString(" is null")
+	case *IsNotNullExpr:
+		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
+			return err
+		}
+		a.WriteString(" is not null")
+		b.WriteString(" is not null")
 	case *InExpr:
 		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
 			return err
@@ -417,6 +429,12 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		}
 		a.WriteString(e.Value)
 		b.WriteString(e.Value)
+	case *Null:
+		if root {
+			return errors.New("invalid boolean expression")
+		}
+		a.WriteString("null")
+		b.WriteString("null")
 	case *ParenExpr:
 		a.WriteRune('(')
 		b.WriteRune('(')
@@ -516,7 +534,7 @@ func attrSQL(a, b *strings.Builder, attr string) {
 		b.WriteString(attr)
 		b.WriteString(",false)")
 	case "fund":
-		b.WriteString("coalesce(fund.name,'')")
+		b.WriteString("fund.name")
 	default:
 		b.WriteString(attr)
 	}
