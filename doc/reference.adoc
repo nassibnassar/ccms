@@ -159,11 +159,12 @@ the `update` command:
 
 |`decision`
 |`boolean`
-|true if the decision to take the project action has been made
+|`true` if the decision to take the project action has been made;
+ otherwise `false`
 
 |`fund`
 |fund name
-|selected from the project property `funds`
+|a fund selected from the project property `funds`, or `null`
 |===
 
 === Lexical structure
