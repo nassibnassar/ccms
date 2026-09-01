@@ -19,10 +19,7 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-var colorMode string
 var devMode bool
-
-var colorInitialized bool
 
 var option struct {
 	Host          string
@@ -75,7 +72,6 @@ func fileExists(file string) (bool, error) {
 const errorPrefix = "ERROR: "
 
 func main() {
-	colorMode = os.Getenv("CCC_COLOR")
 	cccMain()
 }
 
@@ -85,9 +81,6 @@ func cccMain() {
 }
 
 func errorExit(err error) {
-	if !colorInitialized {
-		eout.NeverColor()
-	}
 	eout.Error("%s", err)
 	os.Exit(1)
 }
@@ -181,7 +174,6 @@ func runClient() error {
 	//}
 
 	pager.AllowEnv = true
-	eout.Interactive()
 	fmt.Printf("%s (%s) client for CCMS\n", global.ClientProgram, global.Version)
 	if option.NoTLS && option.Host != "127.0.0.1" {
 		eout.Warning("disabling TLS (insecure)")
@@ -468,19 +460,6 @@ func skipVerifyFlag(cmd *cobra.Command, skipVerify *bool) string {
 	return "" +
 		"      --skipverify            do not verify server certificate chain and host\n" +
 		"                              name (insecure)\n"
-}
-
-func initColor() error {
-	switch colorMode {
-	case "always":
-		eout.AlwaysColor()
-	case "auto":
-		eout.AutoColor()
-	default:
-		eout.NeverColor()
-	}
-	colorInitialized = true
-	return nil
 }
 
 func ValueFromFile(filename string) (string, error) {

@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/indexdata/ccms/cmd/ccd/config"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/option"
@@ -20,10 +19,9 @@ import (
 
 func main() {
 	//testOAI()
-	initColor(os.Getenv("CCMS_COLOR"))
-	spew.Config.Indent = "    "
-	spew.Config.DisablePointerAddresses = true
-	spew.Config.DisableCapacities = true
+	// spew.Config.Indent = "    "
+	// spew.Config.DisablePointerAddresses = true
+	// spew.Config.DisableCapacities = true
 	if err := run(); err != nil {
 		// fmt.Fprintf(os.Stderr, "%s: %s\n", global.ServerProgram, err)
 		eout.Error("%s", err)
@@ -388,16 +386,4 @@ func initSystem(opt *option.Init) error {
 	}
 	eout.Info("initialized new data directory in %s", dd)
 	return nil
-}
-
-func initColor(colorMode string) {
-	eout.Init(os.Args[0])
-	switch colorMode {
-	case "always":
-		eout.AlwaysColor()
-	case "auto":
-		eout.AutoColor()
-	default:
-		eout.NeverColor()
-	}
 }
