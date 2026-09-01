@@ -77,6 +77,11 @@ The supported operators, in order of precedence, are:
 
 Parentheses may be used to override these precedence rules.
 
+Note that with `like` and `ilike`, pattern matching strings can use
+`%` to match any string and `\_` to match any single character.  In
+order to match the literal characters `%`, `_`, or `\`, the character
+should be escaped by preceding it with `\`, as in `\%`, `\_` or `\\`.
+
 ===== Operands
 
 Supported operand types are:
