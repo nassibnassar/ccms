@@ -1,5 +1,8 @@
 # v0.0.31
 
+* Added attributes `library_holdings_count`,
+  `online_database_holdings_count`, and `vendor_holdings_count`.
+
 * Search conditions now support `is null`, `is not null`, and `not in`
   for applicable attributes.
 
