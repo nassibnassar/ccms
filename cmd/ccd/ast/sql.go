@@ -295,31 +295,24 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
 			return err
 		}
-		a.WriteString(" is null")
-		b.WriteString(" is null")
-	case *IsNotNullExpr:
-		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
-			return err
+		if e.Not {
+			a.WriteString(" is not null")
+			b.WriteString(" is not null")
+		} else {
+			a.WriteString(" is null")
+			b.WriteString(" is null")
 		}
-		a.WriteString(" is not null")
-		b.WriteString(" is not null")
 	case *InExpr:
 		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
 			return err
 		}
-		a.WriteString(" in (")
-		b.WriteString(" in (")
-		if err := evalExprValueList(db, a, b, e.ValueList, state); err != nil {
-			return err
+		if e.Not {
+			a.WriteString(" not in (")
+			b.WriteString(" not in (")
+		} else {
+			a.WriteString(" in (")
+			b.WriteString(" in (")
 		}
-		a.WriteRune(')')
-		b.WriteRune(')')
-	case *NotInExpr:
-		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
-			return err
-		}
-		a.WriteString(" not in (")
-		b.WriteString(" not in (")
 		if err := evalExprValueList(db, a, b, e.ValueList, state); err != nil {
 			return err
 		}
@@ -329,8 +322,13 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
 			return err
 		}
-		a.WriteString(" like ")
-		b.WriteString(" like ")
+		if e.Not {
+			a.WriteString(" not like ")
+			b.WriteString(" not like ")
+		} else {
+			a.WriteString(" like ")
+			b.WriteString(" like ")
+		}
 		if err := evalExprOptAttr(db, a, b, e.Expr2, state); err != nil {
 			return err
 		}
@@ -338,8 +336,13 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
 			return err
 		}
-		a.WriteString(" ilike ")
-		b.WriteString(" ilike ")
+		if e.Not {
+			a.WriteString(" not ilike ")
+			b.WriteString(" not ilike ")
+		} else {
+			a.WriteString(" ilike ")
+			b.WriteString(" ilike ")
+		}
 		if err := evalExprOptAttr(db, a, b, e.Expr2, state); err != nil {
 			return err
 		}

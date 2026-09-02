@@ -240,40 +240,31 @@ func (*EqualExpr) node() {}
 
 type IsNullExpr struct {
 	Expr1 Node
+	Not   bool
 }
 
 func (*IsNullExpr) node() {}
 
-type IsNotNullExpr struct {
-	Expr1 Node
-}
-
-func (*IsNotNullExpr) node() {}
-
-type LikeExpr struct {
-	Expr1 Node
-	Expr2 Node
-}
-
 type InExpr struct {
 	Expr1     Node
 	ValueList []Node
+	Not       bool
 }
 
 func (*InExpr) node() {}
 
-type NotInExpr struct {
-	Expr1     Node
-	ValueList []Node
+type LikeExpr struct {
+	Expr1 Node
+	Expr2 Node
+	Not   bool
 }
-
-func (*NotInExpr) node() {}
 
 func (*LikeExpr) node() {}
 
 type ILikeExpr struct {
 	Expr1 Node
 	Expr2 Node
+	Not   bool
 }
 
 func (*ILikeExpr) node() {}

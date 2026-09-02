@@ -1,3 +1,7 @@
+# development
+
+* Search conditions now support `not like` and `not ilike`.
+
 # v0.0.31
 
 * Added attributes `library_holdings_count`,

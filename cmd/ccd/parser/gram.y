@@ -560,9 +560,17 @@ equality_expr:
 		{
 			$$ = &ast.LikeExpr{Expr1: $1, Expr2: $3}
 		}
+	| equality_expr NOT LIKE relational_expr
+		{
+			$$ = &ast.LikeExpr{Expr1: $1, Expr2: $4, Not: true}
+		}
 	| equality_expr ILIKE relational_expr
 		{
 			$$ = &ast.ILikeExpr{Expr1: $1, Expr2: $3}
+		}
+	| equality_expr NOT ILIKE relational_expr
+		{
+			$$ = &ast.ILikeExpr{Expr1: $1, Expr2: $4, Not: true}
 		}
 	| equality_expr NOT_EQUAL relational_expr
 		{
@@ -574,7 +582,7 @@ equality_expr:
 		}
 	| equality_expr NOT IN '(' value_expr_list ')'
 		{
-			$$ = &ast.NotInExpr{Expr1: $1, ValueList: $5}
+			$$ = &ast.InExpr{Expr1: $1, ValueList: $5, Not: true}
 		}
 	| equality_expr IS NULL
 		{
@@ -582,7 +590,7 @@ equality_expr:
 		}
 	| equality_expr IS NOT NULL
 		{
-			$$ = &ast.IsNotNullExpr{Expr1: $1}
+			$$ = &ast.IsNullExpr{Expr1: $1, Not: true}
 		}
 
 value_expr_list:
