@@ -350,6 +350,12 @@ type Number struct {
 
 func (*Number) node() {}
 
+type Boolean struct {
+	Value bool
+}
+
+func (*Boolean) node() {}
+
 type Null struct {
 }
 

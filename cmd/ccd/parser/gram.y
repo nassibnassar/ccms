@@ -82,6 +82,7 @@ import (
 %token DESC
 %token DROP
 %token ENCRYPTED
+%token FALSE
 %token FILTER
 %token FROM
 %token FUND
@@ -109,6 +110,7 @@ import (
 %token SHOW
 %token TAG
 %token TO
+%token TRUE
 %token UPDATE
 %token USER
 %token VERSION
@@ -666,6 +668,14 @@ primary_expr:
 		{
 			$$ = &ast.ParenExpr{Expr: $2}
 		}
+	| TRUE
+		{
+			$$ = &ast.Boolean{Value: true}
+		}
+	| FALSE
+		{
+			$$ = &ast.Boolean{}
+		}
 /*
 	| NULL
 		{
@@ -694,15 +704,3 @@ name:
 		{
 			$$ = strings.ToLower($1)
 		}
-
-/*
-boolean:
-	TRUE
-		{
-			$$ = "true"
-		}
-	| FALSE
-		{
-			$$ = "false"
-		}
-*/

@@ -445,6 +445,14 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		}
 		a.WriteString(e.Value)
 		b.WriteString(e.Value)
+	case *Boolean:
+		if e.Value {
+			a.WriteString("true")
+			b.WriteString("true")
+		} else {
+			a.WriteString("false")
+			b.WriteString("false")
+		}
 	case *Null:
 		if root {
 			return errors.New("invalid boolean expression")
@@ -544,11 +552,7 @@ func attrSQL(a, b *strings.Builder, attr string) {
 		b.WriteRune('.')
 		b.WriteString(attr)
 	case "decision":
-		b.WriteString("coalesce(")
-		b.WriteRune('o')
-		b.WriteRune('.')
 		b.WriteString(attr)
-		b.WriteString(",false)")
 	case "fund":
 		b.WriteString("fund.name")
 	default:
