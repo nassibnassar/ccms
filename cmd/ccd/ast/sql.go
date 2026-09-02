@@ -277,11 +277,13 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 			return err
 		}
 	case *NotExpr:
-		a.WriteString("not ")
-		b.WriteString("not ")
-		if err := evalExpr(db, a, b, e.Expr, false, state); err != nil {
+		a.WriteString("not (")
+		b.WriteString("not (")
+		if err := evalExpr(db, a, b, e.Expr, true, state); err != nil {
 			return err
 		}
+		a.WriteRune(')')
+		b.WriteRune(')')
 	case *EqualExpr:
 		if err := evalExprOptAttr(db, a, b, e.Expr1, state); err != nil {
 			return err
@@ -422,7 +424,7 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		//}
 		//b.WriteRune(')')
 	case *Name:
-		if root {
+		if root && !isAttrBool(e.Value) {
 			return errors.New("invalid boolean expression")
 		}
 		a.WriteString(e.Value)
@@ -552,4 +554,8 @@ func attrSQL(a, b *strings.Builder, attr string) {
 	default:
 		b.WriteString(attr)
 	}
+}
+
+func isAttrBool(attr string) bool {
+	return attr == "decision"
 }

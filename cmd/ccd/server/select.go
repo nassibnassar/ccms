@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/indexdata/ccms"
@@ -72,6 +73,7 @@ func selectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.SelectStmt) *ccms.Resul
 	if err != nil {
 		return cmderr(err.Error())
 	}
+	fmt.Println(sql)
 
 	switch a.Attr {
 	case "*":
