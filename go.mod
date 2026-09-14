@@ -1,6 +1,6 @@
 module github.com/indexdata/ccms
 
-go 1.27.0
+go 1.27.1
 
 require (
 	github.com/chzyer/readline v1.5.1
@@ -25,7 +25,6 @@ require (
 	golang.org/x/telemetry v0.0.0-20260811182544-a038080d80e5 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/tools v0.49.0 // indirect
-	golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated // indirect
 	golang.org/x/vuln v1.7.0 // indirect
 )
 
