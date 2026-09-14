@@ -34,5 +34,5 @@ Examples
 
 To set the decision and fund in an object having ID = 12:
 
-update myproj.myset set decision = true, fund = cultural where id = 12;
+update myproj.object set decision = true, fund = cultural where id = 12;
 
