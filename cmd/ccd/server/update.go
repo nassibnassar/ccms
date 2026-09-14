@@ -65,6 +65,29 @@ func updateStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Resul
 				}
 				si.Value = strconv.FormatInt(int64(fundID), 10)
 			}
+		case "track":
+			si.Attr = "track_id"
+			if !si.ValueNull {
+				// look up track id
+				var trackID int32
+				trackID, err = cat.TrackID(db, si.Value)
+				if err != nil {
+					return cmderr("looking up track: " + err.Error())
+				}
+				if trackID == 0 {
+					return cmderr("track \"" + si.Value + "\" does not exist")
+				}
+				// ensure track is valid for project
+				var inProject bool
+				inProject, err = cat.ProjectTrackExists(db, projectID, trackID)
+				if err != nil {
+					return cmderr("looking up project track: " + err.Error())
+				}
+				if !inProject {
+					return cmderr("track \"" + si.Value + "\" is not selected for project")
+				}
+				si.Value = strconv.FormatInt(int64(trackID), 10)
+			}
 		default:
 			return cmderr("attribute \"" + si.Attr + "\" is not valid for update")
 		}

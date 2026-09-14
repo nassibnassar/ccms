@@ -117,7 +117,8 @@ func CreateProject(db *dbx.DB, project string) error {
 	sql = "create table " + project + ".object (" +
 		"id bigint primary key," +
 		"decision boolean not null default false," +
-		"fund_id integer references ccms.fund (id))"
+		"fund_id integer references ccms.fund (id)," +
+		"track_id integer references ccms.track (id))"
 	if _, err := db.Exec(db.Ctx, sql); err != nil {
 		return dberr.Error(err)
 	}
@@ -582,6 +583,20 @@ func ProjectFundExists(db *dbx.DB, projectID, fundID int32) (bool, error) {
 	sql := "select 1 from ccms.project_fund where project_id=$1 and fund_id=$2"
 	var n int32
 	err := db.QueryRow(db.Ctx, sql, projectID, fundID).Scan(&n)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return false, nil
+	case err != nil:
+		return false, dberr.Error(err)
+	default:
+		return true, nil
+	}
+}
+
+func ProjectTrackExists(db *dbx.DB, projectID, trackID int32) (bool, error) {
+	sql := "select 1 from ccms.project_track where project_id=$1 and track_id=$2"
+	var n int32
+	err := db.QueryRow(db.Ctx, sql, projectID, trackID).Scan(&n)
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil

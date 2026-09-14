@@ -110,7 +110,7 @@ func (s *SelectStmt) sql(db *dbx.DB, a, b *strings.Builder) error {
 	switch s.AttrList.(*SelectAttrList).Attr {
 	case "*":
 		// projection = "a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability, a.library_holdings_count, a.online_database_holdings_count, a.vendor_holdings_count, a.holdings_count, coalesce(fund.name, '') fund"
-		projection = "a.id, a.author, a.title, a.full_vendor_name, a.availability, a.library_holdings_count, a.online_database_holdings_count, a.vendor_holdings_count, a.holdings_count, o.decision, fund.name||':'||fund.title fund"
+		projection = "a.id, a.author, a.title, a.full_vendor_name, a.availability, a.library_holdings_count, a.online_database_holdings_count, a.vendor_holdings_count, a.holdings_count, o.decision, fund.name||':'||fund.title fund, track.name||':'||track.title track"
 	case "count(*)":
 		projection = "count(*)"
 	}
@@ -143,6 +143,7 @@ func (s *QueryClause) sql(db *dbx.DB, a, b *strings.Builder) error {
 
 	b.WriteString(" left join " + table.Schema + ".object o on t.id=o.id")
 	b.WriteString(" left join ccms.fund on o.fund_id=fund.id")
+	b.WriteString(" left join ccms.track on o.track_id=track.id")
 
 	w := s.Where.(*WhereClause)
 	if w.Valid {
@@ -556,6 +557,8 @@ func attrSQL(a, b *strings.Builder, att string) {
 		b.WriteString(att)
 	case "fund":
 		b.WriteString("fund.name")
+	case "track":
+		b.WriteString("track.name")
 	default:
 		b.WriteString(att)
 	}

@@ -176,6 +176,10 @@ the `update` command:
 |`fund`
 |fund name
 |a fund selected from the project property `funds`, or `null`
+
+|`track`
+|track name
+|a track selected from the project property `tracks`, or `null`
 |===
 
 === Lexical structure

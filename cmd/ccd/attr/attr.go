@@ -29,6 +29,7 @@ var AttrSlice = []Attr{
 	{Name: "holdings_count", Type: SmallInt, Core: true},
 	{Name: "decision", Type: Boolean, Core: false},
 	{Name: "fund", Type: Property, Core: false},
+	{Name: "track", Type: Property, Core: false},
 }
 
 var AttrMap map[string]Attr

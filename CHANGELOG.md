@@ -1,4 +1,6 @@
-# development
+# v0.0.32
+
+* Added attribute `track`.
 
 * Added commands `show tracks` and `show track`.
 

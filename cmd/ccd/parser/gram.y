@@ -486,6 +486,14 @@ set_clause:
 		{
 			$$ = []ast.Node{&ast.SetClause{Attr: "fund", ValueNull: true}}
 		}
+	| TRACK '=' name
+		{
+			$$ = []ast.Node{&ast.SetClause{Attr: "track", Value: $3}}
+		}
+	| TRACK '=' NULL
+		{
+			$$ = []ast.Node{&ast.SetClause{Attr: "track", ValueNull: true}}
+		}
 
 select_attr_list:
 	name
