@@ -80,6 +80,18 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 		}
 	case "tags":
 		result.AddField("name", "text")
+	case "track":
+		result.AddField("property", "text")
+		result.AddField("value", "text")
+		if err := addShowTrackData(db, result, cmd.Name); err != nil {
+			return cmderr(err.Error())
+		}
+	case "tracks":
+		result.AddField("track", "text")
+		result.AddField("title", "text")
+		if err := addShowTracksData(db, result); err != nil {
+			return cmderr(err.Error())
+		}
 	case "users":
 		result.AddField("user", "text")
 		result.AddField("superuser", "boolean")
@@ -187,6 +199,29 @@ func addShowSetsData(db *dbx.DB, result *ccms.Result, projectID int32, project s
 	cat.SortSets(sets)
 	for i := range sets {
 		result.AddData([]any{sets[i].Project, sets[i].Set, sets[i].Title})
+	}
+	return nil
+}
+
+func addShowTrackData(db *dbx.DB, result *ccms.Result, track string) error {
+	prop, err := cat.TrackProperties(db, track)
+	if err != nil {
+		return err
+	}
+	for i := range prop {
+		result.AddData([]any{prop[i][0], prop[i][1]})
+	}
+	return nil
+}
+
+func addShowTracksData(db *dbx.DB, result *ccms.Result) error {
+	tracks, err := cat.Tracks(db)
+	if err != nil {
+		return err
+	}
+	tracks.Sort()
+	for i := range tracks {
+		result.AddData([]any{tracks[i].Name, tracks[i].Title})
 	}
 	return nil
 }

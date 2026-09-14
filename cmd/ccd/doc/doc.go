@@ -26,6 +26,13 @@ func AlterSet() string {
 	return strings.TrimSpace(alterSetTxt)
 }
 
+//go:embed altertrack.txt
+var alterTrackTxt string
+
+func AlterTrack() string {
+	return strings.TrimSpace(alterTrackTxt)
+}
+
 //go:embed createfilter.txt
 var createFilterTxt string
 
@@ -52,6 +59,13 @@ var createSetTxt string
 
 func CreateSet() string {
 	return strings.TrimSpace(createSetTxt)
+}
+
+//go:embed createtrack.txt
+var createTrackTxt string
+
+func CreateTrack() string {
+	return strings.TrimSpace(createTrackTxt)
 }
 
 //go:embed createuser.txt
@@ -94,6 +108,13 @@ var dropSetTxt string
 
 func DropSet() string {
 	return strings.TrimSpace(dropSetTxt)
+}
+
+//go:embed droptrack.txt
+var dropTrackTxt string
+
+func DropTrack() string {
+	return strings.TrimSpace(dropTrackTxt)
 }
 
 /*

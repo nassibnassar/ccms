@@ -18,6 +18,10 @@ show projects
 
 show sets [ in project `*_project_name_*` ]
 
+show track `*_track_name_*`
+
+show tracks
+
 show users
 
 show version

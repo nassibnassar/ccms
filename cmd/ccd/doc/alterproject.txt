@@ -44,7 +44,7 @@ origins      composite    location name (clockss, lehigh, nyu)
 
 destinations composite    location name
 
-tracks       composite    track name (offsite, reserve, stacks)
+tracks       composite    track name
 
 Examples
 

@@ -1,0 +1,58 @@
+==== alter track
+
+Change the definition of a track
+
+[source,subs="verbatim,quotes"]
+----
+alter track `*_track_name_*`
+    alter property `*_property_name_*` set `*_value_*`
+----
+
+[discrete]
+===== Description
+
+The `alter track` command changes the definition of a track.
+
+The `alter property` clause changes a property in the track's metadata.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_track_name_*`
+|The name of the track.
+
+|`*_property_name_*`
+|The name of the property in the track metadata.
+
+|`*_value_*`
+|The value of a single-value property.
+|===
+
+[discrete]
+===== Properties
+
+[%header,width=75%,cols="3,3,10"]
+|===
+|Property
+|Type
+|Value
+
+|`name`
+|single-value
+|identifier
+
+|`title`
+|single-value
+|text
+|===
+
+[discrete]
+===== Examples
+
+Set the title of track `t` to `Main Track`:
+
+----
+alter track t alter property title set 'Main Track';
+----

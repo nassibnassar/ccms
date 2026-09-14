@@ -16,6 +16,10 @@ show projects
 
 show sets [ in project project_name ]
 
+show track track_name
+
+show tracks
+
 show users
 
 show version

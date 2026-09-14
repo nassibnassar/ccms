@@ -76,7 +76,7 @@ metadata.  The `set` action is used for single-value properties, while
 
 |`tracks`
 |composite
-|track name (`offsite`, `reserve`, `stacks`)
+|track name
 |===
 
 [discrete]

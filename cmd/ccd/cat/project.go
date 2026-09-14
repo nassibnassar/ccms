@@ -578,21 +578,6 @@ func LocationID(db *dbx.DB, location string) (int32, error) {
 // 	}
 // }
 
-// returns track ID, or 0 if track does not exist
-func TrackID(db *dbx.DB, track string) (int32, error) {
-	sql := "select id from ccms.track where name=$1"
-	var id int32
-	err := db.QueryRow(db.Ctx, sql, track).Scan(&id)
-	switch {
-	case errors.Is(err, pgx.ErrNoRows):
-		return 0, nil
-	case err != nil:
-		return 0, dberr.Error(err)
-	default:
-		return id, nil
-	}
-}
-
 func ProjectFundExists(db *dbx.DB, projectID, fundID int32) (bool, error) {
 	sql := "select 1 from ccms.project_fund where project_id=$1 and fund_id=$2"
 	var n int32
@@ -610,6 +595,16 @@ func ProjectFundExists(db *dbx.DB, projectID, fundID int32) (bool, error) {
 func ProjectsHavingFund(db *dbx.DB, fundID int32) ([]string, error) {
 	sql := "select p.name from ccms.project_fund pf join ccms.project p on pf.project_id=p.id where pf.fund_id=$1"
 	rows, _ := db.Query(db.Ctx, sql, fundID)
+	projects, err := pgx.CollectRows(rows, pgx.RowTo[string])
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
+}
+
+func ProjectsHavingTrack(db *dbx.DB, trackID int32) ([]string, error) {
+	sql := "select p.name from ccms.project_track pf join ccms.project p on pf.project_id=p.id where pf.track_id=$1"
+	rows, _ := db.Query(db.Ctx, sql, trackID)
 	projects, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
 		return nil, err

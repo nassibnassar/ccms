@@ -42,6 +42,16 @@ type AlterSetStmt struct {
 
 func (*AlterSetStmt) node() {}
 
+type AlterTrackStmt struct {
+	Track         string
+	Property      string
+	Action        AlterAction
+	Value         string
+	StringLiteral bool
+}
+
+func (*AlterTrackStmt) node() {}
+
 type ArchiveProjectStmt struct {
 }
 
@@ -71,6 +81,12 @@ type CreateSetStmt struct {
 }
 
 func (*CreateSetStmt) node() {}
+
+type CreateTrackStmt struct {
+	Track string
+}
+
+func (*CreateTrackStmt) node() {}
 
 type CreateUserStmt struct {
 	User              string
@@ -110,6 +126,12 @@ type DropSetStmt struct {
 }
 
 func (*DropSetStmt) node() {}
+
+type DropTrackStmt struct {
+	Track string
+}
+
+func (*DropTrackStmt) node() {}
 
 type InfoStmt struct {
 	Topic string

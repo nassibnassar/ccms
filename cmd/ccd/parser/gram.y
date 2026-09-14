@@ -22,17 +22,20 @@ import (
 %type <node> alter_fund_stmt
 %type <node> alter_project_stmt
 %type <node> alter_set_stmt
+%type <node> alter_track_stmt
 %type <node> archive_project_stmt
 %type <node> create_filter_stmt
 %type <node> create_fund_stmt
 %type <node> create_project_stmt
 %type <node> create_set_stmt
+%type <node> create_track_stmt
 %type <node> create_user_stmt
 %type <node> delete_stmt
 %type <node> drop_filter_stmt
 %type <node> drop_fund_stmt
 %type <node> drop_project_stmt
 %type <node> drop_set_stmt
+%type <node> drop_track_stmt
 %type <node> info_stmt
 %type <node> ping_stmt
 %type <node> insert_stmt
@@ -110,6 +113,7 @@ import (
 %token SHOW
 %token TAG
 %token TO
+%token TRACK
 %token TRUE
 %token UPDATE
 %token USER
@@ -172,6 +176,10 @@ basic_stmt:
 		{
 			$$ = $1
 		}
+	| alter_track_stmt
+		{
+			$$ = $1
+		}
 	| archive_project_stmt
 		{
 			$$ = $1
@@ -189,6 +197,10 @@ basic_stmt:
 			$$ = $1
 		}
 	| create_set_stmt
+		{
+			$$ = $1
+		}
+	| create_track_stmt
 		{
 			$$ = $1
 		}
@@ -213,6 +225,10 @@ basic_stmt:
 			$$ = $1
 		}
 	| drop_set_stmt
+		{
+			$$ = $1
+		}
+	| drop_track_stmt
 		{
 			$$ = $1
 		}
@@ -289,6 +305,16 @@ alter_set_stmt:
 			$$ = &ast.AlterSetStmt{Set: $3, Property: $6, Action: ast.Set, Value: ast.DecodeSLiteral($8), StringLiteral: true}
 		}
 
+alter_track_stmt:
+	ALTER TRACK name ALTER PROPERTY name SET name
+		{
+			$$ = &ast.AlterTrackStmt{Track: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
+		}
+	| ALTER TRACK name ALTER PROPERTY name SET SLITERAL
+		{
+			$$ = &ast.AlterTrackStmt{Track: $3, Property: $6, Action: ast.Set, Value: ast.DecodeSLiteral($8), StringLiteral: true}
+		}
+
 create_filter_stmt:
 	CREATE FILTER name where_clause
 		{
@@ -311,6 +337,12 @@ create_set_stmt:
 	CREATE SET name
 		{
 			$$ = &ast.CreateSetStmt{Set: $3}
+		}
+
+create_track_stmt:
+	CREATE TRACK name
+		{
+			$$ = &ast.CreateTrackStmt{Track: $3}
 		}
 
 create_user_stmt:
@@ -351,6 +383,12 @@ drop_set_stmt:
 	DROP SET name
 		{
 			$$ = &ast.DropSetStmt{Set: $3}
+		}
+
+drop_track_stmt:
+	DROP TRACK name
+		{
+			$$ = &ast.DropTrackStmt{Track: $3}
 		}
 
 info_stmt:
@@ -405,6 +443,10 @@ show_stmt:
 	| SHOW PROJECTS
 		{
 			$$ = &ast.ShowStmt{Type: "projects"}
+		}
+	| SHOW TRACK name
+		{
+			$$ = &ast.ShowStmt{Type: "track", Name: $3}
 		}
 	| SHOW VERSION
 		{

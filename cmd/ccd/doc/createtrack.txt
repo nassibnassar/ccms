@@ -1,0 +1,20 @@
+create track
+
+Define a new track
+
+create track track_name
+
+Description
+
+The create track command creates a new track.
+
+Parameters
+
+track_name The name of the new track.
+
+Examples
+
+Create a new track offsite:
+
+create track offsite;
+

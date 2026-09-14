@@ -1,5 +1,9 @@
 # development
 
+* Added commands `show tracks` and `show track`.
+
+* Added commands `create track`, `alter track`, and `drop track`.
+
 * Search conditions now support `not like` and `not ilike`.
 
 * Improved handling of Boolean values in search conditions.

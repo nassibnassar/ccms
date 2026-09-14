@@ -1,0 +1,34 @@
+alter track
+
+Change the definition of a track
+
+alter track track_name
+    alter property property_name set value
+
+Description
+
+The alter track command changes the definition of a track.
+
+The alter property clause changes a property in the track’s metadata.
+
+Parameters
+
+track_name    The name of the track.
+
+property_name The name of the property in the track metadata.
+
+value         The value of a single-value property.
+
+Properties
+
+Property     Type       Value
+name     single-value identifier
+
+title    single-value text
+
+Examples
+
+Set the title of track t to Main Track:
+
+alter track t alter property title set 'Main Track';
+

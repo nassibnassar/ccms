@@ -8,6 +8,8 @@ include::alterproject.adoc[]
 
 include::alterset.adoc[]
 
+include::altertrack.adoc[]
+
 include::createfilter.adoc[]
 
 include::createfund.adoc[]
@@ -15,6 +17,8 @@ include::createfund.adoc[]
 include::createproject.adoc[]
 
 include::createset.adoc[]
+
+include::createtrack.adoc[]
 
 include::createuser.adoc[]
 
@@ -27,6 +31,8 @@ include::dropfund.adoc[]
 include::dropproject.adoc[]
 
 include::dropset.adoc[]
+
+include::droptrack.adoc[]
 
 include::insert.adoc[]
 

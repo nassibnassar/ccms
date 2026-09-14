@@ -1,0 +1,31 @@
+==== drop track
+
+Remove a track
+
+[source,subs="verbatim,quotes"]
+----
+drop track `*_track_name_*`
+----
+
+[discrete]
+===== Description
+
+The `drop track` command removes a track from the system.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_track_name_*`
+|The name of the track.
+|===
+
+[discrete]
+===== Examples
+
+Remove a track `t`:
+
+----
+drop track t;
+----

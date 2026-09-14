@@ -6,6 +6,7 @@ import (
 
 	"github.com/indexdata/ccms"
 	"github.com/indexdata/ccms/cmd/ccd/ast"
+	"github.com/indexdata/ccms/cmd/ccd/attr"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/cmd/ccd/dberr"
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
@@ -54,7 +55,7 @@ func selectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.SelectStmt) *ccms.Resul
 
 	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
 	if o.Valid {
-		if !cat.IsAttribute(o.Attr) {
+		if !attr.IsAttr(o.Attr) {
 			return cmderr("attribute \"" + o.Attr + "\" does not exist")
 		}
 	}

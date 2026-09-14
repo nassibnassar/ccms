@@ -256,10 +256,10 @@ func createTableFund(tx pgx.Tx) error {
 		return fmt.Errorf("creating table ccms.fund: %v", dberr.Error(err))
 	}
 
-	q = "insert into ccms.fund (name, title) values ('palci_cultural', 'PALCI cultural preservation'), ('coalition_slavic_lit', 'Coalition for Slavic literature')"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.fund: %v", dberr.Error(err))
-	}
+	// q = "insert into ccms.fund (name, title) values ('palci_cultural', 'PALCI cultural preservation'), ('coalition_slavic_lit', 'Coalition for Slavic literature')"
+	// if _, err := tx.Exec(context.TODO(), q); err != nil {
+	// 	return fmt.Errorf("writing to table ccms.fund: %v", dberr.Error(err))
+	// }
 
 	return nil
 }
@@ -368,10 +368,10 @@ func createTableTrack(tx pgx.Tx) error {
 		return fmt.Errorf("creating table ccms.track: %v", dberr.Error(err))
 	}
 
-	q = "insert into ccms.track (name, title) values ('offsite', 'Offsite'), ('reserve', 'Reserve'), ('stacks', 'Stacks')"
-	if _, err := tx.Exec(context.TODO(), q); err != nil {
-		return fmt.Errorf("writing to table ccms.track: %v", dberr.Error(err))
-	}
+	// q = "insert into ccms.track (name, title) values ('offsite', 'Offsite'), ('reserve', 'Reserve'), ('stacks', 'Stacks')"
+	// if _, err := tx.Exec(context.TODO(), q); err != nil {
+	// 	return fmt.Errorf("writing to table ccms.track: %v", dberr.Error(err))
+	// }
 
 	return nil
 }

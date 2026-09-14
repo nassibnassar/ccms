@@ -1,0 +1,31 @@
+==== create track
+
+Define a new track
+
+[source,subs="verbatim,quotes"]
+----
+create track `*_track_name_*`
+----
+
+[discrete]
+===== Description
+
+The `create track` command creates a new track.
+
+[discrete]
+===== Parameters
+
+[frame=none,grid=none,cols="1,2"]
+|===
+|`*_track_name_*`
+|The name of the new track.
+|===
+
+[discrete]
+===== Examples
+
+Create a new track `offsite`:
+
+----
+create track offsite;
+----

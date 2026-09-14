@@ -5,41 +5,6 @@ import (
 	"unicode"
 )
 
-func IsAttribute(attr string) bool {
-	switch attr {
-	case "id", "author", "title", "full_vendor_name", "availability", "library_holdings_count", "online_database_holdings_count", "vendor_holdings_count", "holdings_count":
-		return true
-	case "decision", "fund":
-		return true
-	default:
-		return false
-	}
-}
-
-// var Attributes []string = []string{
-// 	"id",
-// 	"author",
-// 	"title",
-// 	"full_vendor_name",
-// 	"availability",
-// 	"decision",
-// 	"fund",
-// }
-
-// var AttributeMap map[string]struct{}
-
-// func Init() {
-// 	AttributeMap = make(map[string]struct{})
-// 	for i := range Attributes {
-// 		AttributeMap[Attributes[i]] = struct{}{}
-// 	}
-// }
-
-// func IsAttr(attr string) bool {
-// 	_, ok := AttributeMap[attr]
-// 	return ok
-// }
-
 func makeTitle(name string) string {
 	var b strings.Builder
 	q := '_'

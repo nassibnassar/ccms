@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/indexdata/ccms/cmd/ccd/attr"
 	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/internal/global"
@@ -424,7 +425,7 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		//}
 		//b.WriteRune(')')
 	case *Name:
-		if root && !isAttrBool(e.Value) {
+		if root && attr.AttrName(e.Value).Type != attr.Boolean {
 			return errors.New("invalid boolean expression")
 		}
 		a.WriteString(e.Value)
@@ -491,7 +492,7 @@ func evalExprList(db *dbx.DB, a, b *strings.Builder, exprList []Node, state eval
 func evalExprOptAttr(db *dbx.DB, a, b *strings.Builder, expr Node, state evalState) error {
 	switch e := expr.(type) {
 	case *Name:
-		if cat.IsAttribute(e.Value) {
+		if attr.IsAttr(e.Value) {
 			attrSQL(a, b, e.Value)
 		} else {
 			if e.Value == "true" || e.Value == "false" {
@@ -544,22 +545,18 @@ func evalExprValueList(db *dbx.DB, a, b *strings.Builder, expr []Node, state eva
 	return nil
 }
 
-func attrSQL(a, b *strings.Builder, attr string) {
-	a.WriteString(attr)
-	switch attr {
+func attrSQL(a, b *strings.Builder, att string) {
+	a.WriteString(att)
+	switch att {
 	case "id", "author", "title", "full_vendor_name", "availability", "library_holdings_count", "online_database_holdings_count", "vendor_holdings_count", "holdings_count":
 		b.WriteRune('a')
 		b.WriteRune('.')
-		b.WriteString(attr)
+		b.WriteString(att)
 	case "decision":
-		b.WriteString(attr)
+		b.WriteString(att)
 	case "fund":
 		b.WriteString("fund.name")
 	default:
-		b.WriteString(attr)
+		b.WriteString(att)
 	}
-}
-
-func isAttrBool(attr string) bool {
-	return attr == "decision"
 }

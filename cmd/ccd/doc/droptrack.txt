@@ -1,0 +1,20 @@
+drop track
+
+Remove a track
+
+drop track track_name
+
+Description
+
+The drop track command removes a track from the system.
+
+Parameters
+
+track_name The name of the track.
+
+Examples
+
+Remove a track t:
+
+drop track t;
+

@@ -261,6 +261,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			result = alterProjectStmt(s, dbtx, rqid, cmd)
 		case *ast.AlterSetStmt:
 			result = alterSetStmt(s, dbtx, rqid, cmd)
+		case *ast.AlterTrackStmt:
+			result = alterTrackStmt(s, dbtx, rqid, cmd)
 		case *ast.ArchiveProjectStmt:
 			result = cmderr("\"archive project\" is no longer supported; use \"drop project\"")
 
@@ -272,6 +274,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			result = createProjectStmt(s, dbtx, rqid, cmd)
 		case *ast.CreateSetStmt:
 			result = createSetStmt(s, dbtx, rqid, cmd)
+		case *ast.CreateTrackStmt:
+			result = createTrackStmt(s, dbtx, rqid, cmd)
 		case *ast.CreateUserStmt:
 			result = createUserStmt(s, dbtx, rqid, cmd)
 		case *ast.DeleteStmt:
@@ -284,6 +288,8 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			result = dropProjectStmt(s, dbtx, rqid, cmd)
 		case *ast.DropSetStmt:
 			result = dropSetStmt(s, dbtx, rqid, cmd)
+		case *ast.DropTrackStmt:
+			result = dropTrackStmt(s, dbtx, rqid, cmd)
 		case *ast.InfoStmt:
 			result = infoStmt(s, dbtx, cmd)
 		case *ast.InsertStmt:
