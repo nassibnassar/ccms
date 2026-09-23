@@ -34,25 +34,29 @@ func updateStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Resul
 
 	for i := range cmd.SetClause {
 		si := cmd.SetClause[i].(*ast.SetClause)
+		value := ast.PrimaryExpr(si.Value)
 		switch si.Attr {
 		case "decision":
-			if si.ValueNull {
-				return cmderr("invalid decision \"null\"")
-			}
-			if si.Value != "false" && si.Value != "true" {
-				return cmderr("invalid decision \"" + si.Value + "\"")
+			switch si.Value.(type) {
+			case *ast.Boolean:
+				// NOP
+			default:
+				return cmderr("invalid decision \"" + value + "\"")
 			}
 		case "fund":
 			si.Attr = "fund_id"
-			if !si.ValueNull {
+			switch si.Value.(type) {
+			case *ast.Null:
+				// NOP
+			default:
 				// look up fund id
 				var fundID int32
-				fundID, err = cat.FundID(db, si.Value)
+				fundID, err = cat.FundID(db, value)
 				if err != nil {
 					return cmderr("looking up fund: " + err.Error())
 				}
 				if fundID == 0 {
-					return cmderr("fund \"" + si.Value + "\" does not exist")
+					return cmderr("fund \"" + value + "\" does not exist")
 				}
 				// ensure fund is valid for project
 				var inProject bool
@@ -61,21 +65,26 @@ func updateStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Resul
 					return cmderr("looking up project fund: " + err.Error())
 				}
 				if !inProject {
-					return cmderr("fund \"" + si.Value + "\" is not selected for project")
+					return cmderr("fund \"" + value + "\" is not selected for project")
 				}
-				si.Value = strconv.FormatInt(int64(fundID), 10)
+				si.Value = &ast.Number{
+					Value: strconv.FormatInt(int64(fundID), 10),
+				}
 			}
 		case "track":
 			si.Attr = "track_id"
-			if !si.ValueNull {
+			switch si.Value.(type) {
+			case *ast.Null:
+				// NOP
+			default:
 				// look up track id
 				var trackID int32
-				trackID, err = cat.TrackID(db, si.Value)
+				trackID, err = cat.TrackID(db, value)
 				if err != nil {
 					return cmderr("looking up track: " + err.Error())
 				}
 				if trackID == 0 {
-					return cmderr("track \"" + si.Value + "\" does not exist")
+					return cmderr("track \"" + value + "\" does not exist")
 				}
 				// ensure track is valid for project
 				var inProject bool
@@ -84,9 +93,11 @@ func updateStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.UpdateStmt) *ccms.Resul
 					return cmderr("looking up project track: " + err.Error())
 				}
 				if !inProject {
-					return cmderr("track \"" + si.Value + "\" is not selected for project")
+					return cmderr("track \"" + value + "\" is not selected for project")
 				}
-				si.Value = strconv.FormatInt(int64(trackID), 10)
+				si.Value = &ast.Number{
+					Value: strconv.FormatInt(int64(trackID), 10),
+				}
 			}
 		default:
 			return cmderr("attribute \"" + si.Attr + "\" is not valid for update")

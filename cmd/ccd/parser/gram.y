@@ -57,6 +57,7 @@ import (
 %type <node> relational_expr
 %type <node> unary_expr
 %type <node> postfix_expr
+%type <node> paren_expr
 %type <node> primary_expr
 %type <nodeList> arg_expr_list
 %type <nodeList> arg_expr
@@ -470,29 +471,17 @@ set_clause_list:
 		}
 
 set_clause:
-	name '=' name
+	name '=' primary_expr
 		{
 			$$ = []ast.Node{&ast.SetClause{Attr: $1, Value: $3}}
 		}
-	| name '=' NULL
-		{
-			$$ = []ast.Node{&ast.SetClause{Attr: $1, ValueNull: true}}
-		}
-	| FUND '=' name
+	| FUND '=' primary_expr
 		{
 			$$ = []ast.Node{&ast.SetClause{Attr: "fund", Value: $3}}
 		}
-	| FUND '=' NULL
-		{
-			$$ = []ast.Node{&ast.SetClause{Attr: "fund", ValueNull: true}}
-		}
-	| TRACK '=' name
+	| TRACK '=' primary_expr
 		{
 			$$ = []ast.Node{&ast.SetClause{Attr: "track", Value: $3}}
-		}
-	| TRACK '=' NULL
-		{
-			$$ = []ast.Node{&ast.SetClause{Attr: "track", ValueNull: true}}
 		}
 
 select_attr_list:
@@ -684,7 +673,7 @@ relational_expr:
 		}
 
 postfix_expr:
-	primary_expr
+	paren_expr
 		{
 			$$ = $1
 		}
@@ -695,6 +684,16 @@ postfix_expr:
 	| TAG '(' arg_expr_list ')'
 		{
 			$$ = &ast.TagExpr{ExprList: $3}
+		}
+
+paren_expr:
+	primary_expr
+		{
+			$$ = $1
+		}
+	| '(' expression ')'
+		{
+			$$ = &ast.ParenExpr{Expr: $2}
 		}
 
 primary_expr:
@@ -714,10 +713,6 @@ primary_expr:
 		{
 			$$ = &ast.Number{Value: $1}
 		}
-	| '(' expression ')'
-		{
-			$$ = &ast.ParenExpr{Expr: $2}
-		}
 	| TRUE
 		{
 			$$ = &ast.Boolean{Value: true}
@@ -726,12 +721,10 @@ primary_expr:
 		{
 			$$ = &ast.Boolean{}
 		}
-/*
 	| NULL
 		{
 			$$ = &ast.Null{}
 		}
-*/
 
 arg_expr_list:
 	arg_expr

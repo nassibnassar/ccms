@@ -200,9 +200,8 @@ type UpdateStmt struct {
 func (*UpdateStmt) node() {}
 
 type SetClause struct {
-	Attr      string
-	ValueNull bool
-	Value     string
+	Attr  string
+	Value Node
 	// StringLiteral bool
 }
 

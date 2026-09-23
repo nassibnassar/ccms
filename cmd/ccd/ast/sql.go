@@ -246,11 +246,7 @@ func updateSetClauseSQL(b *strings.Builder, setClause []Node) {
 		si := setClause[i].(*SetClause)
 		b.WriteString(si.Attr)
 		b.WriteRune('=')
-		if si.ValueNull {
-			b.WriteString("null")
-		} else {
-			b.WriteString(si.Value)
-		}
+		b.WriteString(PrimaryExpr(si.Value))
 	}
 }
 
@@ -425,42 +421,6 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		//        return err
 		//}
 		//b.WriteRune(')')
-	case *Name:
-		if root && attr.AttrName(e.Value).Type != attr.Boolean {
-			return errors.New("invalid boolean expression")
-		}
-		a.WriteString(e.Value)
-		b.WriteString(e.Value)
-	case *SLiteral:
-		if root {
-			return errors.New("invalid boolean expression")
-		}
-		a.WriteRune('\'')
-		a.WriteString(global.EncodeString(e.Value))
-		a.WriteRune('\'')
-		b.WriteRune('\'')
-		b.WriteString(global.EncodeString(e.Value))
-		b.WriteRune('\'')
-	case *Number:
-		if root {
-			return errors.New("invalid boolean expression")
-		}
-		a.WriteString(e.Value)
-		b.WriteString(e.Value)
-	case *Boolean:
-		if e.Value {
-			a.WriteString("true")
-			b.WriteString("true")
-		} else {
-			a.WriteString("false")
-			b.WriteString("false")
-		}
-	case *Null:
-		if root {
-			return errors.New("invalid boolean expression")
-		}
-		a.WriteString("null")
-		b.WriteString("null")
 	case *ParenExpr:
 		a.WriteRune('(')
 		b.WriteRune('(')
@@ -469,10 +429,63 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		}
 		a.WriteRune(')')
 		b.WriteRune(')')
+	case *Name:
+		if root && attr.AttrName(e.Value).Type != attr.Boolean {
+			return errors.New("invalid boolean expression")
+		}
+		v := PrimaryExpr(expr)
+		a.WriteString(v)
+		b.WriteString(v)
+	case *SLiteral:
+		if root {
+			return errors.New("invalid boolean expression")
+		}
+		v := PrimaryExpr(expr)
+		a.WriteString(v)
+		b.WriteString(v)
+	case *Number:
+		if root {
+			return errors.New("invalid boolean expression")
+		}
+		v := PrimaryExpr(expr)
+		a.WriteString(v)
+		b.WriteString(v)
+	case *Boolean:
+		if root {
+			return errors.New("invalid boolean expression")
+		}
+		v := PrimaryExpr(expr)
+		a.WriteString(v)
+		b.WriteString(v)
+	case *Null:
+		v := PrimaryExpr(expr)
+		a.WriteString(v)
+		b.WriteString(v)
 	default:
 		return fmt.Errorf("unknown node %T", expr)
 	}
 	return nil
+}
+
+func PrimaryExpr(expr Node) string {
+	switch e := expr.(type) {
+	case *Name:
+		return e.Value
+	case *Number:
+		return e.Value
+	case *SLiteral:
+		return "'" + global.EncodeString(e.Value) + "'"
+	case *Boolean:
+		if e.Value {
+			return "true"
+		} else {
+			return "false"
+		}
+	case *Null:
+		return "null"
+	default:
+		return ""
+	}
 }
 
 func evalExprList(db *dbx.DB, a, b *strings.Builder, exprList []Node, state evalState) error {

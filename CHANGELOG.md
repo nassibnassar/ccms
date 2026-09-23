@@ -1,3 +1,7 @@
+# v0.0.33
+
+* Fixed Boolean value bug in search conditions.
+
 # v0.0.32
 
 * Added attribute `track`.
