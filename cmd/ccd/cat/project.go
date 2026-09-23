@@ -46,6 +46,9 @@ func IsValidTargetProject(project string) bool {
 	if strings.ContainsRune(project, '.') {
 		return false
 	}
+	if project == "ccms" {
+		return false
+	}
 	return true
 }
 
