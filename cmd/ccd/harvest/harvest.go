@@ -46,35 +46,19 @@ func harvestLoop(connString string) {
 		})
 	*/
 
-	//(&oai.Request{
-	//        BaseURL: "https://cclp-okapi.reshare-dev.indexdata.com/_/invoke/tenant/cclp/reservoir/oai",
-
-	//        //Verb:  "ListRecords",
-	//        //From:  "2025-10-14T22:52:14Z",
-	//        //Until: "2025-10-14T22:52:16Z",
-
-	//        Verb:           "GetRecord",
-	//        Identifier:     "b6c6160c-6bbb-41cc-9e07-690049d7d537",
-	//        MetadataPrefix: "marcxml",
-	//}).HarvestRecords(func(record *oai.Record) {
-	//        //fmt.Printf("identifier: %s\n", record.Header.Identifier)
-	//        //fmt.Printf("datestamp: %s\n", record.Header.DateStamp)
-	//        //fmt.Printf("setspec: %v\n", record.Header.SetSpec)
-	//        //fmt.Printf("status: %s\n", record.Header.Status)
-	//        //fmt.Printf("about: %s\n", record.About.Body)
-	//        //fmt.Printf("metadata: %s\n", record.Metadata.Body)
-
-	//        fmt.Printf("%s %s\n", record.Header.Identifier, record.Header.DateStamp)
-	//})
+	// HarvestIdentifier(connString, "b6c6160c-6bbb-41cc-9e07-690049d7d537")
+	// HarvestIdentifier(connString, "002c3ae5-3cf5-47c3-8bd5-87c57cdab8f1")
 
 	// The following OAI-PMH verbs are supported by the Reservoir: ListIdentifiers, ListRecords,
 	// GetRecord, Identify.
 	rq := &oai.Request{
 		BaseURL: "https://cclp-okapi.reshare-dev.indexdata.com/_/invoke/tenant/cclp/reservoir/oai",
 
-		Verb:  "ListRecords",
-		From:  "2024-10-14T22:52:14Z",
-		Until: "2026-10-14T22:52:16Z",
+		Verb: "ListRecords",
+		// From:  "2026-02-01T22:52:14Z",
+		// Until: "2026-09-01T22:52:16Z",
+		From:  "2025-11-14T05:45:03Z",
+		Until: "2030-01-01T01:01:01Z",
 
 		//Verb:           "GetRecord",
 		//Identifier:     "b6c6160c-6bbb-41cc-9e07-690049d7d537",
@@ -105,6 +89,8 @@ func harvestLoop(connString string) {
 			fmt.Printf("identifier = %s\n", rs.GetRecord.Record.Header.Identifier)
 			fmt.Printf("data = %s\n", rs.GetRecord.Record.Metadata.Body)
 		*/
+		// fmt.Printf("%#v\n", record.Metadata)
+		// fmt.Printf("%q\n", record.Metadata.Body)
 		m, err := marcxml.Unmarshal(record.Metadata.Body)
 		//m, err := marcxml.Unmarshal(rs.GetRecord.Record.Metadata.Body)
 		if err != nil {
@@ -142,9 +128,9 @@ func harvestLoop(connString string) {
 		// placeOfPublication := nilIfEmpty(&placePub)
 
 		// temporarily skip records with no author to give us better example data
-		if author == nil {
-			return
-		}
+		// if author == nil {
+		// 	return
+		// }
 
 		tx, err := conn.Begin(ctx)
 		if err != nil {
@@ -195,6 +181,29 @@ func harvestLoop(connString string) {
 	fmt.Printf("=======================================================================\n")
 	fmt.Printf("harvest exiting\n")
 	fmt.Printf("=======================================================================\n")
+}
+
+func HarvestIdentifier(connString string, identifier string) {
+	(&oai.Request{
+		BaseURL: "https://cclp-okapi.reshare-dev.indexdata.com/_/invoke/tenant/cclp/reservoir/oai",
+
+		//Verb:  "ListRecords",
+		//From:  "2025-10-14T22:52:14Z",
+		//Until: "2025-10-14T22:52:16Z",
+
+		Verb:           "GetRecord",
+		Identifier:     identifier,
+		MetadataPrefix: "marcxml",
+	}).HarvestRecords(func(record *oai.Record) {
+		//fmt.Printf("identifier: %s\n", record.Header.Identifier)
+		//fmt.Printf("datestamp: %s\n", record.Header.DateStamp)
+		//fmt.Printf("setspec: %v\n", record.Header.SetSpec)
+		//fmt.Printf("status: %s\n", record.Header.Status)
+		//fmt.Printf("about: %s\n", record.About.Body)
+		//fmt.Printf("metadata: %s\n", record.Metadata.Body)
+
+		fmt.Printf("%s %s\n", record.Header.Identifier, record.Header.DateStamp)
+	})
 }
 
 func nilIfEmpty(s *string) *string {
