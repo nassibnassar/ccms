@@ -57,8 +57,8 @@ func harvestLoop(connString string) {
 		Verb: "ListRecords",
 		// From:  "2026-02-01T22:52:14Z",
 		// Until: "2026-09-01T22:52:16Z",
-		From:  "2025-11-14T05:45:03Z",
-		Until: "2030-01-01T01:01:01Z",
+		// From:  "2025-11-14T05:45:03Z",
+		// Until: "2030-01-01T01:01:01Z",
 
 		//Verb:           "GetRecord",
 		//Identifier:     "b6c6160c-6bbb-41cc-9e07-690049d7d537",
