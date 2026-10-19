@@ -8,8 +8,8 @@ import (
 	"github.com/indexdata/ccms/internal/util"
 )
 
-func dropSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropSetStmt) *ccms.Result {
-	project, set, err := util.ParsePair(cmd.Set)
+func dropSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropStmt) *ccms.Result {
+	project, set, err := util.ParsePair(cmd.Name)
 	if err != nil {
 		return cmderr(err.Error())
 	}
@@ -19,7 +19,7 @@ func dropSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropSetStmt) *ccms.Res
 		return cmderr(err.Error())
 	}
 	if !validTargetSet {
-		return cmderr("invalid target set \"" + cmd.Set + "\"")
+		return cmderr("invalid target set \"" + cmd.Name + "\"")
 	}
 
 	projectID, err := cat.ProjectID(db, project)
@@ -35,7 +35,7 @@ func dropSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropSetStmt) *ccms.Res
 		return cmderr(err.Error())
 	}
 	if !setExists {
-		return cmderr("set \"" + cmd.Set + "\" does not exist")
+		return cmderr("set \"" + cmd.Name + "\" does not exist")
 	}
 
 	if err := cat.DropSet(db, projectID, project, set); err != nil {

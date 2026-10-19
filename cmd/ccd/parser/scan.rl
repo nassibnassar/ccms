@@ -69,7 +69,6 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'false'i => { tok = FALSE; fbreak; };
 			'filter'i => { tok = FILTER; fbreak; };
 			'from'i => { tok = FROM; fbreak; };
-			'fund'i => { tok = FUND; fbreak; };
 			'ilike'i => { tok = ILIKE; fbreak; };
 			'info'i => { tok = INFO; fbreak; };
 			'insert'i => { tok = INSERT; fbreak; };
@@ -86,7 +85,6 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'order'i => { tok = ORDER; fbreak; };
 			'password'i => { tok = PASSWORD; fbreak; };
 			'ping'i => { tok = PING; fbreak; };
-			'project'i => { tok = PROJECT; fbreak; };
 			'projects'i => { tok = PROJECTS; fbreak; };
 			'property'i => { tok = PROPERTY; fbreak; };
 			'retrieve'i => { tok = RETRIEVE; fbreak; };
@@ -95,10 +93,8 @@ func (lex *lexer) Lex(out *yySymType) int {
 			'show'i => { tok = SHOW; fbreak; };
 			'tag'i => { tok = TAG; fbreak; };
 			'to'i => { tok = TO; fbreak; };
-			'track'i => { tok = TRACK; fbreak; };
 			'true'i => { tok = TRUE; fbreak; };
 			'update'i => { tok = UPDATE; fbreak; };
-			'user'i => { tok = USER; fbreak; };
 			'version'i => { tok = VERSION; fbreak; };
 			'where'i => { tok = WHERE; fbreak; };
 			'with'i => { tok = WITH; fbreak; };

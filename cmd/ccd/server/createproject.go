@@ -7,8 +7,8 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func createProjectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateProjectStmt) *ccms.Result {
-	if err := cat.CreateProject(db, cmd.Project); err != nil {
+func createProjectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateStmt) *ccms.Result {
+	if err := cat.CreateProject(db, cmd.Name); err != nil {
 		return cmderr(err.Error())
 	}
 	return ccms.NewResult("create project")

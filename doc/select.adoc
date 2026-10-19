@@ -4,7 +4,7 @@ Retrieve data
 
 [source,subs="verbatim,quotes"]
 ----
-select { * | count(*) }
+select { `**_attribute_**` [, ... ] | * | count(*) }
     from `**_set_name_**`
     [ where `**_search_condition_**` ]
     [ order by `**_attribute_**` [ asc | desc ] ]
@@ -26,8 +26,9 @@ clause if the query may return a large result set.
 [discrete]
 ===== Parameters
 
-The first argument specifies `\*` meaning all available attributes or
-`count(*)` meaning a count of the number of rows returned.
+The first argument specifies a list of attributes, or `\*` meaning all
+attributes (except hidden attributes), or `count(*)` meaning a count
+of the number of rows returned.
 
 [discrete]
 ====== from
@@ -72,6 +73,5 @@ by` clause is required when `offset` is used.
 To retrieve items in stock from the set `test.myset`:
 
 ----
-select * from test.myset where availability = 'In stock' order by title;
+select id, title from test.myset where availability = 'In stock' order by title;
 ----
-

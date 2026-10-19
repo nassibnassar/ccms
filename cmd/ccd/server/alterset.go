@@ -8,14 +8,14 @@ import (
 	"github.com/indexdata/ccms/internal/util"
 )
 
-func alterSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.AlterSetStmt) *ccms.Result {
-	project, set, err := util.ParsePair(cmd.Set)
+func alterSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.AlterStmt) *ccms.Result {
+	project, set, err := util.ParsePair(cmd.Name)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 
 	if set == "object" {
-		return cmderr("\"" + cmd.Set + "\" invalid for alter set")
+		return cmderr("\"" + cmd.Name + "\" invalid for alter set")
 	}
 
 	setID, err := cat.SetID(db, project, set)
@@ -23,7 +23,7 @@ func alterSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.AlterSetStmt) *ccms.R
 		return cmderr(err.Error())
 	}
 	if setID == 0 {
-		return cmderr("set \"" + cmd.Set + "\" does not exist")
+		return cmderr("set \"" + cmd.Name + "\" does not exist")
 	}
 
 	switch cmd.Action {

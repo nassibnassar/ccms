@@ -14,15 +14,20 @@ import (
 
 // conversion to SQL
 
-func (s *CreateFilterStmt) SQL(db *dbx.DB, a *strings.Builder) (string, error) {
-	var b strings.Builder
-	if err := s.sql(db, a, &b); err != nil {
-		return "", err
+func (s *CreateStmt) SQL(db *dbx.DB, a *strings.Builder) (string, error) {
+	switch s.Name {
+	case "filter":
+		var b strings.Builder
+		if err := s.filterSQL(db, a, &b); err != nil {
+			return "", err
+		}
+		return b.String(), nil
+	default:
+		return "", errors.New("syntax error")
 	}
-	return b.String(), nil
 }
 
-func (s *CreateFilterStmt) sql(db *dbx.DB, a, b *strings.Builder) error {
+func (s *CreateStmt) filterSQL(db *dbx.DB, a, b *strings.Builder) error {
 	w := s.Where.(*WhereClause)
 	if w.Valid {
 		if err := evalExpr(db, a, b, w.Condition, true, evalState{filter: true}); err != nil {
@@ -97,31 +102,74 @@ func (s *InsertStmt) sql(db *dbx.DB, a, b *strings.Builder) error {
 	return nil
 }
 
-func (s *SelectStmt) SQL(db *dbx.DB) (string, error) {
+func (s *SelectStmt) SQL(db *dbx.DB) (string, []attr.Attr, error) {
 	var b strings.Builder
-	if err := s.sql(db, new(strings.Builder), &b); err != nil {
-		return "", err
+	atts := make([]attr.Attr, 0)
+	if err := s.sql(db, new(strings.Builder), &b, &atts); err != nil {
+		return "", nil, err
 	}
-	return b.String(), nil
+	return b.String(), atts, nil
 }
 
-func (s *SelectStmt) sql(db *dbx.DB, a, b *strings.Builder) error {
-	var projection string
-	switch s.AttrList.(*SelectAttrList).Attr {
-	case "*":
-		// projection = "a.id, coalesce(a.author, '') as author, coalesce(a.title, '') as title, coalesce(a.full_vendor_name, '') as full_vendor_name, coalesce(a.availability, '') as availability, a.library_holdings_count, a.online_database_holdings_count, a.vendor_holdings_count, a.holdings_count, coalesce(fund.name, '') fund"
-		projection = "a.id, a.author, a.title, a.full_vendor_name, a.availability, a.library_holdings_count, a.online_database_holdings_count, a.vendor_holdings_count, a.holdings_count, o.decision, fund.name||':'||fund.title fund, track.name||':'||track.title track"
-	case "count(*)":
-		projection = "count(*)"
+func (s *SelectStmt) sql(db *dbx.DB, a, b *strings.Builder, atts *[]attr.Attr) error {
+	var projection strings.Builder
+	for i := range s.Projection {
+		if i != 0 {
+			projection.WriteRune(',')
+		}
+		switch v := s.Projection[i].(type) {
+		case *Star:
+			i := 0
+			for att := range attr.AllAttrs() {
+				if att.Hide {
+					break
+				}
+				if i > 0 {
+					projection.WriteRune(',')
+				}
+				writeAttrCoalesce(&projection, att)
+				*atts = append(*atts, att)
+				i++
+			}
+		case *CountStar:
+			if len(s.Projection) != 1 {
+				return errors.New("\"count(*)\" cannot be combined with other expressions")
+			}
+			projection.WriteString("count(*)")
+		case *Name:
+			att, ok := attr.AttrName(v.Value)
+			if !ok {
+				return errors.New("attribute \"" + v.Value + "\" does not exist")
+			}
+			writeAttrCoalesce(&projection, att)
+			*atts = append(*atts, att)
+		}
 	}
 
 	b.WriteString("select ")
-	b.WriteString(projection)
+	b.WriteString(projection.String())
 	b.WriteRune(' ')
 	if err := s.Query.(*QueryClause).sql(db, a, b); err != nil {
 		return err
 	}
 	return nil
+}
+
+func writeAttrCoalesce(b *strings.Builder, att attr.Attr) {
+	switch att.Type {
+	case attr.Text, attr.Property:
+		b.WriteString("coalesce(")
+		b.WriteString(att.Projection)
+		b.WriteString(",'')")
+	case attr.Boolean:
+		b.WriteString("coalesce(")
+		b.WriteString(att.Projection)
+		b.WriteString(",false)")
+	default:
+		b.WriteString(att.Projection)
+	}
+	b.WriteRune(' ')
+	b.WriteString(att.Name)
 }
 
 func (s *QueryClause) sql(db *dbx.DB, a, b *strings.Builder) error {
@@ -144,6 +192,7 @@ func (s *QueryClause) sql(db *dbx.DB, a, b *strings.Builder) error {
 	b.WriteString(" left join " + table.Schema + ".object o on t.id=o.id")
 	b.WriteString(" left join ccms.fund on o.fund_id=fund.id")
 	b.WriteString(" left join ccms.track on o.track_id=track.id")
+	b.WriteString(" left join ccms.md on t.id=md.id")
 
 	w := s.Where.(*WhereClause)
 	if w.Valid {
@@ -430,7 +479,11 @@ func evalExpr(db *dbx.DB, a, b *strings.Builder, expr Node, root bool, state eva
 		a.WriteRune(')')
 		b.WriteRune(')')
 	case *Name:
-		if root && attr.AttrName(e.Value).Type != attr.Boolean {
+		att, ok := attr.AttrName(e.Value)
+		if !ok {
+			return errors.New("attribute \"" + e.Value + "\" does not exist")
+		}
+		if root && att.Type != attr.Boolean {
 			return errors.New("invalid boolean expression")
 		}
 		v := PrimaryExpr(expr)
@@ -506,7 +559,8 @@ func evalExprList(db *dbx.DB, a, b *strings.Builder, exprList []Node, state eval
 func evalExprOptAttr(db *dbx.DB, a, b *strings.Builder, expr Node, state evalState) error {
 	switch e := expr.(type) {
 	case *Name:
-		if attr.IsAttr(e.Value) {
+		_, ok := attr.AttrName(e.Value)
+		if ok {
 			attrSQL(a, b, e.Value)
 		} else {
 			if e.Value == "true" || e.Value == "false" {

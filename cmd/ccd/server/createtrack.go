@@ -7,20 +7,20 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func createTrackStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateTrackStmt) *ccms.Result {
-	trackID, err := cat.TrackID(db, cmd.Track)
+func createTrackStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateStmt) *ccms.Result {
+	trackID, err := cat.TrackID(db, cmd.Name)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 	if trackID != 0 {
-		return cmderr("track \"" + cmd.Track + "\" already exists")
+		return cmderr("track \"" + cmd.Name + "\" already exists")
 	}
 
-	if !cat.IsValidTrackName(cmd.Track) {
-		return cmderr("invalid track name \"" + cmd.Track + "\"")
+	if !cat.IsValidTrackName(cmd.Name) {
+		return cmderr("invalid track name \"" + cmd.Name + "\"")
 	}
 
-	if err := cat.CreateTrack(db, cmd.Track); err != nil {
+	if err := cat.CreateTrack(db, cmd.Name); err != nil {
 		return cmderr("creating track: " + err.Error())
 	}
 

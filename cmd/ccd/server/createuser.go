@@ -9,20 +9,20 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func createUserStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateUserStmt) *ccms.Result {
-	userExists, err := cat.UserExists(db, cmd.User)
+func createUserStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateStmt) *ccms.Result {
+	userExists, err := cat.UserExists(db, cmd.Name)
 	if err != nil {
 		return cmderr("checking if user exists: " + err.Error())
 	}
 	if userExists {
-		return cmderr("user \"" + cmd.User + "\" already exists")
+		return cmderr("user \"" + cmd.Name + "\" already exists")
 	}
 
 	if strings.TrimSpace(cmd.EncryptedPassword) == "" {
 		return cmderr("password is required")
 	}
 
-	if err := cat.CreateUser(s.conf.Security.SecretKey, db, cmd.User, cmd.EncryptedPassword, false, true); err != nil {
+	if err := cat.CreateUser(s.conf.Security.SecretKey, db, cmd.Name, cmd.EncryptedPassword, false, true); err != nil {
 		return cmderr("writing user: " + err.Error())
 	}
 

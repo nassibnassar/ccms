@@ -19,23 +19,10 @@ import (
 %type <node> basic_stmt
 %type <nodeList> stmt
 %type <nodeList> stmt_list
-%type <node> alter_fund_stmt
-%type <node> alter_project_stmt
-%type <node> alter_set_stmt
-%type <node> alter_track_stmt
-%type <node> archive_project_stmt
-%type <node> create_filter_stmt
-%type <node> create_fund_stmt
-%type <node> create_project_stmt
-%type <node> create_set_stmt
-%type <node> create_track_stmt
-%type <node> create_user_stmt
+%type <node> alter_stmt
+%type <node> create_stmt
 %type <node> delete_stmt
-%type <node> drop_filter_stmt
-%type <node> drop_fund_stmt
-%type <node> drop_project_stmt
-%type <node> drop_set_stmt
-%type <node> drop_track_stmt
+%type <node> drop_stmt
 %type <node> info_stmt
 %type <node> ping_stmt
 %type <node> insert_stmt
@@ -43,7 +30,7 @@ import (
 %type <node> show_stmt
 %type <node> update_stmt
 
-%type <node> select_attr_list
+%type <nodeList> select_attr_list
 %type <node> query_clause
 %type <node> where_clause
 %type <node> order_clause
@@ -89,7 +76,6 @@ import (
 %token FALSE
 %token FILTER
 %token FROM
-%token FUND
 %token ILIKE
 %token IN
 %token INFO
@@ -104,7 +90,6 @@ import (
 %token OR
 %token ORDER
 %token PASSWORD
-%token PROJECT
 %token PROJECTS
 %token PROPERTY
 %token PING
@@ -114,10 +99,8 @@ import (
 %token SHOW
 %token TAG
 %token TO
-%token TRACK
 %token TRUE
 %token UPDATE
-%token USER
 %token VERSION
 %token WHERE
 %token WITH
@@ -165,47 +148,11 @@ stmt:
 		}
 
 basic_stmt:
-	alter_fund_stmt
+	alter_stmt
 		{
 			$$ = $1
 		}
-	| alter_project_stmt
-		{
-			$$ = $1
-		}
-	| alter_set_stmt
-		{
-			$$ = $1
-		}
-	| alter_track_stmt
-		{
-			$$ = $1
-		}
-	| archive_project_stmt
-		{
-			$$ = $1
-		}
-	| create_filter_stmt
-		{
-			$$ = $1
-		}
-	| create_fund_stmt
-		{
-			$$ = $1
-		}
-	| create_project_stmt
-		{
-			$$ = $1
-		}
-	| create_set_stmt
-		{
-			$$ = $1
-		}
-	| create_track_stmt
-		{
-			$$ = $1
-		}
-	| create_user_stmt
+	| create_stmt
 		{
 			$$ = $1
 		}
@@ -213,23 +160,7 @@ basic_stmt:
 		{
 			$$ = $1
 		}
-	| drop_filter_stmt
-		{
-			$$ = $1
-		}
-	| drop_fund_stmt
-		{
-			$$ = $1
-		}
-	| drop_project_stmt
-		{
-			$$ = $1
-		}
-	| drop_set_stmt
-		{
-			$$ = $1
-		}
-	| drop_track_stmt
+	| drop_stmt
 		{
 			$$ = $1
 		}
@@ -258,98 +189,44 @@ basic_stmt:
 			$$ = $1
 		}
 
+/*
 archive_project_stmt:
 	ARCHIVE PROJECT name
 		{
 			$$ = &ast.ArchiveProjectStmt{}
 		}
+*/
 
-alter_fund_stmt:
-	ALTER FUND name ALTER PROPERTY name SET name
+alter_stmt:
+	ALTER name name ALTER PROPERTY name SET name
 		{
-			$$ = &ast.AlterFundStmt{Fund: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
+			$$ = &ast.AlterStmt{Type: $2, Name: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
 		}
-	| ALTER FUND name ALTER PROPERTY name SET SLITERAL
+	| ALTER name name ALTER PROPERTY name SET SLITERAL
 		{
-			$$ = &ast.AlterFundStmt{Fund: $3, Property: $6, Action: ast.Set, Value: ast.DecodeSLiteral($8), StringLiteral: true}
+			$$ = &ast.AlterStmt{Type: $2, Name: $3, Property: $6, Action: ast.Set, Value: ast.DecodeSLiteral($8), StringLiteral: true}
 		}
-
-alter_project_stmt:
-	ALTER PROJECT name ALTER PROPERTY name SET name
+	| ALTER name name ALTER PROPERTY name ADD name
 		{
-			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
+			$$ = &ast.AlterStmt{Type: $2, Name: $3, Property: $6, Action: ast.Add, Value: $8}
 		}
-	| ALTER PROJECT name ALTER PROPERTY name SET SLITERAL
+	| ALTER name name ALTER PROPERTY name DROP name
 		{
-			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Set, Value: ast.DecodeSLiteral($8), StringLiteral: true}
+			$$ = &ast.AlterStmt{Type: $2, Name: $3, Property: $6, Action: ast.Drop, Value: $8}
 		}
-	| ALTER PROJECT name ALTER PROPERTY name ADD name
+	| ALTER name name ALTER PROPERTY name DROP ALL
 		{
-			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Add, Value: $8}
-		}
-	| ALTER PROJECT name ALTER PROPERTY name DROP name
-		{
-			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Drop, Value: $8}
-		}
-	| ALTER PROJECT name ALTER PROPERTY name DROP ALL
-		{
-			$$ = &ast.AlterProjectStmt{Project: $3, Property: $6, Action: ast.Drop, Value: "*"}
+			$$ = &ast.AlterStmt{Type: $2, Name: $3, Property: $6, Action: ast.Drop, Value: "*"}
 		}
 
-alter_set_stmt:
-	ALTER SET name ALTER PROPERTY name SET name
+create_stmt:
+	CREATE name name where_clause
 		{
-			$$ = &ast.AlterSetStmt{Set: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
+			$$ = &ast.CreateStmt{Type: $2, Name: $3, Where: $4}
 		}
-	| ALTER SET name ALTER PROPERTY name SET SLITERAL
+	| CREATE name name WITH ENCRYPTED PASSWORD SLITERAL
 		{
-			$$ = &ast.AlterSetStmt{Set: $3, Property: $6, Action: ast.Set, Value: ast.DecodeSLiteral($8), StringLiteral: true}
-		}
-
-alter_track_stmt:
-	ALTER TRACK name ALTER PROPERTY name SET name
-		{
-			$$ = &ast.AlterTrackStmt{Track: $3, Property: $6, Action: ast.Set, Value: $8, StringLiteral: false}
-		}
-	| ALTER TRACK name ALTER PROPERTY name SET SLITERAL
-		{
-			$$ = &ast.AlterTrackStmt{Track: $3, Property: $6, Action: ast.Set, Value: ast.DecodeSLiteral($8), StringLiteral: true}
-		}
-
-create_filter_stmt:
-	CREATE FILTER name where_clause
-		{
-			$$ = &ast.CreateFilterStmt{Filter: $3, Where: $4}
-		}
-
-create_fund_stmt:
-	CREATE FUND name
-		{
-			$$ = &ast.CreateFundStmt{Fund: $3}
-		}
-
-create_project_stmt:
-	CREATE PROJECT name
-		{
-			$$ = &ast.CreateProjectStmt{Project: $3}
-		}
-
-create_set_stmt:
-	CREATE SET name
-		{
-			$$ = &ast.CreateSetStmt{Set: $3}
-		}
-
-create_track_stmt:
-	CREATE TRACK name
-		{
-			$$ = &ast.CreateTrackStmt{Track: $3}
-		}
-
-create_user_stmt:
-	CREATE USER name WITH ENCRYPTED PASSWORD SLITERAL
-		{
-			$$ = &ast.CreateUserStmt{User: $3, EncryptedPassword: ast.DecodeSLiteral($7)}
+			$$ = &ast.CreateStmt{Type: $2, User: $3, EncryptedPassword: ast.DecodeSLiteral($7)}
 		}
 
 delete_stmt:
@@ -358,38 +235,14 @@ delete_stmt:
 			$$ = &ast.DeleteStmt{From: $3, Where: $4}
 		}
 
-drop_filter_stmt:
-	DROP FILTER name
+drop_stmt:
+	DROP name name
 		{
-			$$ = &ast.DropFilterStmt{Filter: $3}
+			$$ = &ast.DropStmt{Type: $2, Name: $3}
 		}
-
-drop_fund_stmt:
-	DROP FUND name
+	| DROP name name CASCADE
 		{
-			$$ = &ast.DropFundStmt{Fund: $3}
-		}
-
-drop_project_stmt:
-	DROP PROJECT name
-		{
-			$$ = &ast.DropProjectStmt{Project: $3}
-		}
-	| DROP PROJECT name CASCADE
-		{
-			$$ = &ast.DropProjectStmt{Project: $3, Cascade: true}
-		}
-
-drop_set_stmt:
-	DROP SET name
-		{
-			$$ = &ast.DropSetStmt{Set: $3}
-		}
-
-drop_track_stmt:
-	DROP TRACK name
-		{
-			$$ = &ast.DropTrackStmt{Track: $3}
+			$$ = &ast.DropStmt{Type: $2, Name: $3, Cascade: true}
 		}
 
 info_stmt:
@@ -417,7 +270,7 @@ ping_stmt:
 select_stmt:
 	SELECT select_attr_list query_clause
 		{
-			$$ = &ast.SelectStmt{AttrList: $2, Query: $3}
+			$$ = &ast.SelectStmt{Projection: $2, Query: $3}
 		}
 	| SELECT VERSION '(' ')'
 		{
@@ -429,25 +282,17 @@ show_stmt:
 		{
 			$$ = &ast.ShowStmt{Type: $2}
 		}
-	| SHOW name IN PROJECT name
+	| SHOW name IN name name
 		{
-			$$ = &ast.ShowStmt{Type: $2, In: $5}
+			$$ = &ast.ShowStmt{Type: $2, InType: $4, InName: $5}
 		}
-	| SHOW FUND name
+	| SHOW name name
 		{
-			$$ = &ast.ShowStmt{Type: "fund", Name: $3}
-		}
-	| SHOW PROJECT name
-		{
-			$$ = &ast.ShowStmt{Type: "project", Name: $3}
+			$$ = &ast.ShowStmt{Type: $2, Name: $3}
 		}
 	| SHOW PROJECTS
 		{
 			$$ = &ast.ShowStmt{Type: "projects"}
-		}
-	| SHOW TRACK name
-		{
-			$$ = &ast.ShowStmt{Type: "track", Name: $3}
 		}
 	| SHOW VERSION
 		{
@@ -475,27 +320,22 @@ set_clause:
 		{
 			$$ = []ast.Node{&ast.SetClause{Attr: $1, Value: $3}}
 		}
-	| FUND '=' primary_expr
-		{
-			$$ = []ast.Node{&ast.SetClause{Attr: "fund", Value: $3}}
-		}
-	| TRACK '=' primary_expr
-		{
-			$$ = []ast.Node{&ast.SetClause{Attr: "track", Value: $3}}
-		}
 
 select_attr_list:
-	name
+	arg_expr_list
 		{
-			$$ = &ast.SelectAttrList{Attr: $1}
+			// $$ = &ast.SelectAttrList{Attr: $1}
+			$$ = $1
 		}
 	| '*'
 		{
-			$$ = &ast.SelectAttrList{Attr: "*"}
+			// $$ = &ast.SelectAttrList{Attr: "*"}
+			$$ = []ast.Node{&ast.Star{}}
 		}
 	| COUNT '(' '*' ')'
 		{
-			$$ = &ast.SelectAttrList{Attr: "count(*)"}
+			// $$ = &ast.SelectAttrList{Attr: "count(*)"}
+			$$ = []ast.Node{&ast.CountStar{}}
 		}
 
 query_clause:
@@ -681,9 +521,9 @@ postfix_expr:
 		{
 			$$ = &ast.FilterExpr{Filter: $3}
 		}
-	| TAG '(' arg_expr_list ')'
+	| TAG '(' name ')'
 		{
-			$$ = &ast.TagExpr{ExprList: $3}
+			$$ = &ast.TagExpr{Tag: $3}
 		}
 
 paren_expr:
@@ -700,10 +540,6 @@ primary_expr:
 	name
 		{
 			$$ = &ast.Name{Value: $1}
-		}
-	| FUND
-		{
-			$$ = &ast.Name{Value: "fund"}
 		}
 	| SLITERAL
 		{

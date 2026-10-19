@@ -15,20 +15,20 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 	switch cmd.Type {
 	case "filters":
 		var projectID int32
-		if cmd.In != "" {
+		if cmd.InType == "project" && cmd.InName != "" {
 			var err error
-			projectID, err = cat.ProjectID(db, cmd.In)
+			projectID, err = cat.ProjectID(db, cmd.InName)
 			if err != nil {
 				return cmderr(err.Error())
 			}
 			if projectID == 0 {
-				return cmderr("project \"" + cmd.In + "\" does not exist")
+				return cmderr("project \"" + cmd.InName + "\" does not exist")
 			}
 		}
 		result.AddField("project", "text")
 		result.AddField("filter", "text")
 		result.AddField("definition", "text")
-		if err := addShowFiltersData(db, result, projectID, cmd.In); err != nil {
+		if err := addShowFiltersData(db, result, projectID, cmd.InName); err != nil {
 			return cmderr(err.Error())
 		}
 	case "fund":
@@ -62,20 +62,20 @@ func showStmt(s *svr, db *dbx.DB, cmd *ast.ShowStmt) *ccms.Result {
 		}
 	case "sets":
 		var projectID int32
-		if cmd.In != "" {
+		if cmd.InType == "project" && cmd.InName != "" {
 			var err error
-			projectID, err = cat.ProjectID(db, cmd.In)
+			projectID, err = cat.ProjectID(db, cmd.InName)
 			if err != nil {
 				return cmderr(err.Error())
 			}
 			if projectID == 0 {
-				return cmderr("project \"" + cmd.In + "\" does not exist")
+				return cmderr("project \"" + cmd.InName + "\" does not exist")
 			}
 		}
 		result.AddField("project", "text")
 		result.AddField("set", "text")
 		result.AddField("title", "text")
-		if err := addShowSetsData(db, result, projectID, cmd.In); err != nil {
+		if err := addShowSetsData(db, result, projectID, cmd.InName); err != nil {
 			return cmderr(err.Error())
 		}
 	case "tags":

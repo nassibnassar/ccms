@@ -7,17 +7,17 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func dropProjectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropProjectStmt) *ccms.Result {
-	if !cat.IsValidTargetProject(cmd.Project) {
-		return cmderr("invalid target project \"" + cmd.Project + "\"")
+func dropProjectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropStmt) *ccms.Result {
+	if !cat.IsValidTargetProject(cmd.Name) {
+		return cmderr("invalid target project \"" + cmd.Name + "\"")
 	}
 
-	projectID, err := cat.ProjectID(db, cmd.Project)
+	projectID, err := cat.ProjectID(db, cmd.Name)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 	if projectID == 0 {
-		return cmderr("project \"" + cmd.Project + "\" does not exist")
+		return cmderr("project \"" + cmd.Name + "\" does not exist")
 	}
 
 	if cmd.Cascade {
@@ -28,24 +28,24 @@ func dropProjectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropProjectStmt) *
 			return cmderr(err.Error())
 		}
 	} else {
-		sets, err := cat.SetsInProject(db, projectID, cmd.Project)
+		sets, err := cat.SetsInProject(db, projectID, cmd.Name)
 		if err != nil {
 			return cmderr(err.Error())
 		}
 		if len(sets) > 1 {
-			return cmderr("project \"" + cmd.Project + "\" contains one or more user-defined sets")
+			return cmderr("project \"" + cmd.Name + "\" contains one or more user-defined sets")
 		}
 
-		filters, err := cat.FiltersInProject(db, projectID, cmd.Project)
+		filters, err := cat.FiltersInProject(db, projectID, cmd.Name)
 		if err != nil {
 			return cmderr(err.Error())
 		}
 		if len(filters) > 0 {
-			return cmderr("project \"" + cmd.Project + "\" contains one or more user-defined filters")
+			return cmderr("project \"" + cmd.Name + "\" contains one or more user-defined filters")
 		}
 	}
 
-	if err := cat.DropProject(db, cmd.Project); err != nil {
+	if err := cat.DropProject(db, cmd.Name); err != nil {
 		return cmderr(err.Error())
 	}
 	return ccms.NewResult("drop project")

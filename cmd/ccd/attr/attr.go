@@ -1,5 +1,7 @@
 package attr
 
+import "iter"
+
 type AttrType int
 
 const (
@@ -12,24 +14,27 @@ const (
 )
 
 type Attr struct {
-	Name string
-	Type AttrType
-	Core bool
+	Name       string
+	Projection string
+	Type       AttrType
+	SQLType    string
+	Hide       bool
 }
 
 var AttrSlice = []Attr{
-	{Name: "id", Type: BigInt, Core: true},
-	{Name: "author", Type: Text, Core: true},
-	{Name: "title", Type: Text, Core: true},
-	{Name: "full_vendor_name", Type: Text, Core: true},
-	{Name: "availability", Type: Text, Core: true},
-	{Name: "library_holdings_count", Type: SmallInt, Core: true},
-	{Name: "online_database_holdings_count", Type: SmallInt, Core: true},
-	{Name: "vendor_holdings_count", Type: SmallInt, Core: true},
-	{Name: "holdings_count", Type: SmallInt, Core: true},
-	{Name: "decision", Type: Boolean, Core: false},
-	{Name: "fund", Type: Property, Core: false},
-	{Name: "track", Type: Property, Core: false},
+	{Name: "id", Projection: "a.id", Type: BigInt, SQLType: "bigint"},
+	{Name: "author", Projection: "a.author", Type: Text, SQLType: "text"},
+	{Name: "title", Projection: "a.title", Type: Text, SQLType: "text"},
+	{Name: "full_vendor_name", Projection: "a.full_vendor_name", Type: Text, SQLType: "text"},
+	{Name: "availability", Projection: "a.availability", Type: Text, SQLType: "text"},
+	{Name: "library_holdings_count", Projection: "a.library_holdings_count", Type: SmallInt, SQLType: "smallint"},
+	{Name: "online_database_holdings_count", Projection: "a.online_database_holdings_count", Type: SmallInt, SQLType: "smallint"},
+	{Name: "vendor_holdings_count", Projection: "a.vendor_holdings_count", Type: SmallInt, SQLType: "smallint"},
+	{Name: "holdings_count", Projection: "a.holdings_count", Type: SmallInt, SQLType: "smallint"},
+	{Name: "decision", Projection: "o.decision", Type: Boolean, SQLType: "boolean"},
+	{Name: "fund", Projection: "fund.name||':'||fund.title", Type: Property, SQLType: "text"},
+	{Name: "track", Projection: "track.name||':'||track.title", Type: Property, SQLType: "text"},
+	{Name: "source_record", Projection: "md.data", Type: Text, SQLType: "text", Hide: true},
 }
 
 var AttrMap map[string]Attr
@@ -41,11 +46,23 @@ func init() {
 	}
 }
 
-func AttrName(name string) Attr {
-	return AttrMap[name]
+func AttrName(name string) (Attr, bool) {
+	att, ok := AttrMap[name]
+	return att, ok
 }
 
-func IsAttr(name string) bool {
-	_, ok := AttrMap[name]
-	return ok
+// func IsAttr(name string) bool {
+// 	_, ok := AttrMap[name]
+// 	return ok
+// }
+
+// return an iterator over all attributes
+func AllAttrs() iter.Seq[Attr] {
+	return func(yield func(Attr) bool) {
+		for i := range AttrSlice {
+			if !yield(AttrSlice[i]) {
+				return
+			}
+		}
+	}
 }

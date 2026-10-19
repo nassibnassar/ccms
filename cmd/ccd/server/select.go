@@ -11,7 +11,6 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dberr"
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/internal/util"
-	"github.com/jackc/pgx/v5/pgtype/zeronull"
 )
 
 func selectVersionStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.SelectVersionStmt) *ccms.Result {
@@ -26,11 +25,6 @@ func selectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.SelectStmt) *ccms.Resul
 		if !o.Valid {
 			return cmderr("\"order by\" is required when \"offset\" is used")
 		}
-	}
-
-	a := cmd.AttrList.(*ast.SelectAttrList)
-	if a.Attr != "*" && a.Attr != "count(*)" {
-		return cmderr("selecting attributes is not yet supported")
 	}
 
 	from := cmd.Query.(*ast.QueryClause).From
@@ -55,7 +49,8 @@ func selectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.SelectStmt) *ccms.Resul
 
 	o := cmd.Query.(*ast.QueryClause).Order.(*ast.OrderClause)
 	if o.Valid {
-		if !attr.IsAttr(o.Attr) {
+		_, ok := attr.AttrName(o.Attr)
+		if !ok {
 			return cmderr("attribute \"" + o.Attr + "\" does not exist")
 		}
 	}
@@ -69,20 +64,19 @@ func selectStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.SelectStmt) *ccms.Resul
 		}
 	}
 
-	sql, err := cmd.SQL(db)
+	sql, atts, err := cmd.SQL(db)
 	if err != nil {
 		return cmderr(err.Error())
 	}
-
-	switch a.Attr {
-	case "*":
-		result, err := runQuery(s, db, sql)
+	switch cmd.Projection[0].(type) {
+	case *ast.CountStar:
+		result, err := runQueryCount(s, db, sql)
 		if err != nil {
 			return cmderr(err.Error())
 		}
 		return result
-	case "count(*)":
-		result, err := runQueryCount(s, db, sql)
+	case *ast.Name, *ast.Star:
+		result, err := runQuery(s, db, sql, atts)
 		if err != nil {
 			return cmderr(err.Error())
 		}
@@ -103,40 +97,31 @@ func runQueryCount(s *svr, db *dbx.DB, sql string) (*ccms.Result, error) {
 	return result, nil
 }
 
-func runQuery(s *svr, db *dbx.DB, sql string) (*ccms.Result, error) {
+func runQuery(s *svr, db *dbx.DB, sql string, atts []attr.Attr) (*ccms.Result, error) {
 	rows, err := db.Query(db.Ctx, sql)
 	if err != nil {
 		return nil, dberr.Error(err)
 	}
 	defer rows.Close()
 	result := ccms.NewResult("select")
-	result.AddField("id", "bigint")
-	result.AddField("author", "text")
-	result.AddField("title", "text")
-	result.AddField("full_vendor_name", "text")
-	result.AddField("availability", "text")
-	result.AddField("library_holdings_count", "smallint")
-	result.AddField("online_database_holdings_count", "smallint")
-	result.AddField("vendor_holdings_count", "smallint")
-	result.AddField("holdings_count", "smallint")
-	result.AddField("decision", "boolean")
-	result.AddField("fund", "text")
-	result.AddField("track", "text")
+	for i := range atts {
+		result.AddField(atts[i].Name, atts[i].SQLType)
+	}
 	var count int
 	for rows.Next() {
-		var id int64
-		var author, title, full_vendor_name, availability, fund, track zeronull.Text
-		var libraryHoldingsCount, onlineDatabaseHoldingsCount, vendorHoldingsCount, holdingsCount int16
-		var decisionNull *bool
-		err = rows.Scan(&id, &author, &title, &full_vendor_name, &availability, &libraryHoldingsCount, &onlineDatabaseHoldingsCount, &vendorHoldingsCount, &holdingsCount, &decisionNull, &fund, &track)
+		numCols := len(atts)
+		dest := make([]any, numCols)
+		vals := make([]any, numCols)
+		for i := range dest {
+			dest[i] = &(vals[i])
+		}
+		if err = rows.Scan(dest...); err != nil {
+			return nil, err
+		}
 		if err != nil {
 			return nil, dberr.Error(err)
 		}
-		var decision bool
-		if decisionNull != nil {
-			decision = *decisionNull
-		}
-		result.AddData([]any{id, author, title, full_vendor_name, availability, libraryHoldingsCount, onlineDatabaseHoldingsCount, vendorHoldingsCount, holdingsCount, decision, fund, track})
+		result.AddData(vals)
 		count++
 		if count > 10000 {
 			return nil, errors.New("result set too large")

@@ -8,22 +8,22 @@ import (
 	"github.com/indexdata/ccms/internal/util"
 )
 
-func dropFilterStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropFilterStmt) *ccms.Result {
-	project, filter, err := util.ParsePair(cmd.Filter)
+func dropFilterStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropStmt) *ccms.Result {
+	project, filter, err := util.ParsePair(cmd.Name)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 
 	// is target filter valid?
 	if project == "" || filter == "" {
-		return cmderr("invalid filter name \"" + cmd.Filter + "\"")
+		return cmderr("invalid filter name \"" + cmd.Name + "\"")
 	}
 	projectID, err := cat.ProjectID(db, project)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 	if projectID == 0 {
-		return cmderr("invalid filter name \"" + cmd.Filter +
+		return cmderr("invalid filter name \"" + cmd.Name +
 			"\" (project \"" + project + "\" does not exist)")
 	}
 
@@ -32,7 +32,7 @@ func dropFilterStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.DropFilterStmt) *cc
 		return cmderr(err.Error())
 	}
 	if !filterExists {
-		return cmderr("filter \"" + cmd.Filter + "\" does not exist")
+		return cmderr("filter \"" + cmd.Name + "\" does not exist")
 	}
 
 	if err := cat.DropFilter(db, projectID, filter); err != nil {

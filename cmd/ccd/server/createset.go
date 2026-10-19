@@ -8,8 +8,8 @@ import (
 	"github.com/indexdata/ccms/internal/util"
 )
 
-func createSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateSetStmt) *ccms.Result {
-	project, set, err := util.ParsePair(cmd.Set)
+func createSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateStmt) *ccms.Result {
+	project, set, err := util.ParsePair(cmd.Name)
 	if err != nil {
 		return cmderr(err.Error())
 	}
@@ -19,7 +19,7 @@ func createSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateSetStmt) *ccms
 		return cmderr(err.Error())
 	}
 	if setExists {
-		return cmderr("set \"" + cmd.Set + "\" already exists")
+		return cmderr("set \"" + cmd.Name + "\" already exists")
 	}
 
 	validTargetSet, err := cat.IsValidTargetSet(db, project, set)
@@ -27,7 +27,7 @@ func createSetStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.CreateSetStmt) *ccms
 		return cmderr(err.Error())
 	}
 	if !validTargetSet {
-		return cmderr("invalid set name \"" + cmd.Set + "\"")
+		return cmderr("invalid set name \"" + cmd.Name + "\"")
 	}
 
 	projectID, err := cat.ProjectID(db, project)

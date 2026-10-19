@@ -114,7 +114,8 @@ Supported operand types are:
 ===== Attributes
 
 Supported attributes are divided into two groups.  The first group are
-provided by CCMS or the original data source and cannot be modified:
+provided by CCMS or the original data source, and they cannot be
+modified:
 
 [%header,width=75%,cols="4,3,6"]
 |===
@@ -157,6 +158,10 @@ provided by CCMS or the original data source and cannot be modified:
 |`holdings_count`
 |`smallint`
 |number of holdings
+
+|`source_record`
+|`text`
+|source XML record (hidden)
 |===
 
 The second group are shared within a project and may be modified using
@@ -181,6 +186,9 @@ the `update` command:
 |track name
 |a track selected from the project property `tracks`, or `null`
 |===
+
+Attributes labelled as "hidden" are not displayed by a `select *`
+command.
 
 === Lexical structure
 

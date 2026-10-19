@@ -1,3 +1,13 @@
+# development
+
+* The command `select` now supports specifying a list of attributes to
+  display.
+
+* A new attribute `source_record` has been added which contains the
+  source XML record.  This attribute is not included in the output of
+  a "select *" command but must be requested with "select
+  source_record" etc.
+
 # v0.0.33
 
 * Fixed Boolean value bug in search conditions.

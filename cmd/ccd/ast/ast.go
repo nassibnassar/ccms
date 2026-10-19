@@ -12,50 +12,31 @@ const (
 
 /* statements */
 
-type AlterFundStmt struct {
-	Fund          string
+type AlterStmt struct {
+	Type          string
+	Name          string
 	Property      string
 	Action        AlterAction
 	Value         string
 	StringLiteral bool
 }
 
-func (*AlterFundStmt) node() {}
-
-type AlterProjectStmt struct {
-	Project       string
-	Property      string
-	Action        AlterAction
-	Value         string
-	StringLiteral bool
-}
-
-func (*AlterProjectStmt) node() {}
-
-type AlterSetStmt struct {
-	Set           string
-	Property      string
-	Action        AlterAction
-	Value         string
-	StringLiteral bool
-}
-
-func (*AlterSetStmt) node() {}
-
-type AlterTrackStmt struct {
-	Track         string
-	Property      string
-	Action        AlterAction
-	Value         string
-	StringLiteral bool
-}
-
-func (*AlterTrackStmt) node() {}
+func (*AlterStmt) node() {}
 
 type ArchiveProjectStmt struct {
 }
 
 func (*ArchiveProjectStmt) node() {}
+
+type CreateStmt struct {
+	Type              string
+	Name              string
+	Where             Node
+	User              string
+	EncryptedPassword string
+}
+
+func (*CreateStmt) node() {}
 
 type CreateFilterStmt struct {
 	Filter string
@@ -102,36 +83,13 @@ type DeleteStmt struct {
 
 func (*DeleteStmt) node() {}
 
-type DropFilterStmt struct {
-	Filter string
-}
-
-func (*DropFilterStmt) node() {}
-
-type DropFundStmt struct {
-	Fund string
-}
-
-func (*DropFundStmt) node() {}
-
-type DropProjectStmt struct {
-	Project string
+type DropStmt struct {
+	Type    string
+	Name    string
 	Cascade bool
 }
 
-func (*DropProjectStmt) node() {}
-
-type DropSetStmt struct {
-	Set string
-}
-
-func (*DropSetStmt) node() {}
-
-type DropTrackStmt struct {
-	Track string
-}
-
-func (*DropTrackStmt) node() {}
+func (*DropStmt) node() {}
 
 type InfoStmt struct {
 	Topic string
@@ -152,8 +110,9 @@ type PingStmt struct {
 func (*PingStmt) node() {}
 
 type SelectStmt struct {
-	AttrList Node
-	Query    Node
+	// AttrList Node
+	Projection []Node
+	Query      Node
 }
 
 func (*SelectStmt) node() {}
@@ -166,20 +125,31 @@ type SelectVersionStmt struct {
 func (*SelectVersionStmt) node() {}
 
 type ShowStmt struct {
-	Type string
-	Name string
-	In   string
+	Type   string
+	Name   string
+	InType string
+	InName string
 }
 
 func (*ShowStmt) node() {}
 
 /* select clauses */
 
-type SelectAttrList struct {
-	Attr string
+// type SelectAttrList struct {
+// 	Attr string
+// }
+//
+// func (*SelectAttrList) node() {}
+
+type Star struct {
 }
 
-func (*SelectAttrList) node() {}
+func (*Star) node() {}
+
+type CountStar struct {
+}
+
+func (*CountStar) node() {}
 
 type QueryClause struct {
 	From   string
@@ -338,7 +308,8 @@ type FilterExpr struct {
 func (*FilterExpr) node() {}
 
 type TagExpr struct {
-	ExprList []Node
+	// ExprList []Node
+	Tag string
 }
 
 func (*TagExpr) node() {}

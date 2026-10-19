@@ -255,41 +255,16 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 	for i := range cmds {
 		var result *ccms.Result
 		switch cmd := cmds[i].(type) {
-		case *ast.AlterFundStmt:
-			result = alterFundStmt(s, dbtx, rqid, cmd)
-		case *ast.AlterProjectStmt:
-			result = alterProjectStmt(s, dbtx, rqid, cmd)
-		case *ast.AlterSetStmt:
-			result = alterSetStmt(s, dbtx, rqid, cmd)
-		case *ast.AlterTrackStmt:
-			result = alterTrackStmt(s, dbtx, rqid, cmd)
+		case *ast.AlterStmt:
+			result = alterStmt(s, dbtx, rqid, cmd)
 		case *ast.ArchiveProjectStmt:
 			result = cmderr("\"archive project\" is no longer supported; use \"drop project\"")
-
-		case *ast.CreateFilterStmt:
-			result = createFilterStmt(s, dbtx, rqid, cmd)
-		case *ast.CreateFundStmt:
-			result = createFundStmt(s, dbtx, rqid, cmd)
-		case *ast.CreateProjectStmt:
-			result = createProjectStmt(s, dbtx, rqid, cmd)
-		case *ast.CreateSetStmt:
-			result = createSetStmt(s, dbtx, rqid, cmd)
-		case *ast.CreateTrackStmt:
-			result = createTrackStmt(s, dbtx, rqid, cmd)
-		case *ast.CreateUserStmt:
-			result = createUserStmt(s, dbtx, rqid, cmd)
+		case *ast.CreateStmt:
+			result = createStmt(s, dbtx, rqid, cmd)
 		case *ast.DeleteStmt:
 			result = deleteStmt(s, dbtx, rqid, cmd)
-		case *ast.DropFilterStmt:
-			result = dropFilterStmt(s, dbtx, rqid, cmd)
-		case *ast.DropFundStmt:
-			result = dropFundStmt(s, dbtx, rqid, cmd)
-		case *ast.DropProjectStmt:
-			result = dropProjectStmt(s, dbtx, rqid, cmd)
-		case *ast.DropSetStmt:
-			result = dropSetStmt(s, dbtx, rqid, cmd)
-		case *ast.DropTrackStmt:
-			result = dropTrackStmt(s, dbtx, rqid, cmd)
+		case *ast.DropStmt:
+			result = dropStmt(s, dbtx, rqid, cmd)
 		case *ast.InfoStmt:
 			result = infoStmt(s, dbtx, cmd)
 		case *ast.InsertStmt:

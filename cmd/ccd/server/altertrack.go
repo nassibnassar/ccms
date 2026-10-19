@@ -7,18 +7,18 @@ import (
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 )
 
-func alterTrackStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.AlterTrackStmt) *ccms.Result {
-	trackID, err := cat.TrackID(db, cmd.Track)
+func alterTrackStmt(s *svr, db *dbx.DB, rqid int64, cmd *ast.AlterStmt) *ccms.Result {
+	trackID, err := cat.TrackID(db, cmd.Name)
 	if err != nil {
 		return cmderr(err.Error())
 	}
 	if trackID == 0 {
-		return cmderr("track \"" + cmd.Track + "\" does not exist")
+		return cmderr("track \"" + cmd.Name + "\" does not exist")
 	}
 
 	switch cmd.Action {
 	case ast.Set:
-		if err := cat.AlterTrackSetProperty(db, cmd.Track, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
+		if err := cat.AlterTrackSetProperty(db, cmd.Name, cmd.Property, cmd.Value, cmd.StringLiteral); err != nil {
 			return cmderr(err.Error())
 		}
 	default:
