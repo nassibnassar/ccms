@@ -70,8 +70,14 @@ by` clause is required when `offset` is used.
 [discrete]
 ===== Examples
 
-To retrieve items in stock from the set `test.myset`:
+To select items in stock from the set `test.myset`:
 
 ----
 select id, title from test.myset where availability = 'In stock' order by title;
+----
+
+To select the original source record for ID = 2:
+
+----
+select source_record from test.myset where id = 2;
 ----

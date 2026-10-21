@@ -2,7 +2,7 @@ select
 
 Retrieve data
 
-select { * | count(*) }
+select { attribute [, ... ] | * | count(*) }
     from set_name
     [ where search_condition ]
     [ order by attribute [ asc | desc ] ]
@@ -21,8 +21,9 @@ Note select command. If a result set is larger than this, the server returns an
 
 Parameters
 
-The first argument specifies * meaning all available attributes or count(*)
-meaning a count of the number of rows returned.
+The first argument specifies a list of attributes, or * meaning all attributes
+(except hidden attributes), or count(*) meaning a count of the number of rows
+returned.
 
 from
 
@@ -54,7 +55,11 @@ is used.
 
 Examples
 
-To retrieve items in stock from the set test.myset:
+To select items in stock from the set test.myset:
 
-select * from test.myset where availability = 'In stock' order by title;
+select id, title from test.myset where availability = 'In stock' order by title;
+
+To select the original source record for ID = 2:
+
+select source_record from test.myset where id = 2;
 
