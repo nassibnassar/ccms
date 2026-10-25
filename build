@@ -65,6 +65,7 @@ go build -o $bindir $v $tags -ldflags "-X github.com/indexdata/ccms/internal/glo
 #fi
 
 if $runalltests; then
+    # go get tool
     go vet $v $tags $(go list ./cmd/... | grep -v 'github.com/indexdata/ccms/cmd/ccd/parser') 2>&1 | while read s; do echo "build: $s" 1>&2; done
     go tool shadow ./...
     if $verbose; then
