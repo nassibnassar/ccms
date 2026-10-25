@@ -113,6 +113,7 @@ func (s *SelectStmt) SQL(db *dbx.DB) (string, []attr.Attr, error) {
 
 func (s *SelectStmt) sql(db *dbx.DB, a, b *strings.Builder, atts *[]attr.Attr) error {
 	var projection strings.Builder
+	attMap := make(map[string]struct{})
 	for i := range s.Projection {
 		if i != 0 {
 			projection.WriteRune(',')
@@ -137,14 +138,20 @@ func (s *SelectStmt) sql(db *dbx.DB, a, b *strings.Builder, atts *[]attr.Attr) e
 			}
 			projection.WriteString("count(*)")
 		case *Name:
+			_, ok := attMap[v.Value]
+			if ok {
+				return errors.New("attribute \"" + v.Value + "\" specified more than once")
+			}
 			att, ok := attr.AttrName(v.Value)
 			if !ok {
 				return errors.New("attribute \"" + v.Value + "\" does not exist")
 			}
 			writeAttrCoalesce(&projection, att)
 			*atts = append(*atts, att)
+			attMap[v.Value] = struct{}{}
 		}
 	}
+	attMap = nil
 
 	b.WriteString("select ")
 	b.WriteString(projection.String())
