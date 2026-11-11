@@ -60,10 +60,6 @@ version=`git describe --always`
 # -X github.com/metadb-project/metadb/cmd/metadb/util.MetadbVersion=
 go build -o $bindir $v $tags -ldflags "-X github.com/indexdata/ccms/internal/global.Version=$version" ./cmd/ccd ./cmd/ccc
 
-#if $runtests || $runalltests; then
-#    go test $v -vet=off -count=1 ./ccms/util 1>&2
-#fi
-
 if $runalltests; then
     # go get tool
     go vet $v $tags $(go list ./cmd/... | grep -v 'github.com/indexdata/ccms/cmd/ccd/parser') 2>&1 | while read s; do echo "build: $s" 1>&2; done
@@ -76,3 +72,6 @@ if $runalltests; then
     #go tool govulncheck ./...
 fi
 
+if $runtests || $runalltests; then
+    go test $v -vet=off -count=1 ./cmd/ccd/server 1>&2
+fi
