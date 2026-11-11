@@ -79,7 +79,7 @@ func databaseServer(opt *option.Server) error {
 	}
 
 	// ensure database is initialized and compatible
-	err = cat.Initialize(opt.Program, conf.DB.ConnString(), conf.Security)
+	err = cat.Initialize(opt.Program, conf.DB.ConnString(), conf.Security, opt.Test)
 	if err != nil {
 		return err
 	}

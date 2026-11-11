@@ -72,6 +72,12 @@ if $runalltests; then
     #go tool govulncheck ./...
 fi
 
+# for color tests:  go install github.com/rakyll/gotest@latest
 if $runtests || $runalltests; then
-    go test $v -vet=off -count=1 ./cmd/ccd/server 1>&2
+    gotest=$GOPATH/bin/gotest
+    if [ ! -f "$gotest" ]; then
+	gotest="go test"
+    fi
+    $gotest -v $v -vet=off -count=1 ./cmd/ccd/server 1>&2
+    echo ''
 fi
