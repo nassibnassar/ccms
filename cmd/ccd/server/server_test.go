@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -15,15 +14,7 @@ func TestMain(m *testing.M) {
 	go setupTest()
 	time.Sleep(1 * time.Second)
 
-	client := &ccms.Client{
-		Host:          "localhost",
-		Port:          "8503",
-		User:          "nrn",
-		Password:      "testpass49",
-		NoTLS:         true,
-		TLSSkipVerify: true,
-	}
-	_, _ = client.Send("drop project p cascade")
+	// _, _ = testclient.Send("drop project p cascade")
 
 	m.Run()
 }
@@ -32,7 +23,7 @@ func setupTest() {
 	srv := option.Server{
 		Debug:     false,
 		Trace:     false,
-		Datadir:   "/home/nrn/work/cclp/data/test",
+		Datadir:   "/home/nrn/work/cclp/data/localtest",
 		Listen:    "localhost",
 		Port:      "8503",
 		TLSCert:   "",
@@ -57,21 +48,25 @@ var testclient = &ccms.Client{
 	TLSSkipVerify: true,
 }
 
-func teststatus(resp *ccms.Response) string {
+func teststatus(resp *ccms.Response, resultIndex int) string {
+	i := 0
 	for result := range resp.Results() {
-		return result.Status()
+		if i == resultIndex {
+			return result.Status()
+		}
+		i++
 	}
 	return ""
 }
 
 func testresult(resp *ccms.Response, resultIndex, row, column int) string {
+	// testprintresult(resp)
 	i := 0
 	for result := range resp.Results() {
 		j := 0
 		for data := range result.Data() {
 			values := data.Values()
 			for k := range values {
-				// fmt.Printf("\t%v", values[k])
 				if i == resultIndex && j == row && k == column {
 					str, ok := values[k].(string)
 					if ok {
@@ -81,10 +76,33 @@ func testresult(resp *ccms.Response, resultIndex, row, column int) string {
 					}
 				}
 			}
-			fmt.Printf("\n")
 			j++
 		}
 		i++
 	}
 	return ""
 }
+
+/*
+func testprintresult(resp *ccms.Response) {
+	i := 0
+	for result := range resp.Results() {
+		if i > 0 {
+			fmt.Printf("\n")
+		}
+		j := 0
+		for data := range result.Data() {
+			values := data.Values()
+			for k := range values {
+				if k > 0 {
+					fmt.Printf("\t")
+				}
+				fmt.Printf("%v", values[k])
+			}
+			fmt.Printf("\n")
+			j++
+		}
+		i++
+	}
+}
+*/

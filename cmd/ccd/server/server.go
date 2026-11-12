@@ -294,7 +294,9 @@ func (s *svr) handleCommandPost(w http.ResponseWriter, r *http.Request, rqid int
 			errorState = true
 			resp.SetError(i)
 			s.logStatementIfNotLogged(rqid, commands)
-			log.Info("[%d] ERROR:  %s", rqid, strings.Split(result.Message(), "\n")[0])
+			if !s.conf.Log.Quiet {
+				log.Info("[%d] ERROR:  %s", rqid, strings.Split(result.Message(), "\n")[0])
+			}
 			break
 		}
 	}
@@ -326,7 +328,7 @@ func (s *svr) sendError(w http.ResponseWriter, rqid int64, commands, message str
 }
 
 func (s *svr) logStatementIfNotLogged(rqid int64, commands string) {
-	if commands != "" && !s.conf.Log.Summary && !s.conf.Log.Statement {
+	if commands != "" && !s.conf.Log.Summary && !s.conf.Log.Statement && !s.conf.Log.Quiet {
 		logStatement(rqid, commands)
 	}
 }
