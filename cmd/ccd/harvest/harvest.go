@@ -70,8 +70,12 @@ func harvestLoop(connString, baseURL string) {
 	//fmt.Println("harvesting...")
 	//var c int
 	rq.HarvestRecords(func(record *oai.Record) {
+
+		// Note that a resumption token may need to be escaped, because the goharvest package does not appear to escape it.
 		resumptionToken := rq.ResumptionToken
+		// resumptionToken := url.QueryEscape(rq.ResumptionToken)
 		_ = resumptionToken
+
 		//rq.Harvest(func(rs *oai.Response) {
 		//fmt.Printf("identifier: %s\n", record.Header.Identifier)
 		//fmt.Printf("datestamp: %s\n", record.Header.DateStamp)
