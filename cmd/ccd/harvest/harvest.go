@@ -14,16 +14,16 @@ import (
 	"github.com/nassibnassar/goharvest/oai"
 )
 
-func Harvest(connString string) {
+func Harvest(connString, baseURL string) {
 	for {
-		harvestLoop(connString)
+		harvestLoop(connString, baseURL)
 		log.Info("harvesting: paused")
 		time.Sleep(1 * time.Hour)
 		log.Info("harvesting: restarted")
 	}
 }
 
-func harvestLoop(connString string) {
+func harvestLoop(connString, baseURL string) {
 	defer func() {
 		if r := recover(); r != nil {
 			logError(r)
@@ -53,7 +53,8 @@ func harvestLoop(connString string) {
 	// The following OAI-PMH verbs are supported by the Reservoir: ListIdentifiers, ListRecords,
 	// GetRecord, Identify.
 	rq := &oai.Request{
-		BaseURL: "https://cclp-okapi.reshare-dev.indexdata.com/_/invoke/tenant/cclp/reservoir/oai",
+		// BaseURL: "https://cclp-okapi.reshare-dev.indexdata.com/_/invoke/tenant/cclp/reservoir/oai",
+		BaseURL: baseURL,
 		// Set: (string),
 		// MetadataPrefix: "marcxml",
 		Verb: "ListRecords",

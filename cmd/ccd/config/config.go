@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	DB       *Database
+	Source   *Source
 	Log      *Log
 	Security *Security
 }
@@ -22,6 +23,10 @@ type Database struct {
 	Password string
 	DBName   string
 	SSLMode  string
+}
+
+type Source struct {
+	BaseURL string
 }
 
 type Log struct {
@@ -52,6 +57,11 @@ func New(datadir string) (*Config, error) {
 		SSLMode:  s.Key("sslmode").String(),
 	}
 
+	s = c.Section("source")
+	source := &Source{
+		BaseURL: s.Key("base_url").String(),
+	}
+
 	s = c.Section("log")
 	log := &Log{
 		Summary:    configBool(s.Key("summary").String()),
@@ -72,6 +82,7 @@ func New(datadir string) (*Config, error) {
 
 	return &Config{
 		DB:       db,
+		Source:   source,
 		Log:      log,
 		Security: security,
 	}, nil
@@ -86,6 +97,9 @@ func InitStub() string {
 		"password = \n" +
 		"dbname = \n" +
 		"sslmode = require\n" +
+		"\n" +
+		"[source]\n" +
+		"base_url = \n" +
 		"\n" +
 		"[log]\n" +
 		"summary = off\n" +

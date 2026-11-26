@@ -101,8 +101,8 @@ func startServer(s *svr) error {
 	}()
 
 	go serve(s)
-	if !s.opt.NoHarvest {
-		go harvest.Harvest(s.conf.DB.ConnString())
+	if !s.opt.NoHarvest && s.conf.Source.BaseURL != "" {
+		go harvest.Harvest(s.conf.DB.ConnString(), s.conf.Source.BaseURL)
 	}
 
 	for {
@@ -135,7 +135,7 @@ func serve(s *svr) {
 	if s.opt.NoTLS && s.opt.Listen != "" && !s.conf.Log.Quiet {
 		log.Warning("disabled TLS (insecure)")
 	}
-	if s.opt.NoHarvest && !s.conf.Log.Quiet {
+	if (s.opt.NoHarvest || s.conf.Source.BaseURL == "") && !s.conf.Log.Quiet {
 		log.Warning("disabled harvesting")
 	}
 	// cat.Init()

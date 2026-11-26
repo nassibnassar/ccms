@@ -87,6 +87,9 @@ password = _password of user_
 dbname = _database name_
 sslmode = _should be set to "require" or stronger option_
 
+[source]
+base_url = _URL for the OAI-PMH server_
+
 [log]
 summary = _on or off: log brief summary of connection and statements_
 connection = _on or off: log connection details_
@@ -98,8 +101,8 @@ quiet = _on or off: disable most logging_
 secret_key = _encryption key: do not edit_
 ----
 
-This file should be edited to add database connection parameters, for
-example:
+This file should be edited to add database connection parameters and a
+data source, for example:
 
 [source,ini,subs="verbatim,quotes"]
 ----
@@ -110,6 +113,9 @@ user = ccms
 password = w6bqYkFWm4rpGR5mCtFw
 dbname = ccms
 sslmode = require
+
+[source]
+base_url = https://data.indexdata.com/oai
 ----
 
 The `ccd` server will assume that the user and database defined here
