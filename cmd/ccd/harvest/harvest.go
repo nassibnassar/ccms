@@ -54,21 +54,23 @@ func harvestLoop(connString string) {
 	// GetRecord, Identify.
 	rq := &oai.Request{
 		BaseURL: "https://cclp-okapi.reshare-dev.indexdata.com/_/invoke/tenant/cclp/reservoir/oai",
-
+		// Set: (string),
+		// MetadataPrefix: "marcxml",
 		Verb: "ListRecords",
+		// Verb: "GetRecord",
+		// Identifier: "b6c6160c-6bbb-41cc-9e07-690049d7d537",
+		// ResumptionToken: (string),
 		// From:  "2026-02-01T22:52:14Z",
 		// Until: "2026-09-01T22:52:16Z",
 		// From:  "2025-11-14T05:45:03Z",
 		// Until: "2030-01-01T01:01:01Z",
-
-		//Verb:           "GetRecord",
-		//Identifier:     "b6c6160c-6bbb-41cc-9e07-690049d7d537",
-		//MetadataPrefix: "marcxml",
 	}
 	//fmt.Printf("%#v\n\n", rq)
 	//fmt.Println("harvesting...")
 	//var c int
 	rq.HarvestRecords(func(record *oai.Record) {
+		resumptionToken := rq.ResumptionToken
+		_ = resumptionToken
 		//rq.Harvest(func(rs *oai.Response) {
 		//fmt.Printf("identifier: %s\n", record.Header.Identifier)
 		//fmt.Printf("datestamp: %s\n", record.Header.DateStamp)
