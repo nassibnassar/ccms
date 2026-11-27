@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -118,7 +119,12 @@ func harvestLoop(connString, baseURL string) {
 				logError("parsing: " + identifier + ": " + err.Error())
 				// return
 			}
-			dateStamp := record.Header.DateStamp
+			var datestamp string
+			datestamp, err = datestampSQL(record.Header.DateStamp)
+			if err != nil {
+				logError(err.Error())
+				return
+			}
 			author100a := m.Lookup("100", "", "", "a")
 			author := nilIfEmpty(&author100a)
 			title245 := m.Lookup("245", "", "", "a")
@@ -152,9 +158,9 @@ func harvestLoop(connString, baseURL string) {
 			// }
 
 			var id int64
-			q := "insert into ccms.md (identifier, retrieved, date_stamp, data) " +
+			q := "insert into ccms.md (identifier, retrieved, datestamp, data) " +
 				"values ($1, $2, $3, $4) on conflict do nothing returning id"
-			err = tx.QueryRow(ctx, q, identifier, time.Now(), dateStamp, metadata).Scan(&id)
+			err = tx.QueryRow(ctx, q, identifier, time.Now(), datestamp, metadata).Scan(&id)
 			switch {
 			case errors.Is(err, pgx.ErrNoRows):
 				//log.Info("conflict: skipping record %s", identifier)
@@ -225,6 +231,18 @@ func nilIfEmpty(s *string) *string {
 	}
 	return s
 }
+
+func datestampSQL(ds string) (string, error) {
+	if !datestampRegexp.MatchString(ds) {
+		return "", errors.New("invalid datestamp \"" + ds + "\"")
+	}
+	if ds[len(ds)-1] != 'Z' {
+		return ds + "Z", nil
+	}
+	return ds, nil
+}
+
+var datestampRegexp = regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d(T\d\d:\d\d:\d\dZ)?$`)
 
 func logError(e any) {
 	log.Error("ERROR:  harvesting: %v", e)
