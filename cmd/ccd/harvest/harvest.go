@@ -61,6 +61,8 @@ func harvestLoop(connString, baseURL string) {
 		// Verb: "GetRecord",
 		// Identifier: "b6c6160c-6bbb-41cc-9e07-690049d7d537",
 		// ResumptionToken: (string),
+		// Note that resumption token may need to be escaped, because the goharvest package does not appear to escape it.
+		// ResumptionToken: url.QueryEscape(resumptionToken),
 		// From:  "2026-02-01T22:52:14Z",
 		// Until: "2026-09-01T22:52:16Z",
 		// From:  "2025-11-14T05:45:03Z",
@@ -70,10 +72,15 @@ func harvestLoop(connString, baseURL string) {
 	//fmt.Println("harvesting...")
 	//var c int
 	rq.Harvest(func(resp *oai.Response) {
-		// Note that a resumption token may need to be escaped, because the goharvest package does not appear to escape it.
 		resumptionToken := rq.ResumptionToken
-		// resumptionToken := url.QueryEscape(rq.ResumptionToken)
 		_ = resumptionToken
+
+		tx, err := conn.Begin(ctx)
+		if err != nil {
+			logError("starting transaction" + err.Error())
+			return
+		}
+		defer tx.Rollback(ctx)
 
 		for i := range resp.ListRecords.Records {
 			record := resp.ListRecords.Records[i]
@@ -104,7 +111,6 @@ func harvestLoop(connString, baseURL string) {
 			identifier := strings.TrimPrefix(record.Header.Identifier, "oai:")
 			metadata := strings.TrimSpace(string(record.Metadata.Body))
 			var m *marcxml.MARCXML
-			var err error
 			m, err = marcxml.Unmarshal(record.Metadata.Body)
 			//m, err := marcxml.Unmarshal(rs.GetRecord.Record.Metadata.Body)
 			if err != nil {
@@ -145,13 +151,6 @@ func harvestLoop(connString, baseURL string) {
 			// 	return
 			// }
 
-			tx, err := conn.Begin(ctx)
-			if err != nil {
-				logError("starting transaction" + err.Error())
-				return
-			}
-			defer tx.Rollback(ctx)
-
 			var id int64
 			q := "insert into ccms.md (identifier, retrieved, date_stamp, data) " +
 				"values ($1, $2, $3, $4) on conflict do nothing returning id"
@@ -183,10 +182,10 @@ func harvestLoop(connString, baseURL string) {
 				//log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)
 			}
 
-			if err = tx.Commit(ctx); err != nil {
-				logError("committing transaction: " + err.Error())
-				return
-			}
+		}
+		if err = tx.Commit(ctx); err != nil {
+			logError("committing transaction: " + err.Error())
+			return
 		}
 	})
 	// TODO add to ccd.conf:
