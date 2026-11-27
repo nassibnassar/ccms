@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/indexdata/ccms/cmd/ccd/cat"
 	"github.com/indexdata/ccms/cmd/ccd/dbx"
 	"github.com/indexdata/ccms/cmd/ccd/log"
 	"github.com/indexdata/ccms/cmd/ccd/marcxml"
@@ -31,14 +32,6 @@ func harvestLoop(connString, baseURL string) {
 		}
 	}()
 
-	ctx := context.TODO()
-	conn, err := dbx.Connect(ctx, connString)
-	if err != nil {
-		logError(err)
-		return
-	}
-	defer conn.Close(ctx)
-
 	/*
 		(&oai.Request{
 			BaseURL: "http://services.kb.nl/mdo/oai", Set: "DTS", MetadataPrefix: "dcx",
@@ -51,6 +44,28 @@ func harvestLoop(connString, baseURL string) {
 	// HarvestIdentifier(connString, "b6c6160c-6bbb-41cc-9e07-690049d7d537")
 	// HarvestIdentifier(connString, "002c3ae5-3cf5-47c3-8bd5-87c57cdab8f1")
 
+	ctx := context.TODO()
+	conn, err := dbx.Connect(ctx, connString)
+	if err != nil {
+		logError(err)
+		return
+	}
+	defer conn.Close(ctx)
+	db := &dbx.DB{
+		Ctx:       ctx,
+		Queryable: conn,
+	}
+
+	resumptionToken, lastDatestamp, err := cat.LastHarvest(db)
+	if err != nil {
+		logError(err)
+		return
+	}
+	var from string
+	if resumptionToken == "" {
+		from = lastDatestamp
+	}
+
 	// The following OAI-PMH verbs are supported by the Reservoir: ListIdentifiers, ListRecords,
 	// GetRecord, Identify.
 	rq := &oai.Request{
@@ -61,20 +76,18 @@ func harvestLoop(connString, baseURL string) {
 		Verb: "ListRecords",
 		// Verb: "GetRecord",
 		// Identifier: "b6c6160c-6bbb-41cc-9e07-690049d7d537",
-		// ResumptionToken: (string),
+		ResumptionToken: resumptionToken,
 		// Note that resumption token may need to be escaped, because the goharvest package does not appear to escape it.
 		// ResumptionToken: url.QueryEscape(resumptionToken),
-		// From:  "2026-02-01T22:52:14Z",
-		// Until: "2026-09-01T22:52:16Z",
-		// From:  "2025-11-14T05:45:03Z",
-		// Until: "2030-01-01T01:01:01Z",
+		From: from,
 	}
-	//fmt.Printf("%#v\n\n", rq)
-	//fmt.Println("harvesting...")
-	//var c int
+
 	rq.Harvest(func(resp *oai.Response) {
-		resumptionToken := rq.ResumptionToken
-		_ = resumptionToken
+		// remove resumption token, in case of error writing records
+		if err = cat.RemoveResumptionToken(db); err != nil {
+			logError(err)
+			return
+		}
 
 		tx, err := conn.Begin(ctx)
 		if err != nil {
@@ -82,6 +95,15 @@ func harvestLoop(connString, baseURL string) {
 			return
 		}
 		defer tx.Rollback(ctx)
+
+		var newLastDatestamp time.Time
+		if lastDatestamp != "" {
+			newLastDatestamp, err = parseDatestamp(lastDatestamp)
+			if err != nil {
+				logError(err)
+				return
+			}
+		}
 
 		for i := range resp.ListRecords.Records {
 			record := resp.ListRecords.Records[i]
@@ -124,6 +146,15 @@ func harvestLoop(connString, baseURL string) {
 			if err != nil {
 				logError(err.Error())
 				return
+			}
+			var recordDatestamp time.Time
+			recordDatestamp, err = parseDatestamp(datestamp)
+			if err != nil {
+				logError(err)
+				return
+			}
+			if recordDatestamp.After(newLastDatestamp) {
+				newLastDatestamp = recordDatestamp
 			}
 			author100a := m.Lookup("100", "", "", "a")
 			author := nilIfEmpty(&author100a)
@@ -188,7 +219,19 @@ func harvestLoop(connString, baseURL string) {
 				//log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)
 			}
 
+		} // record loop
+
+		var newResumptionToken string
+		hasResumptionToken, rt := resp.ResumptionToken()
+		if hasResumptionToken {
+			newResumptionToken = rt
 		}
+
+		if err = cat.UpdateHarvest(db, newResumptionToken, datestampString(newLastDatestamp)); err != nil {
+			logError("committing transaction: " + err.Error())
+			return
+		}
+
 		if err = tx.Commit(ctx); err != nil {
 			logError("committing transaction: " + err.Error())
 			return
@@ -232,9 +275,31 @@ func nilIfEmpty(s *string) *string {
 	return s
 }
 
+func parseDatestamp(ds string) (time.Time, error) {
+	var layout string
+	if datestampShortRegexp.MatchString(ds) {
+		layout = "2006-01-02"
+	}
+	if datestampLongRegexp.MatchString(ds) {
+		layout = "2006-01-02T15:04:05Z"
+	}
+	if layout == "" {
+		return time.Time{}, errors.New("parsing: invalid datestamp \"" + ds + "\"")
+	}
+	parsed, err := time.Parse(layout, ds)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return parsed, nil
+}
+
+func datestampString(ds time.Time) string {
+	return ds.Format("2006-01-02T15:04:05Z")
+}
+
 func datestampSQL(ds string) (string, error) {
 	if !datestampRegexp.MatchString(ds) {
-		return "", errors.New("invalid datestamp \"" + ds + "\"")
+		return "", errors.New("writing: invalid datestamp \"" + ds + "\"")
 	}
 	if ds[len(ds)-1] != 'Z' {
 		return ds + "Z", nil
@@ -243,6 +308,8 @@ func datestampSQL(ds string) (string, error) {
 }
 
 var datestampRegexp = regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d(T\d\d:\d\d:\d\dZ)?$`)
+var datestampShortRegexp = regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d$`)
+var datestampLongRegexp = regexp.MustCompile(`^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ$`)
 
 func logError(e any) {
 	log.Error("ERROR:  harvesting: %v", e)

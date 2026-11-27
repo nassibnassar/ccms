@@ -17,9 +17,9 @@ type Filter struct {
 	Definition string
 }
 
-func CreateFilter(db *dbx.DB, projectID int32, filter string, cmdsql, sql string) error {
-	q := "insert into ccms.filter (project_id, name, command, sql) values ($1, $2, $3, $4)"
-	if _, err := db.Exec(db.Ctx, q, projectID, filter, cmdsql, sql); err != nil {
+func CreateFilter(db *dbx.DB, projectID int32, filter string, cmdSQL, filterSQL string) error {
+	sql := "insert into ccms.filter (project_id, name, command, sql) values ($1, $2, $3, $4)"
+	if _, err := db.Exec(db.Ctx, sql, projectID, filter, cmdSQL, filterSQL); err != nil {
 		return dberr.Error(err)
 	}
 	return nil
