@@ -69,121 +69,124 @@ func harvestLoop(connString, baseURL string) {
 	//fmt.Printf("%#v\n\n", rq)
 	//fmt.Println("harvesting...")
 	//var c int
-	rq.HarvestRecords(func(record *oai.Record) {
-
+	rq.Harvest(func(resp *oai.Response) {
 		// Note that a resumption token may need to be escaped, because the goharvest package does not appear to escape it.
 		resumptionToken := rq.ResumptionToken
 		// resumptionToken := url.QueryEscape(rq.ResumptionToken)
 		_ = resumptionToken
 
-		//rq.Harvest(func(rs *oai.Response) {
-		//fmt.Printf("identifier: %s\n", record.Header.Identifier)
-		//fmt.Printf("datestamp: %s\n", record.Header.DateStamp)
-		//fmt.Printf("setspec: %v\n", record.Header.SetSpec)
-		//fmt.Printf("status: %s\n", record.Header.Status)
-		//fmt.Printf("about: %s\n", record.About.Body)
-		//fmt.Printf("metadata: %s\n", record.Metadata.Body)
+		for i := range resp.ListRecords.Records {
+			record := resp.ListRecords.Records[i]
 
-		//fmt.Printf("%s %s\n", record.Header.Identifier, record.Header.DateStamp)
+			//rq.Harvest(func(rs *oai.Response) {
+			//fmt.Printf("identifier: %s\n", record.Header.Identifier)
+			//fmt.Printf("datestamp: %s\n", record.Header.DateStamp)
+			//fmt.Printf("setspec: %v\n", record.Header.SetSpec)
+			//fmt.Printf("status: %s\n", record.Header.Status)
+			//fmt.Printf("about: %s\n", record.About.Body)
+			//fmt.Printf("metadata: %s\n", record.Metadata.Body)
 
-		/*
-			fmt.Printf("=======================================================================\n")
-			fmt.Printf("%v\n", c)
-			c++
-			fmt.Printf("=======================================================================\n")
-			fmt.Printf("%#v\n", rs)
-			fmt.Printf("=======================================================================\n")
-			fmt.Printf("retrieved = %s\n", rs.ResponseDate)
-			fmt.Printf("identifier = %s\n", rs.GetRecord.Record.Header.Identifier)
-			fmt.Printf("data = %s\n", rs.GetRecord.Record.Metadata.Body)
-		*/
-		// fmt.Printf("%#v\n", record.Metadata)
-		// fmt.Printf("%q\n", record.Metadata.Body)
-		identifier := strings.TrimPrefix(record.Header.Identifier, "oai:")
-		metadata := strings.TrimSpace(string(record.Metadata.Body))
-		var m *marcxml.MARCXML
-		var err error
-		m, err = marcxml.Unmarshal(record.Metadata.Body)
-		//m, err := marcxml.Unmarshal(rs.GetRecord.Record.Metadata.Body)
-		if err != nil {
-			// fmt.Printf("----\n%s\n----\n", string(record.Metadata.Body))
-			logError("parsing: " + identifier + ": " + err.Error())
-			// return
-		}
-		dateStamp := record.Header.DateStamp
-		author100a := m.Lookup("100", "", "", "a")
-		author := nilIfEmpty(&author100a)
-		title245 := m.Lookup("245", "", "", "a")
-		title245b := m.Lookup("245", "", "", "b")
-		if title245b != "" {
-			title245 = title245 + "\n" + title245b
-		}
-		//title245 := strings.Join([]string{title245a, title245b}, "\n")
-		title := nilIfEmpty(&title245)
-		fullVendorName := m.Lookup("999", "1", "3", "a")
-		availability := m.Lookup("999", "1", "3", "z")
-		//placePub := m.Lookup("260", "a")
+			//fmt.Printf("%s %s\n", record.Header.Identifier, record.Header.DateStamp)
 
-		libraryCount := m.LookupLibraryCount()
-		libraryHoldingsCount := m.LookupLibraryHoldingsCount()
-		onlineDatabaseHoldingsCount := m.LookupOnlineDatabaseHoldingsCount()
-		vendorHoldingsCount := m.LookupVendorHoldingsCount()
-		holdingsCount := m.LookupHoldingsCount()
+			/*
+				fmt.Printf("=======================================================================\n")
+				fmt.Printf("%v\n", c)
+				c++
+				fmt.Printf("=======================================================================\n")
+				fmt.Printf("%#v\n", rs)
+				fmt.Printf("=======================================================================\n")
+				fmt.Printf("retrieved = %s\n", rs.ResponseDate)
+				fmt.Printf("identifier = %s\n", rs.GetRecord.Record.Header.Identifier)
+				fmt.Printf("data = %s\n", rs.GetRecord.Record.Metadata.Body)
+			*/
+			// fmt.Printf("%#v\n", record.Metadata)
+			// fmt.Printf("%q\n", record.Metadata.Body)
+			identifier := strings.TrimPrefix(record.Header.Identifier, "oai:")
+			metadata := strings.TrimSpace(string(record.Metadata.Body))
+			var m *marcxml.MARCXML
+			var err error
+			m, err = marcxml.Unmarshal(record.Metadata.Body)
+			//m, err := marcxml.Unmarshal(rs.GetRecord.Record.Metadata.Body)
+			if err != nil {
+				// fmt.Printf("----\n%s\n----\n", string(record.Metadata.Body))
+				logError("parsing: " + identifier + ": " + err.Error())
+				// return
+			}
+			dateStamp := record.Header.DateStamp
+			author100a := m.Lookup("100", "", "", "a")
+			author := nilIfEmpty(&author100a)
+			title245 := m.Lookup("245", "", "", "a")
+			title245b := m.Lookup("245", "", "", "b")
+			if title245b != "" {
+				title245 = title245 + "\n" + title245b
+			}
+			//title245 := strings.Join([]string{title245a, title245b}, "\n")
+			title := nilIfEmpty(&title245)
+			fullVendorName := m.Lookup("999", "1", "3", "a")
+			availability := m.Lookup("999", "1", "3", "z")
+			//placePub := m.Lookup("260", "a")
 
-		_ = m
-		//c++
-		//if c%10000 == 0 {
-		//        log.Info("harvested %d records", c)
-		//}
+			libraryCount := m.LookupLibraryCount()
+			libraryHoldingsCount := m.LookupLibraryHoldingsCount()
+			onlineDatabaseHoldingsCount := m.LookupOnlineDatabaseHoldingsCount()
+			vendorHoldingsCount := m.LookupVendorHoldingsCount()
+			holdingsCount := m.LookupHoldingsCount()
 
-		// placeOfPublication := nilIfEmpty(&placePub)
+			_ = m
+			//c++
+			//if c%10000 == 0 {
+			//        log.Info("harvested %d records", c)
+			//}
 
-		// temporarily skip records with no author to give us better example data
-		// if author == nil {
-		// 	return
-		// }
+			// placeOfPublication := nilIfEmpty(&placePub)
 
-		tx, err := conn.Begin(ctx)
-		if err != nil {
-			logError("starting transaction" + err.Error())
-			return
-		}
-		defer tx.Rollback(ctx)
+			// temporarily skip records with no author to give us better example data
+			// if author == nil {
+			// 	return
+			// }
 
-		var id int64
-		q := "insert into ccms.md (identifier, retrieved, date_stamp, data) " +
-			"values ($1, $2, $3, $4) on conflict do nothing returning id"
-		err = tx.QueryRow(ctx, q, identifier, time.Now(), dateStamp, metadata).Scan(&id)
-		switch {
-		case errors.Is(err, pgx.ErrNoRows):
-			//log.Info("conflict: skipping record %s", identifier)
-		case err != nil:
-			logError("writing to table md: " + err.Error())
-			return
-		default:
-		}
-
-		if id != 0 {
-			q = "insert into ccms.attr (id, author, title, full_vendor_name, availability, library_count, library_holdings_count, online_database_holdings_count, vendor_holdings_count, holdings_count) " +
-				"values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) on conflict do nothing"
-			if _, err = tx.Exec(ctx, q, id, author, title, fullVendorName, availability, libraryCount, libraryHoldingsCount, onlineDatabaseHoldingsCount, vendorHoldingsCount, holdingsCount); err != nil {
-				logError("writing to table attr: " + err.Error())
+			tx, err := conn.Begin(ctx)
+			if err != nil {
+				logError("starting transaction" + err.Error())
 				return
 			}
+			defer tx.Rollback(ctx)
 
-			q = "insert into ccms.reserve (id) " +
-				"values ($1) on conflict do nothing"
-			if _, err = tx.Exec(ctx, q, id); err != nil {
-				logError("writing to table reserve: " + err.Error())
+			var id int64
+			q := "insert into ccms.md (identifier, retrieved, date_stamp, data) " +
+				"values ($1, $2, $3, $4) on conflict do nothing returning id"
+			err = tx.QueryRow(ctx, q, identifier, time.Now(), dateStamp, metadata).Scan(&id)
+			switch {
+			case errors.Is(err, pgx.ErrNoRows):
+				//log.Info("conflict: skipping record %s", identifier)
+			case err != nil:
+				logError("writing to table md: " + err.Error())
 				return
+			default:
 			}
 
-			//log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)
-		}
+			if id != 0 {
+				q = "insert into ccms.attr (id, author, title, full_vendor_name, availability, library_count, library_holdings_count, online_database_holdings_count, vendor_holdings_count, holdings_count) " +
+					"values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) on conflict do nothing"
+				if _, err = tx.Exec(ctx, q, id, author, title, fullVendorName, availability, libraryCount, libraryHoldingsCount, onlineDatabaseHoldingsCount, vendorHoldingsCount, holdingsCount); err != nil {
+					logError("writing to table attr: " + err.Error())
+					return
+				}
 
-		if err = tx.Commit(ctx); err != nil {
-			logError("committing transaction: " + err.Error())
-			return
+				q = "insert into ccms.reserve (id) " +
+					"values ($1) on conflict do nothing"
+				if _, err = tx.Exec(ctx, q, id); err != nil {
+					logError("writing to table reserve: " + err.Error())
+					return
+				}
+
+				//log.Info("(%d) %s %s / %s", id, identifier, author100a, title245)
+			}
+
+			if err = tx.Commit(ctx); err != nil {
+				logError("committing transaction: " + err.Error())
+				return
+			}
 		}
 	})
 	// TODO add to ccd.conf:
